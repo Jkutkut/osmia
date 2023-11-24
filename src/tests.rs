@@ -1,4 +1,4 @@
-use crate::render;
+use crate::osmia_syntax;
 
 use std::collections::HashMap;
 
@@ -7,7 +7,7 @@ fn identity() {
 	let template = "Hello, world!";
 	let cxt: HashMap<&str, String> = HashMap::new();
 	let expected = "Hello, world!";
-	match render(template, &cxt) {
+	match osmia_syntax().render(template, &cxt) {
 		Ok(actual) => assert_eq!(expected, actual),
 		Err(err) => panic!("{}", err)
 	}
@@ -20,7 +20,7 @@ fn basic_test() {
 		("name", "world")
 	]);
 	let expected = "Hello, world!";
-	match render(template, &cxt) {
+	match osmia_syntax().render(template, &cxt) {
 		Ok(actual) => assert_eq!(expected, actual),
 		Err(err) => panic!("{}", err)
 	}
@@ -33,7 +33,7 @@ fn fail_render() {
 		("name", 1)
 	]);
 	let expected = "Hello, world!";
-	match render(template, &cxt) {
+	match osmia_syntax().render(template, &cxt) {
 		Ok(actual) => assert_ne!(expected, actual),
 		Err(err) => assert_eq!(err, "Key not found: name")
 	}
@@ -46,7 +46,7 @@ fn not_found_key() {
 		("name2", "world")
 	]);
 	let expected = "Hello, world!";
-	match render(template, &cxt) {
+	match osmia_syntax().render(template, &cxt) {
 		Ok(actual) => assert_ne!(expected, actual),
 		Err(err) => assert_eq!(err, "Key not found: name")
 	}
@@ -59,7 +59,7 @@ fn similar_syntax() {
 		("name", "world")
 	]);
 	let expected = "Hello, world! The syntax is \"Hello, {{name}}!\".";
-	match render(template, &cxt) {
+	match osmia_syntax().render(template, &cxt) {
 		Ok(actual) => assert_eq!(expected, actual),
 		Err(err) => panic!("{}", err)
 	}
@@ -72,7 +72,7 @@ fn comment() {
 		("name", "world")
 	]);
 	let expected = "Hello, world!";
-	match render(template, &cxt) {
+	match osmia_syntax().render(template, &cxt) {
 		Ok(actual) => assert_eq!(expected, actual),
 		Err(err) => panic!("{}", err)
 	}
@@ -85,7 +85,7 @@ fn comment_with_brackets() {
 		("name", "world")
 	]);
 	let expected = "Hello, world!";
-	match render(template, &cxt) {
+	match osmia_syntax().render(template, &cxt) {
 		Ok(actual) => assert_eq!(expected, actual),
 		Err(err) => panic!("{}", err)
 	}
@@ -98,7 +98,7 @@ fn comment_with_brackets_and_text() {
 		("name", "world")
 	]);
 	let expected = "Hello, world!";
-	match render(template, &cxt) {
+	match osmia_syntax().render(template, &cxt) {
 		Ok(actual) => assert_eq!(expected, actual),
 		Err(err) => panic!("{}", err)
 	}
