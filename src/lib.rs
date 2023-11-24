@@ -24,8 +24,9 @@ impl<'a, T> RenderSyntax<'a, T> {
 	pub fn add_simple_block(
 		&mut self,
 		render_function: &'a FtStractBlock<T>
-	) {
+	) -> &mut Self {
 		self.simple_blocks.push(render_function);
+		self
 	}
 
 	pub fn render(
@@ -73,14 +74,21 @@ where
 {
 	let mut syntax: RenderSyntax<'_, T> = RenderSyntax::new();
 	syntax.add_simple_block(&|code, _ctx| {
+		let result = detect_simple_block("{*", "*}", code);
+		if let Ok(Some((block, block_size))) = &result {
+			return Ok(Some((String::new(), *block_size)));
+		}
+		result
+	})
+	.add_simple_block(&|code, _ctx| {
 		let result = detect_simple_block("{{{", "}}}", code);
 		if let Ok(Some((block, block_size))) = &result {
 			let block = "{{".to_owned() + block.as_str() + "}}";
 			return Ok(Some((block, *block_size)));
 		}
 		result
-	});
-	syntax.add_simple_block(&|code, ctx| {
+	})
+	.add_simple_block(&|code, ctx| {
 		let result = detect_simple_block("{{", "}}", code);
 		if let Ok(Some((block, block_size))) = &result {
 			let value = match ctx.get(block.as_str()) {
@@ -91,8 +99,7 @@ where
 		}
 		result
 	});
-	
-	return syntax.render(template, ctx);
+	syntax.render(template, ctx)
 }
 
 fn detect_simple_block(

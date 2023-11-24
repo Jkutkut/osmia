@@ -54,11 +54,50 @@ fn not_found_key() {
 
 #[test]
 fn similar_syntax() {
-	let template = "Hello, {{name}}! The syntax to us a variable is {{{name}}}.";
+	let template = "Hello, {{name}}! The syntax is \"Hello, {{{name}}}!\".";
 	let cxt = std::collections::HashMap::from([
 		("name", "world")
 	]);
-	let expected = "Hello, world! The syntax to us a variable is {{name}}.";
+	let expected = "Hello, world! The syntax is \"Hello, {{name}}!\".";
+	match render(template, &cxt) {
+		Ok(actual) => assert_eq!(expected, actual),
+		Err(err) => panic!("{}", err)
+	}
+}
+
+#[test]
+fn comment() {
+	let template = "Hello, {{name}}!{* This is a comment *}";
+	let cxt = std::collections::HashMap::from([
+		("name", "world")
+	]);
+	let expected = "Hello, world!";
+	match render(template, &cxt) {
+		Ok(actual) => assert_eq!(expected, actual),
+		Err(err) => panic!("{}", err)
+	}
+}
+
+#[test]
+fn comment_with_brackets() {
+	let template = "Hello, {{name}}!{* This is a comment with brackets: { { } } *}";
+	let cxt = std::collections::HashMap::from([
+		("name", "world")
+	]);
+	let expected = "Hello, world!";
+	match render(template, &cxt) {
+		Ok(actual) => assert_eq!(expected, actual),
+		Err(err) => panic!("{}", err)
+	}
+}
+
+#[test]
+fn comment_with_brackets_and_text() {
+	let template = "Hello, {{name}}!{* This is a comment with brackets: {{ {{{ }}} }} *}";
+	let cxt = std::collections::HashMap::from([
+		("name", "world")
+	]);
+	let expected = "Hello, world!";
 	match render(template, &cxt) {
 		Ok(actual) => assert_eq!(expected, actual),
 		Err(err) => panic!("{}", err)
