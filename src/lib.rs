@@ -14,9 +14,9 @@
 //!
 //! let template = "Hello, {{name}}!";
 //! let result = osmia_syntax().render(
-//!		"Hello, {{name}}!",
-//!		&serde_json::from_str::<Json>(r#"{ "name": "world" }"#).unwrap()
-//!	).unwrap();
+//! 	"Hello, {{name}}!",
+//! 	&serde_json::from_str::<Json>(r#"{ "name": "world" }"#).unwrap()
+//! ).unwrap();
 //! assert_eq!(result, "Hello, world!".to_string());
 //! ```
 
@@ -139,7 +139,7 @@ impl<'a> RenderSyntax<'a> {
 	/// assert_eq!(result, "Hello, world!".to_string());
 	/// ```
 	pub fn render(
-		self,
+		&self,
 		template: &str,
 		ctx: JsonRef
 	) -> Result<String, String> {
@@ -212,8 +212,8 @@ impl<'a> RenderSyntax<'a> {
 pub fn osmia_syntax<'a>() -> RenderSyntax<'a> {
 	let mut syntax: RenderSyntax<'_> = RenderSyntax::new();
 	syntax
-	/*.add_complex_block(&|code, ctx, syntax| {
-		let result = match detect_simple_block("{{for", "}}", code) {
+	.add_complex_block(&|code, ctx, syntax| {
+		let result: OsmiaResult = match detect_simple_block("{{for", "}}", code) {
 			Ok(None) => return Ok(None),
 			Err(err) => return Err(err),
 			Ok(Some((block, block_size))) => Ok(Some((block, block_size)))
@@ -226,7 +226,7 @@ pub fn osmia_syntax<'a>() -> RenderSyntax<'a> {
 		let key = block_arr[0];
 		let value = match ctx.get(block_arr[2]) {
 			Some(value) => value,
-			None => return Err(format!("Key not found: {}", block_arr[2]))
+			None => return Err(format!("Key not found: \"{}\"", block_arr[2]))
 		};
 		let iterator = match value.as_array() {
 			Some(iterator) => iterator,
@@ -240,20 +240,20 @@ pub fn osmia_syntax<'a>() -> RenderSyntax<'a> {
 			return Err(format!("Missing closing block: {{end}}"));
 		}
 		let new_code = &code[block_size..i];
-		let mut new_ctx = ctx.clone();
-		new_ctx.insert(key, value);
 		let mut new_block = String::new();
-		for (i, value) in iterator.iter().enumerate() {
-			match syntax.render(new_code, ctx) {
+		for value in iterator.iter() {
+			let mut new_ctx = ctx.clone();
+			new_ctx[key] = value.clone();
+			match syntax.render(new_code, &new_ctx) {
 				Err(err) => return Err(err),
 				Ok(rendered) => new_block.push_str(rendered.as_str())
 			}
 		}
 
 		let new_block_size = i + "{{end}}".len();
-		let result = Ok(Some((new_block, new_block_size)));
+		let result: OsmiaResult = Ok(Some((new_block, new_block_size)));
 		result
-	})*/
+	})
 	.add_simple_block(&|code, _ctx| {
 		let result = detect_simple_block("{*", "*}", code);
 		if let Ok(Some((_block, block_size))) = &result {
@@ -272,18 +272,92 @@ pub fn osmia_syntax<'a>() -> RenderSyntax<'a> {
 	.add_simple_block(&|code, ctx| {
 		let result = detect_simple_block("{{", "}}", code);
 		if let Ok(Some((block, block_size))) = &result {
-			let value = match ctx.get(block.as_str()) {
-				Some(value) => match value.as_str() {
-					Some(value) => value.to_owned(),
-					None => return Err(format!("\"{}\" is not a string", block))
-				},
-				None => return Err(format!("Key not found: {}", block))
+			let value = match get_json_value(ctx, block.trim()) {
+				Ok(value) => value,
+				Err(err) => return Err(err)
 			};
 			return Ok(Some((value, *block_size)));
 		}
 		result
 	});
 	syntax
+}
+
+fn get_json_value<'a>(
+	ctx: JsonRef<'a>,
+	key: &str
+) -> Result<String, String> {
+	let mut key_index: usize = 0;
+	while key_index < key.len() {
+		let c = key.chars().nth(key_index).unwrap();
+		if c == '.' || c == '[' {
+			break;
+		}
+		key_index += 1;
+	}
+	let value = match ctx.get(key[..key_index].to_owned()) {
+		Some(value) => value,
+		None => return Err(format!(
+			"Key not found: \"{}\" in \"{}\"",
+			key[..key_index].to_owned(),
+			serde_json::to_string(&ctx).unwrap()
+		))
+	};
+	if key_index >= key.len() {
+		return json_as_str(value);
+	}
+	let c = key.chars().nth(key_index).unwrap();
+	if c == '.' {
+		match value {
+			Json::Object(_) => return get_json_value(value, &key[key_index + 1..]),
+			_ => Err(format!("\"{}\" is not an object", key[..key_index].to_owned()))
+		}
+	}
+	else {
+		match value {
+			Json::Array(_) => (),
+			_ => return Err(format!("\"{}\" is not an array", key[..key_index].to_owned()))
+		}
+		let mut key_end_index = key_index + 1;
+		while key_end_index < key.len() {
+			let c = key.chars().nth(key_end_index).unwrap();
+			if c == ']' {
+				break;
+			}
+			key_end_index += 1;
+		}
+		if key_end_index >= key.len() || key.chars().nth(key_end_index).unwrap() != ']' {
+			return Err(format!("Missing closing bracket: {}", key));
+		}
+		let index = match key[key_index + 1..key_end_index].parse::<usize>() {
+			Ok(index) => index,
+			Err(err) => return Err(format!("Invalid index: {}", err))
+		};
+		let value = match value.as_array() {
+			Some(value) => value,
+			None => return Err(format!("\"{}\" is not an array", key[..key_index].to_owned()))
+		};
+		if index >= value.len() {
+			return Err(format!("Index out of bounds: {}", index));
+		}
+		if key_end_index < key.len() - 1 && key.chars().nth(key_end_index + 1).unwrap() == '.' {
+			key_end_index += 1;
+		}
+		if key_end_index + 1 >= key.len() {
+			return json_as_str(&value[index]);
+		}
+		return get_json_value(&value[index], &key[key_end_index + 1..]);
+	}
+}
+
+fn json_as_str(value: JsonRef) -> Result<String, String> {
+	match value {
+		Json::String(value) => Ok(value.to_string()),
+		Json::Number(value) => Ok(value.to_string()),
+		Json::Bool(value) => Ok(value.to_string()),
+		Json::Null => Ok("null".to_string()),
+		e => serde_json::to_string(&e).map_err(|err| err.to_string())
+	}
 }
 
 /// Detects a simple block.
