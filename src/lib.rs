@@ -212,46 +212,40 @@ impl<'a> RenderSyntax<'a> {
 pub fn osmia_syntax<'a>() -> RenderSyntax<'a> {
 	let mut syntax: RenderSyntax<'_> = RenderSyntax::new();
 	syntax
+	// .add_complex_block(&|code, ctx, syntax| {
+	// TODO
+	// })
 	.add_complex_block(&|code, ctx, syntax| {
-		let result: OsmiaResult = match detect_simple_block("{{for", "}}", code) {
+		let (condition, body, block_size) = match detect_complex_block(
+			"{{for", "}}", "{{end}}", code
+		) {
 			Ok(None) => return Ok(None),
 			Err(err) => return Err(err),
-			Ok(Some((block, block_size))) => Ok(Some((block, block_size)))
+			Ok(Some((condition, body, block_size))) => (condition, body, block_size)
 		};
-		let (block, block_size) = result.clone().unwrap().unwrap();
-		let block_arr = block.trim().split_whitespace().collect::<Vec<&str>>();
-		if block_arr.len() != 3 || block_arr[1] != "in" {
-			return Err(format!("Invalid for block: {}", block));
+		let condition_arr: Vec<&str> = Tokenizer::new(&condition).collect();
+		if condition_arr.len() != 3 || condition_arr[1] != "in" {
+			return Err(format!("Invalid for block: {}", condition_arr.join(" ")));
 		}
-		let key = block_arr[0];
-		let value = match ctx.get(block_arr[2]) {
+		let key = &condition_arr[0];
+		let value = match ctx.get(&condition_arr[2]) {
 			Some(value) => value,
-			None => return Err(format!("Key not found: \"{}\"", block_arr[2]))
+			None => return Err(format!("Key not found: \"{}\"", condition_arr[2]))
 		};
 		let iterator = match value.as_array() {
 			Some(iterator) => iterator,
-			None => return Err(format!("\"{}\" is not iterable", block_arr[2]))
+			None => return Err(format!("\"{}\" is not iterable", condition_arr[2]))
 		};
-		let mut i = block_size;
-		while i < code.len() && !code[i..].starts_with("{{end}}") {
-			i += 1;
-		}
-		if i >= code.len() || !code[i..].starts_with("{{end}}") {
-			return Err(format!("Missing closing block: {{end}}"));
-		}
-		let new_code = &code[block_size..i];
 		let mut new_block = String::new();
 		for value in iterator.iter() {
 			let mut new_ctx = ctx.clone();
 			new_ctx[key] = value.clone();
-			match syntax.render(new_code, &new_ctx) {
+			match syntax.render(&body, &new_ctx) {
 				Err(err) => return Err(err),
 				Ok(rendered) => new_block.push_str(rendered.as_str())
 			}
 		}
-
-		let new_block_size = i + "{{end}}".len();
-		let result: OsmiaResult = Ok(Some((new_block, new_block_size)));
+		let result: OsmiaResult = Ok(Some((new_block, block_size)));
 		result
 	})
 	.add_simple_block(&|code, _ctx| {
@@ -350,12 +344,16 @@ fn get_json_value<'a>(
 	}
 }
 
+/// Converts a Json value to a String.
+///
+/// It prevents serde_json from adding quotes to the string.
+///
+/// # Arguments
+///
+/// * `value` - The Json value to convert.
 fn json_as_str(value: JsonRef) -> Result<String, String> {
 	match value {
 		Json::String(value) => Ok(value.to_string()),
-		Json::Number(value) => Ok(value.to_string()),
-		Json::Bool(value) => Ok(value.to_string()),
-		Json::Null => Ok("null".to_string()),
 		e => serde_json::to_string(&e).map_err(|err| err.to_string())
 	}
 }
@@ -400,4 +398,91 @@ pub fn detect_simple_block(
 	};
 	let block = &code[start.len()..end_index + start.len()];
 	Ok(Some((block.to_owned(), start.len() + end_index + end.len())))
+}
+
+
+
+struct Tokenizer<'a> {
+	text: &'a str,
+	start: usize,
+	current: usize,
+	in_quotes: Option<char>,
+}
+
+impl<'a> Tokenizer<'a> {
+	fn new(text: &'a str) -> Self {
+		Self {
+			text,
+			start: 0,
+			current: 0,
+			in_quotes: None
+		}
+	}
+}
+
+impl<'a> std::iter::Iterator for Tokenizer<'a> {
+	type Item = &'a str;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		while self.current < self.text.len() {
+			let c = self.text.chars().nth(self.current).unwrap();
+			if c == '"' || c == '\'' {
+				match self.in_quotes {
+					None => self.in_quotes = Some(c),
+					Some(q) => {
+						if q == c {
+							self.in_quotes = None;
+						}
+					}
+				}
+			}
+			if c.is_whitespace() && self.in_quotes.is_none() {
+				let token = &self.text[self.start..self.current].trim();
+				self.start = self.current;
+				if token.len() > 0 {
+					return Some(token);
+				}
+			}
+			self.current += 1;
+		}
+		if self.current >= self.text.len() && self.current != self.start {
+			if self.in_quotes.is_some() {
+				panic!("Unclosed quotes!");
+			}
+			let token = &self.text[self.start..self.current].trim();
+			self.start = self.current;
+			if token.len() > 0 {
+				return Some(token);
+			}
+		}
+		None
+	}
+}
+
+pub fn detect_complex_block<'a>(
+	start_block_start: &'a str,
+	start_block_end: &'a str,
+	end_block: &'a str,
+	code: &'a str
+) -> Result<Option<(String, String, usize)>, String> {
+	let (block, block_size) = match detect_simple_block(
+		start_block_start, start_block_end, code
+	) {
+		Ok(None) => return Ok(None),
+		Err(err) => return Err(err),
+		Ok(Some((block, block_size))) => (block, block_size)
+	};
+	let mut i = block_size;
+	while i < code.len() && !code[i..].starts_with(end_block) {
+		i += 1;
+	}
+	if i >= code.len() || !code[i..].starts_with(end_block) {
+		return Err(format!("Missing closing block: {}", end_block));
+	}
+	let new_code = &code[block_size..i].to_owned();
+	Ok(Some((
+		block.to_owned(),
+		new_code.to_owned(),
+		i + end_block.len()
+	)))
 }
