@@ -332,3 +332,80 @@ fn for_each_fail01() {
 		}
 	}
 }
+
+#[test]
+fn conditional01() {
+	let template = r#"
+		{{user.name}} is {{if user.age == 18}}an adult{{if}}.
+	"#;
+	let ctx: Json = serde_json::from_str(r#"
+		{
+			"user": {
+				"name": "John",
+				"age": 18
+			}
+		}
+	"#).unwrap();
+	let expected = "\n\t\tJohn is an adult.\n\t";
+	match osmia_syntax().render(template, &ctx) {
+		Ok(actual) => assert_eq!(expected, actual),
+		Err(err) => panic!("{}", err)
+	}
+}
+
+#[test]
+fn conditional02() {
+	let template = r#"
+		{{for user in users}}{{if user.age >= 18}}{{user.name}} is an adult.{{if}}{{end}}
+	"#.trim();
+	let ctx: Json = serde_json::from_str(r#"
+		{
+			"users": [
+				{
+					"name": "John",
+					"age": 18
+				},
+				{
+					"name": "Jane",
+					"age": 17
+				},
+				{
+					"name": "Jack",
+					"age": 19
+				}
+			]
+		}
+	"#).unwrap();
+	let expected = "John is an adult.Jack is an adult.";
+	match osmia_syntax().render(template, &ctx) {
+		Ok(actual) => assert_eq!(expected, actual),
+		Err(err) => panic!("{}", err)
+	}
+}
+#[test]
+fn conditional03() {
+	let template = r#"
+		{{for user in users}}
+			{{user.name}} is {{if user.age >= 18}}an adult{{else}}a child{{if}}.
+		{{end}}
+	"#;
+	let ctx: Json = serde_json::from_str(r#"
+		{
+			"users": [
+				{
+					"name": "John",
+					"age": 18
+				},
+				{
+					"name": "Jane",
+					"age": 17
+				}
+			]
+		}
+	"#).unwrap();
+	let expected = "\n\t\tJohn is an adult.\n\t\n\t\tJane is a child.\n\t\n\t";
+	match osmia_syntax().render(template, &ctx) {
+		Ok(actual) => assert_eq!(expected, actual),
+		Err(err) => panic!("{}", err)
+	}
+}

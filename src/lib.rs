@@ -212,9 +212,46 @@ impl<'a> RenderSyntax<'a> {
 pub fn osmia_syntax<'a>() -> RenderSyntax<'a> {
 	let mut syntax: RenderSyntax<'_> = RenderSyntax::new();
 	syntax
-	// .add_complex_block(&|code, ctx, syntax| {
-	// TODO
-	// })
+	.add_complex_block(&|code, ctx, syntax| {
+		let (condition, body, block_size) = match detect_complex_block(
+			"{{if", "}}", "{{if}}", code
+		) {
+			Ok(None) => return Ok(None),
+			Err(err) => return Err(err),
+			Ok(Some((condition, body, block_size))) => (condition, body, block_size)
+		};
+		let condition_arr: Vec<&str> = Tokenizer::new(&condition).collect();
+		if condition_arr.len() != 3 {
+			return Err(format!("Invalid if block: {}", condition_arr.join(" ")));
+		}
+		let first_value = match get_json_value(ctx, condition_arr[0]) {
+			Ok(value) => value,
+			Err(err) => return Err(err)
+		};
+		let operator = condition_arr[1];
+		let second_value = match get_json_value(ctx, condition_arr[2]) {
+			Ok(value) => value,
+			Err(err) => return Err(err)
+		}; // TODO refactor
+		let condition_result = match operator {
+			"==" => first_value == second_value,
+			"!=" => first_value != second_value,
+			"<" => first_value < second_value,
+			">" => first_value > second_value,
+			"<=" => first_value <= second_value,
+			">=" => first_value >= second_value,
+			_ => return Err(format!("Invalid operator: {}", operator))
+		};
+		let mut new_block = String::new();
+		if condition_result {
+			match syntax.render(&body, ctx) {
+				Err(err) => return Err(err),
+				Ok(rendered) => new_block.push_str(rendered.as_str())
+			}
+		}
+		let result: OsmiaResult = Ok(Some((new_block, block_size)));
+		result
+	})
 	.add_complex_block(&|code, ctx, syntax| {
 		let (condition, body, block_size) = match detect_complex_block(
 			"{{for", "}}", "{{end}}", code
@@ -281,6 +318,15 @@ fn get_json_value<'a>(
 	ctx: JsonRef<'a>,
 	key: &str
 ) -> Result<String, String> {
+	if key.starts_with('"') && key.ends_with('"') {
+		return Ok(key[1..key.len() - 1].to_owned());
+	}
+	if let Some(nbr) = key.parse::<i64>().ok() {
+		return Ok(nbr.to_string());
+	}
+	if let Some(nbr) = key.parse::<f64>().ok() {
+		return Ok(nbr.to_string());
+	}
 	let mut key_index: usize = 0;
 	while key_index < key.len() {
 		let c = key.chars().nth(key_index).unwrap();
