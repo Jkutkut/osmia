@@ -1,147 +1,15 @@
-use std::collections::LinkedList;
-
 mod tokenizer;
+mod token;
+mod scanner;
 
-use tokenizer::Tokenizer;
+use scanner::Scanner;
+use token::Token;
 
 #[cfg(test)]
 mod tests;
 
 // type Json = serde_json::Value;
 // type JsonRef<'a> = &'a Json;
-
-#[derive(Debug)]
-enum Token<'a> {
-	DelimiterStart,
-	DelimiterEnd,
-
-	Raw(&'a str),
-	Value(&'a str),
-
-	If,
-	ElseIf,
-	Else,
-
-	For,
-
-	Equal,
-	NotEqual,
-	LessThan,
-	LessEqual,
-	GreaterThan,
-	GreaterEqual,
-
-	Plus,
-	Minus,
-	Multiply,
-	Divide,
-	Modulo,
-
-	And,
-	Or,
-	Not,
-
-	GroupingStart,
-	GroupingEnd,
-
-	// Assign,
-}
-
-impl Token<'_> {
-	fn from_str(s: &str) -> Option<Token> {
-		match s {
-			"if" => Some(Token::If),
-			"elif" => Some(Token::ElseIf),
-			"else" => Some(Token::Else),
-			"for" => Some(Token::For),
-			"==" => Some(Token::Equal),
-			"!=" => Some(Token::NotEqual),
-			"<" => Some(Token::LessThan),
-			"<=" => Some(Token::LessEqual),
-			">" => Some(Token::GreaterThan),
-			">=" => Some(Token::GreaterEqual),
-			"+" => Some(Token::Plus),
-			"-" => Some(Token::Minus),
-			"*" => Some(Token::Multiply),
-			"/" => Some(Token::Divide),
-			"%" => Some(Token::Modulo),
-			"&&" => Some(Token::And),
-			"||" => Some(Token::Or),
-			"!" => Some(Token::Not),
-			"(" => Some(Token::GroupingStart),
-			")" => Some(Token::GroupingEnd),
-			_ => None
-		}
-	}
-
-// 	fn is_conditional(&self) -> bool {
-// 		match self {
-// 			Token::If => true,
-// 			Token::ElseIf => true,
-// 			Token::Else => true,
-// 			Token::For => true,
-// 			_ => false
-// 		}
-// 	}
-}
-
-struct Scanner<'a> {
-	delimiter_start: &'a str,
-	delimiter_end: &'a str
-}
-
-impl<'a> Scanner<'a> {
-	fn new(delimiter_start: &'a str, delimiter_end: &'a str) -> Self {
-		Scanner {
-			delimiter_start: delimiter_start,
-			delimiter_end: delimiter_end
-		}
-	}
-
-	fn scan(&self, input: &'a str) -> Result<LinkedList<Token>, String> {
-		#[cfg(test)]
-		{
-			println!("** Scanning input **\n{}\n", input);
-		}
-		let mut tokens = LinkedList::new();
-		let mut last = 0;
-		let mut i = 0;
-		while i < input.len() {
-			let delimiter_start_idx = input[i..].find(self.delimiter_start).unwrap_or(input.len() - i);
-			if delimiter_start_idx > 0 {
-				tokens.push_back(Token::Raw(&input[last..i + delimiter_start_idx]));
-				i += delimiter_start_idx;
-				if i >= input.len() {
-					break;
-				}
-			}
-			tokens.push_back(Token::DelimiterStart);
-			i += self.delimiter_start.len();
-			let delimiter_end_idx = match input[i..].find(self.delimiter_end) {
-				Some(idx) => idx,
-				None => return Err("Unclosed delimiter".to_string())
-			};
-			for token in Tokenizer::new(&input[i..i + delimiter_end_idx]) {
-				let token = token?;
-				match Token::from_str(token) {
-					Some(t) => tokens.push_back(t),
-					None => tokens.push_back(Token::Value(token))
-				}
-			}
-			tokens.push_back(Token::DelimiterEnd);
-			i += delimiter_end_idx + self.delimiter_end.len();
-			last = i;
-		}
-		#[cfg(test)]
-		{
-			for token in &tokens {
-				println!("{:?}", token);
-			}
-			println!("** Scanning done **\n");
-		}
-		Ok(tokens)
-	}
-}
 
 pub struct Lexer<'a> {
 	scanner: Scanner<'a>
@@ -191,7 +59,6 @@ impl<'a> Lexer<'a> {
 		}
 		Ok(output)
 	}
-
 
 	fn find_end_of_block(&self, tokens: &[&Token]) -> Result<usize, String> {
 		let mut i = 1;
