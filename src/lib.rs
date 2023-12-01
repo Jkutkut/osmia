@@ -41,6 +41,9 @@ enum Token<'a> {
 	Or,
 	Not,
 
+	GroupingStart,
+	GroupingEnd,
+
 	// Assign,
 }
 
@@ -65,19 +68,21 @@ impl Token<'_> {
 			"&&" => Some(Token::And),
 			"||" => Some(Token::Or),
 			"!" => Some(Token::Not),
+			"(" => Some(Token::GroupingStart),
+			")" => Some(Token::GroupingEnd),
 			_ => None
 		}
 	}
 
-	fn is_conditional(&self) -> bool {
-		match self {
-			Token::If => true,
-			Token::ElseIf => true,
-			Token::Else => true,
-			Token::For => true,
-			_ => false
-		}
-	}
+// 	fn is_conditional(&self) -> bool {
+// 		match self {
+// 			Token::If => true,
+// 			Token::ElseIf => true,
+// 			Token::Else => true,
+// 			Token::For => true,
+// 			_ => false
+// 		}
+// 	}
 }
 
 struct Scanner<'a> {
