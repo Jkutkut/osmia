@@ -2,6 +2,7 @@ mod tokenizer;
 mod token;
 mod scanner;
 mod syntax_tree;
+pub mod parser;
 
 use scanner::Scanner;
 use token::Token;

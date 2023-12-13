@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token<'a> {
 	DelimiterStart,
 	DelimiterEnd,
@@ -12,27 +12,34 @@ pub enum Token<'a> {
 
 	For,
 
+	// Equality
 	Equal,
 	NotEqual,
+
+	// Comparison
 	LessThan,
 	LessEqual,
 	GreaterThan,
 	GreaterEqual,
 
+	// Terms
 	Plus,
-	Minus,
+	Minus, // Unary
+
+	// Factors
 	Multiply,
 	Divide,
 	Modulo,
 
+	Not, // Unary
+
 	And,
 	Or,
-	Not,
 
 	GroupingStart,
 	GroupingEnd,
 
-	// Assign,
+	// Assign?
 }
 
 impl Token<'_> {

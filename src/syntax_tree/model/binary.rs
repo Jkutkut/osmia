@@ -1,6 +1,7 @@
 use super::Expression;
 use crate::token::Token;
 
+#[derive(Debug, PartialEq)]
 pub struct Binary<'a> {
 	pub left: Box<Expression<'a>>,
 	pub operator: Token<'a>,

@@ -1,2 +1,3 @@
 mod tests;
-mod syntax_tree_test;
+mod syntax_tree;
+mod tokenizer;
