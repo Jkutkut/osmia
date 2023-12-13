@@ -1,3 +1,18 @@
+/// A simple word tokenizer.
+///
+/// Takes a str and returns an iterator with the words.
+///
+/// Words are a sequence of non-whitespace characters and
+/// all the content between quotes.
+///
+/// # Examples
+/// ```
+/// use osmia::tokenizer::Tokenizer;
+/// let words = Tokenizer::new("Hello world")
+///		.map(|word| word.unwrap())
+///		.collect::<Vec<&str>>();
+///	assert_eq!(words, vec!["Hello", "world"]);
+///	```
 pub struct Tokenizer<'a> {
 	text: &'a str,
 	start: usize,
@@ -16,6 +31,9 @@ impl<'a> Tokenizer<'a> {
 	}
 }
 
+/// Iterator trait implementation.
+///
+/// Returns the next word in the text or an error as a String.
 impl<'a> std::iter::Iterator for Tokenizer<'a> {
 	type Item = Result<&'a str, String>;
 

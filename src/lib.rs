@@ -1,4 +1,4 @@
-mod tokenizer;
+pub mod tokenizer;
 mod token;
 mod scanner;
 mod syntax_tree;
