@@ -31,7 +31,11 @@ impl<'a> Parser<'a> {
 		{
 			println!("parse: {:?}", self.tokens);
 		}
-		self.expression()
+		let result = self.expression()?;
+		if !self.is_at_end() {
+			return self.error(self.peek(), "Unexpected token.");
+		}
+		Ok(result)
 	}
 
 	fn expression(&mut self) -> Result<Expression<'a>, String> {
@@ -51,6 +55,10 @@ impl<'a> Parser<'a> {
 
 	fn equality(&mut self) -> Result<Expression<'a>, String> {
 		let mut expr = self.comparison()?;
+		#[cfg(debug_assertions)]
+		{
+			println!("equality: {:?} -> next: {:?}", &expr, &self.peek());
+		}
 		while self.match_token(vec![Token::NotEqual, Token::Equal]) {
 			let operator = self.previous();
 			let right = self.comparison()?;
@@ -142,7 +150,7 @@ impl<'a> Parser<'a> {
 			let right = self.unary()?;
 			#[cfg(debug_assertions)]
 			{
-				println!("factor: {:?} {} {:?}", &expr, &operator, &right);
+				println!("factor:\n  {:?}\n  {}\n  {:?}", &expr, &operator, &right);
 			}
 			expr = Self::new_binary(
 				expr, operator, right
@@ -162,35 +170,41 @@ impl<'a> Parser<'a> {
 			let unary = Unary::new(operator, right)?;
 			return Ok(Expression::Unary(unary));
 		}
-		#[cfg(debug_assertions)]
-		{
-			println!("literal: {:?}", self.peek());
-		}
 		self.primary()
 	}
 
 	fn primary(&mut self) -> Result<Expression<'a>, String> {
-		let result = match self.peek() {
+		match self.peek() {
 			Token::Value(s) => {
+				self.advance();
 				match Literal::from_str(s) {
-					Some(literal) => Ok(Expression::Literal(literal)),
+					Some(literal) => {
+						#[cfg(debug_assertions)]
+						{
+							println!("literal: {:?}", &literal);
+						}
+						Ok(Expression::Literal(literal))
+					},
 					None => self.error(self.peek(), "Expect literal.")
 				}
 			},
 			Token::GroupingStart => {
+				self.advance();
 				let expr = self.expression()?;
 				self.consume(
 					Token::GroupingEnd,
 					&format!("Expected '{}' after expression.", Token::GroupingEnd)
 				)?;
+				#[cfg(debug_assertions)]
+				{
+					println!("grouping: ({:?})", &expr);
+				}
 				Ok(Expression::Grouping(Grouping::new(expr)))
 			},
 			_ => {
 				self.error(self.peek(), "Expected expression")
 			}
-		};
-		self.advance();
-		result
+		}
 	}
 
 	fn consume(
