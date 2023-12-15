@@ -14,12 +14,12 @@ use crate::syntax_tree::model::{Expression, Binary, Unary, Grouping, Literal};
 /// primary        →  Literal | "(" expression ")" ;
 /// ```
 pub struct Parser<'a> {
-	tokens: Vec<Token<'a>>,
+	tokens: &'a [Token<'a>],
 	current: usize,
 }
 
 impl<'a> Parser<'a> {
-	pub fn new(tokens: Vec<Token<'a>>) -> Self {
+	pub fn new(tokens: &'a [Token<'a>]) -> Self {
 		Self {
 			tokens,
 			current: 0,
@@ -55,12 +55,8 @@ impl<'a> Parser<'a> {
 
 	fn equality(&mut self) -> Result<Expression<'a>, String> {
 		let mut expr = self.comparison()?;
-		#[cfg(debug_assertions)]
-		{
-			println!("equality: {:?} -> next: {:?}", &expr, &self.get_current());
-		}
-		while self.match_and_advance(vec![Token::NotEqual, Token::Equal]) {
-			let operator = self.get_previous();
+		while self.match_and_advance(&[Token::NotEqual, Token::Equal]) {
+			let operator = self.get_previous().clone();
 			let right = self.comparison()?;
 			#[cfg(debug_assertions)]
 			{
@@ -73,7 +69,7 @@ impl<'a> Parser<'a> {
 		Ok(expr)
 	}
 
-	fn match_and_advance(&mut self, types: Vec<Token<'a>>) -> bool {
+	fn match_and_advance(&mut self, types: &[Token<'a>]) -> bool {
 		for token_type in types {
 			if self.check_current(token_type) {
 				self.advance();
@@ -83,14 +79,14 @@ impl<'a> Parser<'a> {
 		false
 	}
 
-	fn check_current(&self, token2compare: Token<'a>) -> bool {
+	fn check_current(&self, token2compare: &Token<'a>) -> bool {
 		if self.is_at_end() {
 			return false;
 		}
 		self.get_current() == token2compare
 	}
 
-	fn advance(&mut self) -> Token<'a> {
+	fn advance(&mut self) -> &Token<'a> {
 		if !self.is_at_end() {
 			self.current += 1;
 		}
@@ -101,21 +97,21 @@ impl<'a> Parser<'a> {
 		self.current >= self.tokens.len() - 1
 	}
 
-	fn get_current(&self) -> Token<'a> { // TODO use references
-		self.tokens[self.current].clone()
+	fn get_current(&self) -> &Token<'a> {
+		&self.tokens[self.current]
 	}
 
-	fn get_previous(&self) -> Token<'a> { // TODO use references
-		self.tokens[self.current - 1].clone()
+	fn get_previous(&self) -> &Token<'a> {
+		&self.tokens[self.current - 1]
 	}
 
 	fn comparison(&mut self) -> Result<Expression<'a>, String> {
 		let mut expr = self.term()?;
-		while self.match_and_advance(vec![
+		while self.match_and_advance(&[
 			Token::GreaterThan, Token::GreaterEqual,
 			Token::LessThan, Token::LessEqual
 		]) {
-			let operator = self.get_previous();
+			let operator = self.get_previous().clone();
 			let right = self.term()?;
 			#[cfg(debug_assertions)]
 			{
@@ -130,8 +126,8 @@ impl<'a> Parser<'a> {
 
 	fn term(&mut self) -> Result<Expression<'a>, String> {
 		let mut expr = self.factor()?;
-		while self.match_and_advance(vec![Token::Minus, Token::Plus]) {
-			let operator = self.get_previous();
+		while self.match_and_advance(&[Token::Minus, Token::Plus]) {
+			let operator = self.get_previous().clone();
 			let right = self.factor()?;
 			#[cfg(debug_assertions)]
 			{
@@ -146,14 +142,14 @@ impl<'a> Parser<'a> {
 
 	fn factor(&mut self) -> Result<Expression<'a>, String> {
 		let mut expr = self.unary()?;
-		while self.match_and_advance(vec![
+		while self.match_and_advance(&[
 			Token::Multiply, Token::Divide, Token::Modulo
 		]) {
-			let operator = self.get_previous();
+			let operator = self.get_previous().clone();
 			let right = self.unary()?;
 			#[cfg(debug_assertions)]
 			{
-				println!("factor:\n  {:?}\n  {}\n  {:?}", &expr, &operator, &right);
+				println!("factor:\n  {:?}\n  {}\n  {:?}", &expr, operator, &right);
 			}
 			expr = Self::new_binary(
 				expr, operator, right
@@ -163,12 +159,12 @@ impl<'a> Parser<'a> {
 	}
 
 	fn unary(&mut self) -> Result<Expression<'a>, String> {
-		if self.match_and_advance(vec![Token::Not, Token::Minus]) {
-			let operator = self.get_previous();
+		if self.match_and_advance(&[Token::Not, Token::Minus]) {
+			let operator = self.get_previous().clone();
 			let right = self.unary()?;
 			#[cfg(debug_assertions)]
 			{
-				println!("unary: {} {:?}", &operator, &right);
+				println!("unary: {} {:?}", operator, right);
 			}
 			let unary = Unary::new(operator, right)?;
 			return Ok(Expression::Unary(unary));
@@ -179,8 +175,9 @@ impl<'a> Parser<'a> {
 	fn primary(&mut self) -> Result<Expression<'a>, String> {
 		match self.get_current() {
 			Token::Value(s) => {
+				let literal = Literal::from_str(s);
 				self.advance();
-				match Literal::from_str(s) {
+				match literal {
 					Some(literal) => {
 						#[cfg(debug_assertions)]
 						{
@@ -215,13 +212,13 @@ impl<'a> Parser<'a> {
 		token: Token<'a>,
 		message: &str
 	) -> Result<Token<'a>, String> {
-		if self.check_current(token) {
-			return Ok(self.advance());
+		if self.check_current(&token) {
+			return Ok(self.advance().clone());
 		}
 		Err(format!("{}", message))
 	}
 
-	fn error(&self, token: Token<'a>, message: &str) -> Result<Expression<'a>, String> {
+	fn error(&self, token: &Token<'a>, message: &str) -> Result<Expression<'a>, String> {
 		Err(format!("{} at '{}'.", message, token))
 	}
 
