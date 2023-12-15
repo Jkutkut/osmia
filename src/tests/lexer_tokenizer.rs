@@ -1,4 +1,4 @@
-use crate::tokenizer::Tokenizer;
+use crate::lexer::Tokenizer;
 
 fn compare(code: &str, expected: Vec<&str>) {
 	let result = Tokenizer::new(code)

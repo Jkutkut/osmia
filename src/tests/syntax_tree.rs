@@ -1,4 +1,4 @@
-use crate::token::Token;
+use crate::lexer::Token;
 use crate::syntax_tree::model::{Expression, Literal, Grouping, Unary, Binary};
 use crate::syntax_tree::syntax_tree_printer::SyntaxTreePrinter;
 use crate::syntax_tree::visitable::{Visitable};

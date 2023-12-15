@@ -1,5 +1,5 @@
 use super::Expression;
-use crate::token::Token;
+use crate::lexer::Token;
 
 #[derive(Debug, PartialEq)]
 pub struct Binary<'a> {

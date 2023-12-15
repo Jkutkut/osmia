@@ -1,4 +1,4 @@
-use crate::token::Token;
+use crate::lexer::Token;
 use crate::syntax_tree::model::{Expression, Binary, Unary, Grouping, Literal};
 
 /// Parses a list of tokens into a syntax tree.

@@ -1,3 +1,3 @@
-mod tests;
+mod lexer_tokenizer;
 mod syntax_tree;
-mod tokenizer;
+mod osmia;

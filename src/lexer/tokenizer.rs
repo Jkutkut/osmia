@@ -4,15 +4,6 @@
 ///
 /// Words are a sequence of non-whitespace characters and
 /// all the content between quotes.
-///
-/// # Examples
-/// ```
-/// use osmia::tokenizer::Tokenizer;
-/// let words = Tokenizer::new("Hello world")
-///		.map(|word| word.unwrap())
-///		.collect::<Vec<&str>>();
-///	assert_eq!(words, vec!["Hello", "world"]);
-///	```
 pub struct Tokenizer<'a> {
 	text: &'a str,
 	start: usize,

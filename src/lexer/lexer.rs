@@ -1,15 +1,15 @@
-use crate::token::Token;
-use crate::tokenizer::Tokenizer;
+use crate::lexer::Token;
+use crate::lexer::Tokenizer;
 use std::collections::LinkedList;
 
-pub struct Scanner<'a> {
+pub struct Lexer<'a> {
 	delimiter_start: &'a str,
 	delimiter_end: &'a str
 }
 
-impl<'a> Scanner<'a> {
+impl<'a> Lexer<'a> {
 	pub fn new(delimiter_start: &'a str, delimiter_end: &'a str) -> Self {
-		Scanner {
+		Lexer {
 			delimiter_start: delimiter_start,
 			delimiter_end: delimiter_end
 		}

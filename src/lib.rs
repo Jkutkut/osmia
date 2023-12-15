@@ -1,11 +1,8 @@
-pub mod tokenizer;
-mod token;
-mod scanner;
+mod lexer;
 mod syntax_tree;
 pub mod parser;
 
-use scanner::Scanner;
-use token::Token;
+use lexer::{Lexer, Token};
 
 #[cfg(test)]
 mod tests;
@@ -13,14 +10,14 @@ mod tests;
 // type Json = serde_json::Value;
 // type JsonRef<'a> = &'a Json;
 
-pub struct Lexer<'a> {
-	scanner: Scanner<'a>
+pub struct Osmia<'a> {
+	lexer: Lexer<'a>
 }
 
-impl<'a> Lexer<'a> {
+impl<'a> Osmia<'a> {
 	pub fn new(delimiter_start: &'a str, delimiter_end: &'a str) -> Self {
 		Self {
-			scanner: Scanner::new(delimiter_start, delimiter_end)
+			lexer: Lexer::new(delimiter_start, delimiter_end)
 		}
 	}
 
@@ -30,7 +27,7 @@ impl<'a> Lexer<'a> {
 
 	pub fn render(&self, code: &str/*, _ctx: JsonRef*/) -> Result<String, String> {
 		// TODO handle ctx
-		let scan_result = self.scanner.scan(code)?;
+		let scan_result = self.lexer.scan(code)?;
 		let tokens = scan_result.iter().collect::<Vec<&Token>>();
 
 		let mut output = String::new();

@@ -1,14 +1,14 @@
-use crate::Lexer;
+use crate::Osmia;
 
 fn render(code: &str) -> Result<String, String> {
-	let parser = Lexer::default();
+	let parser = Osmia::default();
 	parser.render(code)
 }
 
 #[test]
 fn init() {
-	let _parser = Lexer::new("{{", "}}");
-	let _parser = Lexer::default();
+	let _parser = Osmia::new("{{", "}}");
+	let _parser = Osmia::default();
 }
 
 #[test]
