@@ -1,5 +1,5 @@
 use crate::lexer::Token;
-use crate::syntax_tree::model::{Expression, Literal, Grouping, Unary, Binary};
+use crate::syntax_tree::model::{Expression, Literal, Grouping, Unary, Binary, Variable};
 use crate::syntax_tree::syntax_tree_printer::SyntaxTreePrinter;
 use crate::syntax_tree::visitable::{Visitable};
 use crate::parser::Parser;
@@ -377,3 +377,77 @@ fn invalid_grouping02() {
 }
 
 // TODO tests for json_values
+#[test]
+fn json_value01() {
+	let tokens = vec![Token::Value("user.age"), Token::Equal, Token::Value("42")];
+	let expected = Expression::Binary(Binary::new(
+		Expression::Variable(Variable::from_str("user.age").unwrap()),
+		Token::Equal,
+		Expression::Literal(Literal::Int(42))
+	).unwrap());
+	test_parser(tokens, expected);
+}
+
+#[test]
+fn json_value02() {
+	let tests = [
+		"user",
+		"user.age",
+		"user.surnames[0]",
+		"user.surnames[0].length",
+		"user.first_name",
+		"this.key.is.really.long.arr[0][120][14560].key",
+	];
+	for test in tests.iter() {
+		match Variable::from_str(test) {
+			Some(var) => {
+				println!("{:?}", var);
+				assert!(true);
+			},
+			None => {
+				panic!("Failed to parse: {}", test);
+			}
+		}
+	}
+}
+
+#[test]
+fn invalid_json_values() {
+	let tests = [
+		"",
+		" ",
+		".",
+		".age",
+		"user.",
+		"user..age",
+		"user.age.",
+		"user.age..",
+		"user.age[",
+		"user.age[0",
+		"user.age[0.",
+		"user.age[0].",
+		" user",
+		"user ",
+		"user.first_name-key",
+		"user[af]",
+		"[0]",
+		"[]",
+		"user[0.2]",
+		"user[2fs3]",
+		"user[0][0.2]",
+		"user.[0]",
+		"user[[0]",
+		"user[0]]",
+		"u[.0]",
+		"u[0.]",
+		"u[0[0]]",
+	];
+	for test in tests.iter() {
+		match Variable::from_str(test) {
+			Some(var) => {
+				panic!("'{}' should not compile: {:?}", test, var);
+			},
+			None => assert!(true)
+		}
+	}
+}

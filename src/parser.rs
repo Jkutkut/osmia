@@ -1,5 +1,5 @@
 use crate::lexer::Token;
-use crate::syntax_tree::model::{Expression, Binary, Unary, Grouping, Literal};
+use crate::syntax_tree::model::{Expression, Binary, Unary, Grouping, Literal, Variable};
 
 /// Parses a list of tokens into a syntax tree.
 ///
@@ -11,7 +11,7 @@ use crate::syntax_tree::model::{Expression, Binary, Unary, Grouping, Literal};
 /// term           → factor ( ( "-" | "+" ) factor )* ;
 /// factor         → unary ( ( "/" | "*" ) unary )* ;
 /// unary          → ( "!" | "-" ) unary | primary ;
-/// primary        →  Literal | "(" expression ")" ;
+/// primary        →  Literal | Variable | "(" expression ")" ;
 /// ```
 pub struct Parser<'a> {
 	tokens: &'a [Token<'a>],
@@ -175,18 +175,23 @@ impl<'a> Parser<'a> {
 	fn primary(&mut self) -> Result<Expression<'a>, String> {
 		match self.get_current() {
 			Token::Value(s) => {
-				let literal = Literal::from_str(s);
-				self.advance();
-				match literal {
-					Some(literal) => {
-						#[cfg(debug_assertions)]
-						{
-							println!("literal: {:?}", &literal);
-						}
-						Ok(Expression::Literal(literal))
-					},
-					None => self.error(self.get_current(), "Expect literal.")
+				if let Some(literal) = Literal::from_str(s) {
+					self.advance();
+					#[cfg(debug_assertions)]
+					{
+						println!("literal: {:?}", &literal);
+					}
+					return Ok(Expression::Literal(literal));
 				}
+				if let Some(variable) = Variable::from_str(s) {
+					self.advance();
+					#[cfg(debug_assertions)]
+					{
+						println!("variable: {:?}", &variable);
+					}
+					return Ok(Expression::Variable(variable));
+				}
+				self.error(self.get_current(), "Expect literal or variable.")
 			},
 			Token::GroupingStart => {
 				self.advance();

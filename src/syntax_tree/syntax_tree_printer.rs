@@ -1,6 +1,6 @@
 use super::visitor::Visitor;
 use super::visitable::Visitable;
-use super::model::{Expression, Literal, Unary, Binary, Grouping};
+use super::model::{Expression, Literal, Unary, Binary, Grouping, Variable};
 
 pub struct SyntaxTreePrinter;
 
@@ -17,6 +17,10 @@ impl Visitor<String> for SyntaxTreePrinter {
 			Literal::Bool(b) => b.to_string(),
 			Literal::Null => "null".to_string()
 		}
+	}
+
+	fn visit_variable(&self, variable: &Variable) -> String {
+		variable.to_string()
 	}
 
 	fn visit_grouping(&self, grouping: &Grouping) -> String {
