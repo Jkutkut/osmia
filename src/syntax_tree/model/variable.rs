@@ -14,84 +14,14 @@ impl<'a> Variable<'a> {
 		}
 	}
 
-	pub fn from_str(raw: &'a str) -> Option<Self> {
-		{
-			println!("\nfrom_str: {}", raw);
-		}
-		if let Some(fist_char) = raw.chars().nth(0) {
-			if !Self::is_valid_key_start(fist_char) {
-				return None;
-			}
-		}
-		let mut keys = LinkedList::new();
-		let mut i: usize = 0;
-		while i < raw.len() {
-			let current_char = raw.chars().nth(i).unwrap(); // TODO
-			{
-				println!("current_char: {}", current_char);
-			}
-			if current_char == '[' {
-				if i == 0 {
-					return None;
-				}
-				{
-					println!("  i: {} -- raw.len(): {}", i, raw.len());
-					println!("  current: {:?}", raw[i..].to_string());
-				}
-				let end: usize = raw[i..].find(']')?;
-				{
-					println!("  end: {}", end);
-				}
-				match Self::get_key(raw, i + 1, i + end, true) {
-					Some(VariableKey::Index(index)) => {
-						{
-							println!("index: {}", index);
-						}
-						keys.push_back(VariableKey::Index(index));
-						i += end + 1;
-					},
-					_ => return None
-				};
-				{
-					println!("arr key: {:?}", &keys.back());
-					println!("  current_char: {:?}", raw.chars().nth(i));
-					println!("  i: {} -- raw.len(): {}", i, raw.len());
-				}
-				if let Some(next_char) = raw.chars().nth(i) {
-					if next_char == '.' {
-						i += 1;
-					}
-				}
-			}
-			else {
-				let start = i;
-				while i < raw.len() && Self::is_valid_key_char(raw.chars().nth(i).unwrap()) {
-					i += 1;
-				}
-				let key = Self::get_key(raw, start, i, false)?;
-				{
-					println!("key: {:?}", &key);
-					println!("  current_char: {:?}", raw.chars().nth(i));
-					println!("  i: {} -- raw.len(): {}", i, raw.len());
-				}
-				keys.push_back(key);
-			}
-			if let Some(current_char) = raw.chars().nth(i) {
-				if current_char == '.' {
-					i += 1;
-				}
-			}
-		}
-		if keys.is_empty() {
+	fn get_key_str(value: &'a str, start: usize, end: usize) -> Option<&'a str> {
+		if start >= end {
 			return None;
 		}
-		let last_char = raw.chars().last().unwrap();
-		if last_char == '.' || last_char == '[' {
-			if !Self::is_valid_key_start(last_char) {
-				return None;
-			}
+		match value[start..end].trim() {
+			"" => None,
+			result => Some(result)
 		}
-		Some(Self::new(raw, keys))
 	}
 
 	fn is_valid_key_char(c: char) -> bool {
@@ -102,30 +32,96 @@ impl<'a> Variable<'a> {
 		c.is_alphabetic() || c == '_'
 	}
 
-	fn get_key(value: &str, start: usize, end: usize, validate: bool) -> Option<VariableKey> {
-		if start >= end {
-			return None;
+	fn is_valid_key(value: &'a str) -> bool {
+		if value.is_empty() {
+			return false;
 		}
-		let result = value[start..end].trim();
-		{
-			println!("  -> get_key: {}", result);
-
+		let mut chars = value.chars();
+		if !Self::is_valid_key_start(chars.next().unwrap()) {
+			return false;
 		}
-		if result.is_empty() {
-			return None;
-		}
-		if let Ok(index) = result.parse::<usize>() {
-			return Some(VariableKey::Index(index));
-		}
-		// Validate key
-		if validate {
-			for c in result.chars() {
-				if !Self::is_valid_key_char(c) {
-					return None;
-				}
+		for c in chars {
+			if !Self::is_valid_key_char(c) {
+				return false;
 			}
 		}
-		Some(VariableKey::Key(result))
+		true
+	}
+
+	fn get_as_key(value: &'a str, start: usize, end: usize) -> Option<VariableKey<'a>> {
+		let key = Self::get_key_str(value, start, end)?;
+		match Self::is_valid_key(key) {
+			true => Some(VariableKey::Key(key)),
+			false => None
+		}
+	}
+
+	fn get_as_index(value: &'a str, start: usize, end: usize) -> Option<VariableKey<'a>> {
+		let key = Self::get_key_str(value, start, end)?;
+		match key.parse::<usize>() {
+			Ok(index) => Some(VariableKey::Index(index)),
+			Err(_) => None
+		}
+	}
+
+	pub fn from_str(raw: &'a str) -> Option<Self> {
+		let mut keys = LinkedList::new();
+		let mut can_be_index = false;
+		let mut i: usize = 0;
+		if let Some(last_char) = raw.chars().last() {
+			if !Self::is_valid_key_start(last_char) && last_char != ']' {
+				return None;
+			}
+		}
+		while i < raw.len() {
+			let current_char = raw.chars().nth(i).unwrap(); // TODO
+			if current_char == '[' {
+				if !can_be_index {
+					return None;
+				}
+				let end: usize = raw[i..].find(']')?;
+				let key = Self::get_as_index(raw, i + 1, i + end)?;
+				keys.push_back(key);
+				i += end + 1;
+				match raw.chars().nth(i) {
+					None => (),
+					Some('.') => {
+						can_be_index = false;
+						i += 1;
+					},
+					Some('[') => {
+						can_be_index = true;
+						i -= 1;
+					},
+					_ => return None
+				}
+			}
+			else if Self::is_valid_key_start(current_char) {
+				let start = i;
+				while i < raw.len() && Self::is_valid_key_char(raw.chars().nth(i).unwrap()) {
+					i += 1;
+				}
+				let key = Self::get_as_key(raw, start, i)?;
+				keys.push_back(key);
+				match raw.chars().nth(i) {
+					None => (),
+					Some('[') => {
+						can_be_index = true;
+						i -= 1;
+					},
+					Some('.') => can_be_index = false,
+					_ => return None
+				}
+			}
+			else {
+				return None;
+			}
+			i += 1;
+		}
+		match keys.is_empty() {
+			true => None,
+			false => Some(Self::new(raw, keys))
+		}
 	}
 }
 

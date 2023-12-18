@@ -376,7 +376,6 @@ fn invalid_grouping02() {
 	should_fail(tokens);
 }
 
-// TODO tests for json_values
 #[test]
 fn json_value01() {
 	let tokens = vec![Token::Value("user.age"), Token::Equal, Token::Value("42")];
@@ -397,6 +396,7 @@ fn json_value02() {
 		"user.surnames[0].length",
 		"user.first_name",
 		"this.key.is.really.long.arr[0][120][14560].key",
+		"u[1].key[2][3].hola"
 	];
 	for test in tests.iter() {
 		match Variable::from_str(test) {
@@ -441,6 +441,8 @@ fn invalid_json_values() {
 		"u[.0]",
 		"u[0.]",
 		"u[0[0]]",
+		"u[]",
+		"u[0][0]]",
 	];
 	for test in tests.iter() {
 		match Variable::from_str(test) {
