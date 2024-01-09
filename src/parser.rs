@@ -5,6 +5,20 @@ use crate::syntax_tree::model::{Expression, Binary, Unary, Grouping, Literal, Va
 ///
 /// ## Structure:
 /// ```text
+/// program        → Stmt
+/// Stmt           → Block | Raw | Print | Expression | Assign | If | While | ForEach | Break | Continue
+///
+/// Block          → Stmt[] ;
+/// Raw            → "..." ;
+/// Print          → "{{" "print" expression ";" "}}" ;
+/// Expression     → "{{" expression "}}" ;
+/// Assign         → "{{" "assign" Variable "=" expression ";" "}}" ;
+/// If             → "{{" "if" expression "}}" Stmt ( "{{" "elseif" expression "}}" Stmt )* ( "{{" "else" "}}" Stmt )? "{{" "fi" "}}" ;
+/// While          → "{{" "while" expression "}}" Stmt "{{" "done" "}}" ;
+/// ForEach        → "{{" "foreach" Variable "in" Variable "}}" Stmt "{{" "done" "}}" ;
+/// Break          → "{{" "break" "}}" ;
+/// Continue       → "{{" "continue" "}}" ;
+///
 /// expression     → equality ;
 /// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 /// comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;

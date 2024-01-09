@@ -15,18 +15,14 @@ pub use unary::Unary;
 pub use variable::Variable;
 
 enum Stmt<'a> {
-	Expression(Expression<'a>),
-	// Print(Expression<'a>),
-	// Var(&'a str, Option<Expression<'a>>),
-	// Block(Vec<Stmt<'a>>),
-	If(Expression<'a>, Box<Stmt<'a>>, Option<Box<Stmt<'a>>>),
-	// While(Expression<'a>, Box<Stmt<'a>>),
-	ForEach(Variable<'a>, Variable<'a>, Box<Stmt<'a>>),
-	// Break,
-	// Continue,
-}
-
-enum CodeBlock<'a> {
-	Stmt(Stmt<'a>),
+	Block(Vec<Stmt<'a>>),
 	Raw(&'a str),
+	Print(Expression<'a>),
+	Expression(Expression<'a>),
+	Assign(Variable<'a>, Expression<'a>),
+	If(Expression<'a>, Box<Stmt<'a>>, Option<Box<Stmt<'a>>>),
+	While(Expression<'a>, Box<Stmt<'a>>),
+	ForEach(Variable<'a>, Variable<'a>, Box<Stmt<'a>>),
+	Break,
+	Continue,
 }
