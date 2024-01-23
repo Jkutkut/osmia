@@ -1,5 +1,8 @@
 use crate::lexer::Token;
-use crate::syntax_tree::model::{Expression, Binary, Unary, Grouping, Literal, Variable};
+use crate::syntax_tree::model::{
+	Expression, Binary, Unary, Grouping, Literal, Variable,
+	Stmt
+};
 
 /// Parses a list of tokens into a syntax tree.
 ///
@@ -32,6 +35,8 @@ pub struct Parser<'a> {
 	current: usize,
 }
 
+// Public methods
+
 impl<'a> Parser<'a> {
 	pub fn new(tokens: &'a [Token<'a>]) -> Self {
 		Self {
@@ -40,22 +45,26 @@ impl<'a> Parser<'a> {
 		}
 	}
 
-	pub fn parse(&mut self) -> Result<Expression<'a>, String> {
+	pub fn parse(&mut self) -> Result<Stmt<'a>, String> {
 		#[cfg(debug_assertions)]
 		{
 			println!("parse: {:?}", self.tokens);
 		}
-		let result = self.expression()?;
+		self.advance(); // TODO remove
+		self.advance(); // TODO remove
+		let result = Stmt::Expression(self.expression()?);
+		self.advance(); // TODO remove
 		if !self.is_at_end() {
-			return self.error(self.get_current(), "Unexpected token.");
+			return Err(self.error(self.get_current(), "Unexpected token."));
 		}
 		Ok(result)
 	}
 
-	fn expression(&mut self) -> Result<Expression<'a>, String> {
-		self.equality()
-	}
+}
 
+// Tools
+
+impl<'a> Parser<'a> {
 	fn new_binary(
 		left: Expression<'a>,
 		operator: Token<'a>,
@@ -65,22 +74,6 @@ impl<'a> Parser<'a> {
 			left, operator, right
 		)?;
 		Ok(Expression::Binary(binary))
-	}
-
-	fn equality(&mut self) -> Result<Expression<'a>, String> {
-		let mut expr = self.comparison()?;
-		while self.match_and_advance(&[Token::NotEqual, Token::Equal]) {
-			let operator = self.get_previous().clone();
-			let right = self.comparison()?;
-			#[cfg(debug_assertions)]
-			{
-				println!("equality: {:?} {} {:?}", &expr, &operator, &right);
-			}
-			expr = Self::new_binary(
-				expr, operator, right
-			)?;
-		}
-		Ok(expr)
 	}
 
 	fn match_and_advance(&mut self, types: &[Token<'a>]) -> bool {
@@ -117,6 +110,45 @@ impl<'a> Parser<'a> {
 
 	fn get_previous(&self) -> &Token<'a> {
 		&self.tokens[self.current - 1]
+	}
+
+	fn consume(
+		&mut self,
+		token: Token<'a>,
+		message: &str
+	) -> Result<Token<'a>, String> {
+		if self.check_current(&token) {
+			return Ok(self.advance().clone());
+		}
+		Err(format!("{}", message))
+	}
+
+	fn error(&self, token: &Token<'a>, message: &str) -> String {
+		format!("{} at '{}'.", message, token)
+	}
+}
+
+// Grammar
+
+impl<'a> Parser<'a> {
+	fn expression(&mut self) -> Result<Expression<'a>, String> {
+		self.equality()
+	}
+
+	fn equality(&mut self) -> Result<Expression<'a>, String> {
+		let mut expr = self.comparison()?;
+		while self.match_and_advance(&[Token::NotEqual, Token::Equal]) {
+			let operator = self.get_previous().clone();
+			let right = self.comparison()?;
+			#[cfg(debug_assertions)]
+			{
+				println!("equality: {:?} {} {:?}", &expr, &operator, &right);
+			}
+			expr = Self::new_binary(
+				expr, operator, right
+			)?;
+		}
+		Ok(expr)
 	}
 
 	fn comparison(&mut self) -> Result<Expression<'a>, String> {
@@ -205,7 +237,7 @@ impl<'a> Parser<'a> {
 					}
 					return Ok(Expression::Variable(variable));
 				}
-				self.error(self.get_current(), "Expect literal or variable.")
+				Err(self.error(self.get_current(), "Expect literal or variable."))
 			},
 			Token::GroupingStart => {
 				self.advance();
@@ -220,25 +252,7 @@ impl<'a> Parser<'a> {
 				}
 				Ok(Expression::Grouping(Grouping::new(expr)))
 			},
-			_ => {
-				self.error(self.get_current(), "Expected expression")
-			}
+			_ => Err(self.error(self.get_current(), "Expected expression"))
 		}
 	}
-
-	fn consume(
-		&mut self,
-		token: Token<'a>,
-		message: &str
-	) -> Result<Token<'a>, String> {
-		if self.check_current(&token) {
-			return Ok(self.advance().clone());
-		}
-		Err(format!("{}", message))
-	}
-
-	fn error(&self, token: &Token<'a>, message: &str) -> Result<Expression<'a>, String> {
-		Err(format!("{} at '{}'.", message, token))
-	}
-
 }
