@@ -14,7 +14,7 @@ CODE_VOLUME = -v ${DIR}:/${REPO}
 CARGO_REGISTRY = -v cargo_registy:/root/.cargo/registry
 
 # ****** Docker Constants ******
-DOCKER_RUN = docker run --rm
+DOCKER_RUN = docker run --rm -t
 DOCKER_RUN_IT = ${DOCKER_RUN} -it --name ${REPO}
 
 RUN_ATTRS = ${CODE_VOLUME} ${CARGO_REGISTRY} -w /${REPO}
