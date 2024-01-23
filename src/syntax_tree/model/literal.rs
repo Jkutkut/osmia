@@ -40,3 +40,15 @@ impl Literal {
 		}
 	}
 }
+
+impl std::fmt::Display for Literal {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		match self {
+			Literal::Float(fl) => write!(f, "{}", fl),
+			Literal::Int(i) => write!(f, "{}", i),
+			Literal::Str(s) => write!(f, "{}", s),
+			Literal::Bool(b) => write!(f, "{}", b),
+			Literal::Null => write!(f, "null")
+		}
+	}
+}

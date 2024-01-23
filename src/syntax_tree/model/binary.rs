@@ -24,3 +24,9 @@ impl<'a> Binary<'a> {
 		})
 	}
 }
+
+impl std::fmt::Display for Binary<'_> {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{} {} {}", self.operator, self.left, self.right)
+	}
+}

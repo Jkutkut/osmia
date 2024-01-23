@@ -4,13 +4,23 @@ pub enum Token<'a> {
 	DelimiterEnd,
 
 	Raw(&'a str),
+
 	Value(&'a str),
 
+	// Statements
+	Print,
+	Assign,
+	AssignEq,
+
+	// Conditionals
 	If,
 	ElseIf,
 	Else,
 
+	// Loops
+	While,
 	For,
+	In,
 
 	// Equality
 	Equal,
@@ -38,17 +48,18 @@ pub enum Token<'a> {
 
 	GroupingStart,
 	GroupingEnd,
-
-	// Assign?
 }
 
 impl Token<'_> {
 	pub fn from_str(s: &str) -> Option<Token> {
 		match s {
-			"if" => Some(Token::If),
-			"elif" => Some(Token::ElseIf),
-			"else" => Some(Token::Else),
+			// Delimiters
+			"print" => Some(Token::Print),
+			"assign" => Some(Token::Assign),
+			"=" => Some(Token::AssignEq),
+			"while" => Some(Token::While),
 			"for" => Some(Token::For),
+			"in" => Some(Token::In),
 			"==" => Some(Token::Equal),
 			"!=" => Some(Token::NotEqual),
 			"<" => Some(Token::LessThan),
@@ -60,24 +71,14 @@ impl Token<'_> {
 			"*" => Some(Token::Multiply),
 			"/" => Some(Token::Divide),
 			"%" => Some(Token::Modulo),
+			"!" => Some(Token::Not),
 			"&&" => Some(Token::And),
 			"||" => Some(Token::Or),
-			"!" => Some(Token::Not),
 			"(" => Some(Token::GroupingStart),
 			")" => Some(Token::GroupingEnd),
 			_ => None
 		}
 	}
-
-	// pub fn is_conditional(&self) -> bool {
-	// 	match self {
-	// 		Token::If => true,
-	// 		Token::ElseIf => true,
-	// 		Token::Else => true,
-	// 		Token::For => true,
-	// 		_ => false
-	// 	}
-	// }
 
 	pub fn is_binary_operator(&self) -> bool {
 		match self {
@@ -114,10 +115,15 @@ impl std::fmt::Display for Token<'_> {
 			Token::DelimiterEnd => write!(f, "}}"),
 			Token::Raw(s) => write!(f, "{}", s),
 			Token::Value(s) => write!(f, "{}", s),
+			Token::Print => write!(f, "print"),
+			Token::Assign => write!(f, "assign"),
+			Token::AssignEq => write!(f, "="),
 			Token::If => write!(f, "if"),
-			Token::ElseIf => write!(f, "elif"),
+			Token::ElseIf => write!(f, "elseif"),
 			Token::Else => write!(f, "else"),
+			Token::While => write!(f, "while"),
 			Token::For => write!(f, "for"),
+			Token::In => write!(f, "in"),
 			Token::Equal => write!(f, "=="),
 			Token::NotEqual => write!(f, "!="),
 			Token::LessThan => write!(f, "<"),
@@ -129,9 +135,9 @@ impl std::fmt::Display for Token<'_> {
 			Token::Multiply => write!(f, "*"),
 			Token::Divide => write!(f, "/"),
 			Token::Modulo => write!(f, "%"),
+			Token::Not => write!(f, "!"),
 			Token::And => write!(f, "&&"),
 			Token::Or => write!(f, "||"),
-			Token::Not => write!(f, "!"),
 			Token::GroupingStart => write!(f, "("),
 			Token::GroupingEnd => write!(f, ")"),
 		}

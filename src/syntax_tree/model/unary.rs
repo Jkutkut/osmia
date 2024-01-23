@@ -18,3 +18,9 @@ impl<'a> Unary<'a> {
 		}
 	}
 }
+
+impl std::fmt::Display for Unary<'_> {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{}{}", self.operator, self.right)
+	}
+}

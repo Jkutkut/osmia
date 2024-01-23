@@ -1,6 +1,8 @@
 use super::visitor::Visitor;
 use super::visitable::Visitable;
-use super::model::{Expression, Literal, Unary, Binary, Grouping, Variable};
+use super::model::{
+	Expression, Literal, Unary, Binary, Grouping, Variable, Stmt
+};
 
 pub struct SyntaxTreePrinter;
 
@@ -33,5 +35,9 @@ impl Visitor<String> for SyntaxTreePrinter {
 
 	fn visit_binary(&self, binary: &Binary) -> String {
 		format!("{} {} {}", &binary.left.accept(self), &binary.operator, &binary.right.accept(self))
+	}
+
+	fn visit_stmt(&self, stmt: &Stmt) -> String {
+		stmt.accept(self)
 	}
 }
