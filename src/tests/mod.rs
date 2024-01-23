@@ -1,3 +1,7 @@
+mod parser;
+mod model;
+
 mod lexer_tokenizer;
-mod syntax_tree;
 mod osmia;
+
+mod syntax_tree_printer;

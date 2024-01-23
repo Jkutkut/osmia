@@ -1,81 +1,35 @@
-use crate::lexer::Token;
-use crate::syntax_tree::model::{Expression, Literal, Grouping, Unary, Binary, Variable};
-use crate::syntax_tree::syntax_tree_printer::SyntaxTreePrinter;
-use crate::syntax_tree::visitable::{Visitable};
-use crate::parser::Parser;
+use crate::Token;
+use crate::syntax_tree::model::{
+	Expression, Binary, Unary, Grouping, Literal, Variable,
+	Stmt
+};
+use super::{test_parser, should_fail};
 
-#[test]
-fn create_syntax_tree01() {
-	let expected = "(5 + 3) * 2 <= !!true";
-	let expression = Expression::Binary(Binary::new(
-		Expression::Grouping(Grouping::new(
-			Expression::Binary(Binary::new(
-				Expression::Literal(Literal::Int(5)),
-				Token::Plus,
-				Expression::Literal(Literal::Int(3))
-			).unwrap())
-		)),
-		Token::Multiply,
-		Expression::Binary(Binary::new(
-			Expression::Literal(Literal::Int(2)),
-			Token::LessEqual,
-			Expression::Unary(Unary::new(
-				Token::Not,
-				Expression::Unary(Unary::new(
-					Token::Not,
-					Expression::Literal(Literal::Bool(true))
-				).unwrap())
-			).unwrap())
-		).unwrap())
-	).unwrap());
-	let printer = SyntaxTreePrinter;
-	let result = expression.accept(&printer);
-	assert_eq!(result, expected);
-}
-
-#[test]
-fn create_syntax_tree02() {
-	let expecteds = vec![
-		"Hello, world!",
-		"42",
-		"42.5",
-		"null",
-		"true",
-		"false",
+#[cfg(test)]
+fn token_expression_to_token_stmt(tokens: Vec<Token>) -> Vec<Token> {
+	let mut new_tokens = vec![
+		Token::DelimiterStart,
+		Token::Print,
 	];
-	let expressions = vec![
-		Expression::Literal(Literal::Str(String::from("Hello, world!"))),
-		Expression::Literal(Literal::Int(42)),
-		Expression::Literal(Literal::Float(42.5)),
-		Expression::Literal(Literal::Null),
-		Expression::Literal(Literal::Bool(true)),
-		Expression::Literal(Literal::Bool(false)),
-	];
-	let printer = SyntaxTreePrinter;
-	for (i, expression) in expressions.iter().enumerate() {
-		let result = expression.accept(&printer);
-		assert_eq!(result, expecteds[i]);
-	}
+	new_tokens.extend(tokens);
+	new_tokens.push(Token::DelimiterEnd);
+	new_tokens
 }
 
-fn test_parser(
-	tokens: Vec<Token>,
-	expected: Expression
-) {
-	let parsed_result = match Parser::new(&tokens).parse() {
-		Ok(expr) => expr,
-		Err(err) => panic!("Parser threw an error:\n{}", err),
-	};
-	let printer = SyntaxTreePrinter;
-	let parsed_result_str = parsed_result.accept(&printer);
-	let expected_str = expected.accept(&printer);
-	println!("\nParsed:              {}", parsed_result_str);
-	println!("Original - Expected: {}\n", expected_str);
-	assert_eq!(parsed_result_str, expected_str);
-	println!("Parsed:              {:#?}", parsed_result);
-	println!("Original - Expected: {:#?}\n", expected);
-	assert_eq!(parsed_result, expected);
+#[cfg(test)]
+fn test_parser_expression(tokens: Vec<Token>, expected: Expression) {
+	let tokens = token_expression_to_token_stmt(tokens);
+	let expected = Stmt::Expression(expected);
+	test_parser(tokens, expected);
 }
+
+#[cfg(test)]
+fn should_fail_expression(tokens: Vec<Token>) {
+	let tokens = token_expression_to_token_stmt(tokens);
+	should_fail(tokens);
+}
+
+// Valid tests
 
 #[test]
 fn basic_parser() {
@@ -101,7 +55,7 @@ fn basic_parser() {
 		Token::Equal,
 		Expression::Literal(Literal::Int(7))
 	).unwrap());
-	test_parser(tokens, expected);
+	test_parser_expression(tokens, expected);
 }
 
 #[test]
@@ -173,7 +127,7 @@ fn precedence() {
 		Token::Equal,
 		Expression::Literal(Literal::Bool(true))
 	).unwrap());
-	test_parser(tokens, expected);
+	test_parser_expression(tokens, expected);
 }
 
 #[test]
@@ -235,7 +189,7 @@ fn unary_operators01() {
 		Token::NotEqual,
 		Expression::Literal(Literal::Bool(false))
 	).unwrap());
-	test_parser(tokens, expected);
+	test_parser_expression(tokens, expected);
 }
 
 #[test]
@@ -297,7 +251,7 @@ fn unary_operators02() {
 			Expression::Literal(Literal::Int(1))
 		).unwrap())
 	).unwrap());
-	test_parser(tokens, expected);
+	test_parser_expression(tokens, expected);
 }
 
 #[test]
@@ -329,20 +283,22 @@ fn grouping() {
 		Token::Equal,
 		Expression::Literal(Literal::Int(9))
 	).unwrap());
-	test_parser(tokens, expected);
+	test_parser_expression(tokens, expected);
 }
 
-// TODO tests for errors
-fn should_fail(
-	code: Vec<Token>,
-) {
-	let parsed_result = Parser::new(&code).parse();
-	let printer = SyntaxTreePrinter;
-	if let Ok(ref parsed_result) = parsed_result {
-		println!("Parsed: {}", parsed_result.accept(&printer));
-	}
-	assert!(parsed_result.is_err());
+#[test]
+fn json_value01() {
+	// user.age == 42
+	let tokens = vec![Token::Value("user.age"), Token::Equal, Token::Value("42")];
+	let expected = Expression::Binary(Binary::new(
+		Expression::Variable(Variable::from_str("user.age").unwrap()),
+		Token::Equal,
+		Expression::Literal(Literal::Int(42))
+	).unwrap());
+	test_parser_expression(tokens, expected);
 }
+
+// Invalid tests
 
 #[test]
 fn invalid_grouping01() {
@@ -357,7 +313,7 @@ fn invalid_grouping01() {
 		Token::Equal,
 		Token::Value("7")
 	];
-	should_fail(tokens);
+	should_fail_expression(tokens);
 }
 
 #[test]
@@ -374,82 +330,4 @@ fn invalid_grouping02() {
 		Token::Value("7")
 	];
 	should_fail(tokens);
-}
-
-#[test]
-fn json_value01() {
-	let tokens = vec![Token::Value("user.age"), Token::Equal, Token::Value("42")];
-	let expected = Expression::Binary(Binary::new(
-		Expression::Variable(Variable::from_str("user.age").unwrap()),
-		Token::Equal,
-		Expression::Literal(Literal::Int(42))
-	).unwrap());
-	test_parser(tokens, expected);
-}
-
-#[test]
-fn json_value02() {
-	let tests = [
-		"user",
-		"user.age",
-		"user.surnames[0]",
-		"user.surnames[0].length",
-		"user.first_name",
-		"this.key.is.really.long.arr[0][120][14560].key",
-		"u[1].key[2][3].hola"
-	];
-	for test in tests.iter() {
-		match Variable::from_str(test) {
-			Some(var) => {
-				println!("{:?}", var);
-				assert!(true);
-			},
-			None => {
-				panic!("Failed to parse: {}", test);
-			}
-		}
-	}
-}
-
-#[test]
-fn invalid_json_values() {
-	let tests = [
-		"",
-		" ",
-		".",
-		".age",
-		"user.",
-		"user..age",
-		"user.age.",
-		"user.age..",
-		"user.age[",
-		"user.age[0",
-		"user.age[0.",
-		"user.age[0].",
-		" user",
-		"user ",
-		"user.first_name-key",
-		"user[af]",
-		"[0]",
-		"[]",
-		"user[0.2]",
-		"user[2fs3]",
-		"user[0][0.2]",
-		"user.[0]",
-		"user[[0]",
-		"user[0]]",
-		"u[.0]",
-		"u[0.]",
-		"u[0[0]]",
-		"u[]",
-		"u[0][0]]",
-	];
-	for test in tests.iter() {
-		match Variable::from_str(test) {
-			Some(var) => {
-				panic!("'{}' should not compile: {:?}", test, var);
-			},
-			None => assert!(true)
-		}
-	}
 }
