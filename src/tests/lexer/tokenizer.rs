@@ -7,6 +7,18 @@ fn compare(code: &str, expected: Vec<&str>) {
 	assert_eq!(result, expected);
 }
 
+fn fails(code: &str) {
+	let mut fails = false;
+	for t in Tokenizer::new(code) {
+		if let Err(_) = t {
+			fails = true;
+			break;
+		}
+	}
+	println!("this code should fail:\n{}", code);
+	assert!(fails);
+}
+
 #[test]
 fn basic_test() {
 	compare(
@@ -39,9 +51,9 @@ fn multiple_spaces_test() {
 #[test]
 fn white_spaces() {
 	let tests = [
-		("spaces: this words has spaces", vec!["spaces:", "this", "words", "has", "spaces"]),
-		("tabs: this\twords\thas\ttabs", vec!["tabs:", "this", "words", "has", "tabs"]),
-		("newlines: this\nwords\nhas\nnewlines", vec!["newlines:", "this", "words", "has", "newlines"])
+		("\"spaces:\" this words has spaces", vec![r#""spaces:""#, "this", "words", "has", "spaces"]),
+		("\"tabs:\" this\twords\thas\ttabs", vec![r#""tabs:""#, "this", "words", "has", "tabs"]),
+		("\"newlines:\" this\nwords\nhas\nnewlines", vec![r#""newlines:""#, "this", "words", "has", "newlines"]),
 	];
 	for (code, expected) in &tests {
 		compare(code, expected.to_vec());
@@ -64,10 +76,99 @@ fn simple_quotes() {
 #[test]
 fn double_quotes() {
 	let tests = [
-		("this sentences has \"double quotes\" at the middle", vec!["this", "sentences", "has", "\"double quotes\"", "at", "the", "middle"]),
-		("\"double quotes\" at the start", vec!["\"double quotes\"", "at", "the", "start"]),
-		("double \"quotes at the end\"", vec!["double", "\"quotes at the end\""]),
-		("\"multiple double\" \"quotes\" in the \"same sentence\"", vec!["\"multiple double\"", "\"quotes\"", "in", "the", "\"same sentence\""]),
+		(
+			r#"this sentences has "double quotes" at the middle"#,
+			vec!["this", "sentences", "has", r#""double quotes""#, "at", "the", "middle"]
+		),
+		(
+			r#""double quotes" at the start"#,
+			vec![r#""double quotes""#, "at", "the", "start"]
+		),
+		(
+			r#"double "quotes at the end""#,
+			vec!["double", r#""quotes at the end""#]
+		),
+		(
+			r#""multiple double" "quotes" in the "same sentence""#,
+			vec![r#""multiple double""#, r#""quotes""#, "in", "the", r#""same sentence""#]
+		),
+	];
+	for (code, expected) in &tests {
+		compare(code, expected.to_vec());
+	}
+}
+
+#[test]
+fn multiple_quotes() {
+	let tests = [
+		(
+			r#"sentences "with multiple" "quotes together""#,
+			vec!["sentences", r#""with multiple""#, r#""quotes together""#]
+		),
+		(
+			r#"sentences 'with multiple' 'quotes together'"#,
+			vec!["sentences", r#"'with multiple'"#, r#"'quotes together'"#]
+		),
+		(
+			r#"sentences "with multiple" 'quotes together'"#,
+			vec!["sentences", r#""with multiple""#, r#"'quotes together'"#]
+		),
+		(
+			r#"sentences 'with multiple' "quotes together""#,
+			vec!["sentences", r#"'with multiple'"#, r#""quotes together""#]
+		)
+	];
+	for (code, expected) in &tests {
+		compare(code, expected.to_vec());
+	}
+}
+
+#[test]
+fn quotes_together() {
+	let tests = [
+		r#"this text contains "quotes"" without separation""#,
+		r#"this text contains "quotes"' without separation'"#,
+		r#"this text contains 'quotes'" without separation"#,
+		r#"this text contains 'quotes'' without separation'"#,
+	];
+	for code in &tests {
+		fails(code);
+	}
+}
+
+#[test]
+fn shoud_fail() {
+	let tests = [
+		"\"",
+		"\"invalid quoted text'",
+		"'",
+		"'invalid quoted text\"",
+	];
+	for code in &tests {
+		fails(code);
+	}
+}
+
+// Symbols
+#[test]
+fn symbols01() {
+	let tests = [
+		("1 + 1", vec!["1", "+", "1"]),
+		("1+1", vec!["1", "+", "1"]),
+		("1-1", vec!["1", "-", "1"]),
+		("1*1", vec!["1", "*", "1"]),
+		("1/1", vec!["1", "/", "1"]),
+	];
+	for (code, expected) in &tests {
+		compare(code, expected.to_vec());
+	}
+}
+
+#[test]
+fn symbols02() {
+	let tests = [
+		("1*(2+3)", vec!["1", "*", "(", "2", "+", "3", ")"]),
+		("(2-2*(3+2/3)*2", vec!["(", "2", "-", "2", "*", "(", "3", "+", "2", "/", "3", ")", "*", "2"]),
 	];
 	for (code, expected) in &tests {
 		compare(code, expected.to_vec());

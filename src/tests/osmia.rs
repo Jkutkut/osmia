@@ -40,7 +40,6 @@ fn literal_values() {
 		r#""\n""#,
 		r#""\r""#,
 		r#""\t""#,
-		"{{}}", // Empty value
 	];
 	let mut all_literals = String::new();
 	for literal in &literals {
@@ -64,6 +63,7 @@ fn invalid_values() {
 		r#"{{"}}"#,
 		r#"{{'}}"#,
 		r#"{{"""}}"#,
+		r#"{{}}"#,
 		// TODO
 	];
 	for invalid in &invalids {
