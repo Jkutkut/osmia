@@ -67,7 +67,11 @@ impl<'a> Parser<'a> {
 					let stmt = match self.get_current() {
 						Token::Print => self.print()?,
 						Token::Assign => self.assign()?,
-						// TODO add all cases
+						// TODO if
+						// TODO while
+						// TODO for
+						Token::Continue => self.continue_stmt(),
+						Token::Break => self.break_stmt(),
 						_ => self.statement()?,
 					};
 					self.consume(
@@ -85,34 +89,6 @@ impl<'a> Parser<'a> {
 			return Ok(statements.pop().unwrap());
 		}
 		Ok(Stmt::Block(Block::new(statements)))
-	}
-
-	fn assign(&mut self) -> Result<Stmt<'a>, String> {
-		self.advance();
-		let variable = match self.get_current() {
-			Token::Value(name) => {
-				let variable = self.variable(name)?;
-				self.advance();
-				variable
-			},
-			_ => {
-				return Err(self.error(
-					self.get_current(),
-					"Expected variable before '=' in assign."
-				));
-			}
-		};
-		#[cfg(debug_assertions)]
-		{
-			println!("assign: variable {:?}", &variable);
-			println!("current: {:?}", self.get_current());
-		}
-		self.consume(
-			Token::Equal,
-			"Expected '=' after variable",
-		)?;
-		let expression = self.expression()?;
-		Ok(Stmt::Assign(Assign::new(variable, expression)))
 	}
 }
 
@@ -191,6 +167,39 @@ impl<'a> Parser<'a> {
 	fn statement(&mut self) -> Result<Stmt<'a>, String> {
 		let expression = self.expression()?;
 		Ok(Stmt::Expression(expression))
+	}
+
+	fn assign(&mut self) -> Result<Stmt<'a>, String> {
+		self.advance();
+		let variable = match self.get_current() {
+			Token::Value(name) => {
+				let variable = self.variable(name)?;
+				self.advance();
+				variable
+			},
+			_ => {
+				return Err(self.error(
+					self.get_current(),
+					"Expected variable before '=' in assign."
+				));
+			}
+		};
+		self.consume(
+			Token::Equal,
+			"Expected '=' after variable",
+		)?;
+		let expression = self.expression()?;
+		Ok(Stmt::Assign(Assign::new(variable, expression)))
+	}
+
+	fn continue_stmt(&mut self) -> Stmt<'a> {
+		self.advance();
+		Stmt::Continue
+	}
+
+	fn break_stmt(&mut self) -> Stmt<'a> {
+		self.advance();
+		Stmt::Break
 	}
 }
 

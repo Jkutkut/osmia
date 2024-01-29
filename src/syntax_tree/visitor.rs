@@ -9,6 +9,9 @@ pub trait Visitor<T> {
 	fn visit_block(&self, block: &Block) -> T;
 	fn visit_raw(&self, raw: &str) -> T;
 	fn visit_assign(&self, assign: &Assign) -> T;
+	// TODO
+	fn visit_break(&self) -> T;
+	fn visit_continue(&self) -> T;
 
 	// Expression
 	fn visit_expression(&self, expression: &Expression) -> T;

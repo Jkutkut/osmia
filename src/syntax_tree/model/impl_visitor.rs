@@ -18,8 +18,8 @@ impl<T> Visitable<T> for Stmt<'_> {
 			// Stmt::If(if_stmt) => if_stmt.accept(visitor),
 			// Stmt::While(while_stmt) => while_stmt.accept(visitor),
 			// Stmt::ForEach(for_each) => for_each.accept(visitor),
-			// Stmt::Break => visitor.visit_break(),
-			// Stmt::Continue => visitor.visit_continue(),
+			Stmt::Break => visitor.visit_break(),
+			Stmt::Continue => visitor.visit_continue(),
 			_ => {
 				#[cfg(debug_assertions)]
 				{

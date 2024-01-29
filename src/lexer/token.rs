@@ -21,9 +21,8 @@ pub enum Token<'a> {
 	While,
 	For,
 	In,
-
-	// TODO break
-	// TODO continue
+	Continue,
+	Break,
 
 	// Equality
 	Equal,
@@ -63,6 +62,8 @@ impl Token<'_> {
 			"while" => Some(Token::While),
 			"for" => Some(Token::For),
 			"in" => Some(Token::In),
+			"continue" => Some(Token::Continue),
+			"break" => Some(Token::Break),
 			"==" => Some(Token::Equal),
 			"!=" => Some(Token::NotEqual),
 			"<" => Some(Token::LessThan),
@@ -127,6 +128,8 @@ impl std::fmt::Display for Token<'_> {
 			Token::While => write!(f, "while"),
 			Token::For => write!(f, "for"),
 			Token::In => write!(f, "in"),
+			Token::Continue => write!(f, "continue"),
+			Token::Break => write!(f, "break"),
 			Token::Equal => write!(f, "=="),
 			Token::NotEqual => write!(f, "!="),
 			Token::LessThan => write!(f, "<"),

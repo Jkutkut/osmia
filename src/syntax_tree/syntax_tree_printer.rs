@@ -1,3 +1,4 @@
+use crate::Token;
 use super::visitor::Visitor;
 use super::visitable::Visitable;
 use super::model::{
@@ -27,6 +28,14 @@ impl Visitor<String> for SyntaxTreePrinter {
 
 	fn visit_assign(&self, assign: &Assign) -> String {
 		format!("{} = {}", assign.variable(), assign.expression().accept(self))
+	}
+
+	fn visit_break(&self) -> String {
+		Token::Break.to_string()
+	}
+
+	fn visit_continue(&self) -> String {
+		Token::Continue.to_string()
 	}
 
 	// Expression

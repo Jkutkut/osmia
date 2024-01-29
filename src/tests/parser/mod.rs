@@ -2,6 +2,7 @@ mod expression;
 mod print;
 mod raw;
 mod assign;
+mod loop_blocks;
 
 use crate::lexer::Token;
 use crate::syntax_tree::model::Stmt;
