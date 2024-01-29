@@ -8,8 +8,8 @@ use crate::syntax_tree::visitor::Visitor;
 impl<T> Visitable<T> for Stmt<'_> {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		match self {
-			// Stmt::Block(block) => block.accept(visitor),
-			// Stmt::Raw(raw) => raw.accept(visitor),
+			Stmt::Block(blocks) => visitor.visit_block(blocks),
+			Stmt::Raw(raw) => visitor.visit_raw(raw),
 			Stmt::Print(print) => print.accept(visitor),
 			Stmt::Expression(expression) => expression.accept(visitor),
 			// Stmt::Assign(assign) => assign.accept(visitor),

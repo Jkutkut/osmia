@@ -15,7 +15,7 @@ use crate::syntax_tree::model::{
 /// Raw            → "..." ;
 /// Print          → "{{" "print" expression ";" "}}" ;
 /// Expression     → "{{" expression "}}" ;
-/// Assign         → "{{" "assign" Variable "=" expression ";" "}}" ;
+/// Assign         → "{{" "assign" Variable "=" expression "}}" ;
 /// If             → "{{" "if" expression "}}" Stmt ( "{{" "elseif" expression "}}" Stmt )* ( "{{" "else" "}}" Stmt )? "{{" "fi" "}}" ;
 /// While          → "{{" "while" expression "}}" Stmt "{{" "done" "}}" ;
 /// ForEach        → "{{" "foreach" Variable "in" Variable "}}" Stmt "{{" "done" "}}" ;
@@ -59,11 +59,10 @@ impl<'a> Parser<'a> {
 	fn block(&mut self) -> Result<Stmt<'a>, String> {
 		let mut statements: Vec<Stmt<'a>> = Vec::new();
 		while !self.is_at_end() {
-			#[cfg(debug_assertions)]
-			{
-				println!("while loop: {}", self.get_current());
-			}
 			match self.advance() {
+				Token::Raw(r) => {
+					statements.push(Stmt::Raw(r));
+				},
 				Token::DelimiterStart => {
 					let stmt = match self.get_current() {
 						Token::Print => self.print()?,
@@ -77,13 +76,14 @@ impl<'a> Parser<'a> {
 					)?;
 					statements.push(stmt);
 				},
-				Token::Raw(r) => {
-					statements.push(Stmt::Raw(r));
-				},
 				_ => {
 					return Err(self.error(self.get_current(), "Unexpected token"));
 				}
 			}
+		}
+		#[cfg(debug_assertions)]
+		{
+			println!("block: {:?}", statements);
 		}
 		if statements.len() == 1 {
 			return Ok(statements.pop().unwrap());
@@ -139,7 +139,7 @@ impl<'a> Parser<'a> {
 	}
 
 	fn is_at_end(&self) -> bool {
-		self.current >= self.tokens.len() - 1
+		self.current >= self.tokens.len()
 	}
 
 	fn get_current(&self) -> &Token<'a> {

@@ -9,6 +9,10 @@ impl<'a> Block<'a> {
 	pub fn new(stmts: Vec<Stmt<'a>>) -> Self {
 		Self { stmts }
 	}
+
+	pub fn stmts(&self) -> &Vec<Stmt<'a>> {
+		&self.stmts
+	}
 }
 
 impl std::fmt::Display for Block<'_> {
