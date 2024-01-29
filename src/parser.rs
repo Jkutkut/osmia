@@ -185,8 +185,8 @@ impl<'a> Parser<'a> {
 			}
 		};
 		self.consume(
-			Token::Equal,
-			"Expected '=' after variable",
+			Token::AssignEq,
+			&format!("Expected '{}' after variable", Token::AssignEq),
 		)?;
 		let expression = self.expression()?;
 		Ok(Stmt::Assign(Assign::new(variable, expression)))

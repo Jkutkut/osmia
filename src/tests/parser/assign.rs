@@ -12,7 +12,7 @@ fn basic_test01() {
 			Token::DelimiterStart,
 			Token::Assign,
 			Token::Value("foo"),
-			Token::Equal,
+			Token::AssignEq,
 			Token::Value("\"bar\""),
 			Token::DelimiterEnd
 		],
@@ -32,7 +32,7 @@ fn basic_test02() {
 			Token::DelimiterStart,
 			Token::Assign,
 			Token::Value("foo"),
-			Token::Equal,
+			Token::AssignEq,
 			Token::Value("bar"),
 			Token::DelimiterEnd
 		],
@@ -52,7 +52,7 @@ fn basic_test03() {
 			Token::DelimiterStart,
 			Token::Assign,
 			Token::Value("foo"),
-			Token::Equal,
+			Token::AssignEq,
 			Token::Value("2"),
 			Token::Plus,
 			Token::Value("2"),
