@@ -1,9 +1,11 @@
 use super::{
-	Literal, Unary, Binary, Grouping, Variable, Stmt,
-	Expression
+	Expression, Literal, Unary, Binary, Grouping, Variable,
+	Stmt, Assign
 };
 use crate::syntax_tree::visitable::Visitable;
 use crate::syntax_tree::visitor::Visitor;
+
+// Stmt
 
 impl<T> Visitable<T> for Stmt<'_> {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
@@ -12,7 +14,7 @@ impl<T> Visitable<T> for Stmt<'_> {
 			Stmt::Raw(raw) => visitor.visit_raw(raw),
 			Stmt::Print(print) => print.accept(visitor),
 			Stmt::Expression(expression) => expression.accept(visitor),
-			// Stmt::Assign(assign) => assign.accept(visitor),
+			Stmt::Assign(assign) => assign.accept(visitor),
 			// Stmt::If(if_stmt) => if_stmt.accept(visitor),
 			// Stmt::While(while_stmt) => while_stmt.accept(visitor),
 			// Stmt::ForEach(for_each) => for_each.accept(visitor),
@@ -28,6 +30,14 @@ impl<T> Visitable<T> for Stmt<'_> {
 		}
 	}
 }
+
+impl<T> Visitable<T> for Assign<'_> {
+	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
+		visitor.visit_assign(self)
+	}
+}
+
+// Expression
 
 impl<T> Visitable<T> for Literal {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {

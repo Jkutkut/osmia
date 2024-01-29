@@ -2,7 +2,7 @@ use super::visitor::Visitor;
 use super::visitable::Visitable;
 use super::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
-	Stmt, Block
+	Stmt, Block, Assign
 };
 
 pub struct SyntaxTreePrinter;
@@ -23,6 +23,10 @@ impl Visitor<String> for SyntaxTreePrinter {
 
 	fn visit_raw(&self, raw: &str) -> String {
 		raw.to_string()
+	}
+
+	fn visit_assign(&self, assign: &Assign) -> String {
+		format!("{} = {}", assign.variable(), assign.expression().accept(self))
 	}
 
 	// Expression

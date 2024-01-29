@@ -1,6 +1,7 @@
 mod expression;
 mod print;
 mod raw;
+mod assign;
 
 use crate::lexer::Token;
 use crate::syntax_tree::model::Stmt;

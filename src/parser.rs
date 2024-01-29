@@ -1,7 +1,7 @@
 use crate::lexer::Token;
 use crate::syntax_tree::model::{
 	Expression, Binary, Unary, Grouping, Literal, Variable,
-	Stmt, Block
+	Stmt, Block, Assign
 };
 
 /// Parses a list of tokens into a syntax tree.
@@ -66,7 +66,7 @@ impl<'a> Parser<'a> {
 				Token::DelimiterStart => {
 					let stmt = match self.get_current() {
 						Token::Print => self.print()?,
-						// Token::Assign => self.assign()?,
+						Token::Assign => self.assign()?,
 						// TODO add all cases
 						_ => self.statement()?,
 					};
@@ -81,26 +81,39 @@ impl<'a> Parser<'a> {
 				}
 			}
 		}
-		#[cfg(debug_assertions)]
-		{
-			println!("block: {:?}", statements);
-		}
 		if statements.len() == 1 {
 			return Ok(statements.pop().unwrap());
 		}
 		Ok(Stmt::Block(Block::new(statements)))
 	}
 
-	// fn assign(&mut self) -> Result<Stmt<'a>, String> {
-	// 	self.advance();
-	// 	let variable = self.variable()?;
-	// 	self.consume(
-	// 		Token::Assign,
-	// 		"Expected '=' after variable.",
-	// 	)?;
-	// 	let expression = self.expression()?;
-	// 	Ok(Stmt::Assign(variable, expression))
-	// }
+	fn assign(&mut self) -> Result<Stmt<'a>, String> {
+		self.advance();
+		let variable = match self.get_current() {
+			Token::Value(name) => {
+				let variable = self.variable(name)?;
+				self.advance();
+				variable
+			},
+			_ => {
+				return Err(self.error(
+					self.get_current(),
+					"Expected variable before '=' in assign."
+				));
+			}
+		};
+		#[cfg(debug_assertions)]
+		{
+			println!("assign: variable {:?}", &variable);
+			println!("current: {:?}", self.get_current());
+		}
+		self.consume(
+			Token::Equal,
+			"Expected '=' after variable",
+		)?;
+		let expression = self.expression()?;
+		Ok(Stmt::Assign(Assign::new(variable, expression)))
+	}
 }
 
 // Tools
@@ -158,7 +171,7 @@ impl<'a> Parser<'a> {
 		if self.check_current(&token) {
 			return Ok(self.advance().clone());
 		}
-		Err(self.error(&token, message))
+		Err(self.error(self.get_current(), message))
 	}
 
 	fn error(&self, token: &Token<'a>, message: &str) -> String {

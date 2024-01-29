@@ -1,6 +1,6 @@
 use crate::syntax_tree::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
-	Stmt, Block
+	Stmt, Block, Assign
 };
 
 pub trait Visitor<T> {
@@ -8,6 +8,7 @@ pub trait Visitor<T> {
 	fn visit_stmt(&self, stmt: &Stmt) -> T;
 	fn visit_block(&self, block: &Block) -> T;
 	fn visit_raw(&self, raw: &str) -> T;
+	fn visit_assign(&self, assign: &Assign) -> T;
 
 	// Expression
 	fn visit_expression(&self, expression: &Expression) -> T;
