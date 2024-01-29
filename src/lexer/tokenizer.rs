@@ -7,7 +7,6 @@
 pub struct Tokenizer<'a> {
 	text: &'a str,
 	current: usize,
-	in_quotes: Option<char>,
 }
 
 impl<'a> Tokenizer<'a> {
@@ -15,7 +14,6 @@ impl<'a> Tokenizer<'a> {
 		Self {
 			text,
 			current: 0,
-			in_quotes: None
 		}
 	}
 
@@ -33,6 +31,11 @@ impl<'a> Tokenizer<'a> {
 		c.is_whitespace()
 	}
 
+	/// Attempts to get the next quoted token.
+	///
+	/// Returns None if no token was found.
+	/// Returns Err if an unclosed quote was found.
+	/// Returns Ok(token) if a quote was found.
 	fn quotes(&mut self) -> Option<Result<&'a str, String>> {
 		let mut chars = self.text.chars();
 		let quote = chars.nth(self.current)?;
@@ -51,9 +54,25 @@ impl<'a> Tokenizer<'a> {
 		None
 	}
 
+	/// Attempts to get the next static token.
+	///
+	/// Returns None if no token was found.
+	/// Returns Some(token) if a token was found.
+	///
+	/// Note: a static token is a reserved word or an operator.
 	fn get_static_token(&mut self) -> Option<&'a str> {
-		let c = self.text.chars().nth(self.current)?;
-		let single_char_tokens = "+-*/=()";
+		let mut chars = self.text.chars();
+		let c = chars.nth(self.current)?;
+		if let Some(_) = chars.next() {
+			match &self.text[self.current..self.current + 2] {
+				"==" | "!=" | "<=" | ">=" | "&&" | "||" => {
+					self.current += 2;
+					return Some(&self.text[self.current - 2..self.current]);
+				}
+				_ => ()
+			}
+		}
+		let single_char_tokens = "+-*/=()<>!";
 		if single_char_tokens.contains(c) {
 			let token = &self.text[self.current..self.current + 1];
 			self.current += 1;
@@ -62,8 +81,14 @@ impl<'a> Tokenizer<'a> {
 		None
 	}
 
+	/// Attempts to get the next dynamic token.
+	///
+	/// Returns None if no token was found.
+	/// Returns Some(token) if a token was found.
+	///
+	/// Note: a dynamic token is a variable.
+	/// Note: the validity of the token is not checked and must be handled by the executor.
 	fn get_dynamic_token(&mut self) -> Option<&'a str> {
-		let valid_chars = "_.[]";
 		let mut chars = self.text.chars();
 		let mut some_c = chars.nth(self.current);
 		let mut i = 0;
@@ -92,6 +117,16 @@ impl<'a> std::iter::Iterator for Tokenizer<'a> {
 	type Item = Result<&'a str, String>;
 
 	fn next(&mut self) -> Option<Self::Item> {
+		if self.current > 0 && self.current < self.text.len() {
+			let mut chars = self.text.chars();
+			let previous_char = chars.nth(self.current - 1)?;
+			let current = chars.next()?;
+			if !(current.is_whitespace() || previous_char.is_whitespace()) &&
+				("\"'".contains(previous_char) || "\"'".contains(current))
+			{
+				return Some(Err("Missing whitespace before token!".to_string()));
+			}
+		}
 		while self.current < self.text.len() {
 			if let Some(quotes) = self.quotes() {
 				match quotes {
@@ -109,13 +144,10 @@ impl<'a> std::iter::Iterator for Tokenizer<'a> {
 				self.current += 1;
 			}
 			else {
-				#[cfg(debug_assertions)]
-				{
-					println!("Text: {}", self.text);
-					println!("Current: {}", self.current);
-					println!("Current text: {}", self.text[self.current..].chars().collect::<String>());
-				}
-				return Some(Err(format!(r#"Unexpected character: {}"#, self.text.chars().nth(self.current).unwrap())));
+				return Some(Err(format!(
+					r#"Unexpected character: {}"#,
+					self.text.chars().nth(self.current).unwrap()
+				)));
 			}
 		}
 		None
