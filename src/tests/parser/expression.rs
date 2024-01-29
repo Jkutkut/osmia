@@ -9,7 +9,6 @@ use super::{test_parser, should_fail};
 fn token_expression_to_token_stmt(tokens: Vec<Token>) -> Vec<Token> {
 	let mut new_tokens = vec![
 		Token::DelimiterStart,
-		Token::Print,
 	];
 	new_tokens.extend(tokens);
 	new_tokens.push(Token::DelimiterEnd);

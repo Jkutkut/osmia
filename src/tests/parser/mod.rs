@@ -1,5 +1,5 @@
 mod expression;
-
+mod print;
 
 use crate::lexer::Token;
 use crate::syntax_tree::model::Stmt;

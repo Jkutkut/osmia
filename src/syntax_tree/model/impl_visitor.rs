@@ -10,7 +10,7 @@ impl<T> Visitable<T> for Stmt<'_> {
 		match self {
 			// Stmt::Block(block) => block.accept(visitor),
 			// Stmt::Raw(raw) => raw.accept(visitor),
-			// Stmt::Print(print) => print.accept(visitor),
+			Stmt::Print(print) => print.accept(visitor),
 			Stmt::Expression(expression) => expression.accept(visitor),
 			// Stmt::Assign(assign) => assign.accept(visitor),
 			// Stmt::If(if_stmt) => if_stmt.accept(visitor),
@@ -18,7 +18,13 @@ impl<T> Visitable<T> for Stmt<'_> {
 			// Stmt::ForEach(for_each) => for_each.accept(visitor),
 			// Stmt::Break => visitor.visit_break(),
 			// Stmt::Continue => visitor.visit_continue(),
-			_ => todo!()
+			_ => {
+				#[cfg(debug_assertions)]
+				{
+					println!("Unknown statement: {:?}", self);
+				}
+				todo!()
+			}
 		}
 	}
 }

@@ -22,6 +22,9 @@ pub enum Token<'a> {
 	For,
 	In,
 
+	// TODO break
+	// TODO continue
+
 	// Equality
 	Equal,
 	NotEqual,
@@ -111,8 +114,8 @@ impl Token<'_> {
 impl std::fmt::Display for Token<'_> {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Token::DelimiterStart => write!(f, "{{"),
-			Token::DelimiterEnd => write!(f, "}}"),
+			Token::DelimiterStart => write!(f, "{{{{"),
+			Token::DelimiterEnd => write!(f, "}}}}"),
 			Token::Raw(s) => write!(f, "{}", s),
 			Token::Value(s) => write!(f, "{}", s),
 			Token::Print => write!(f, "print"),
