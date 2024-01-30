@@ -1,9 +1,23 @@
-use crate::syntax_tree::model::{Expression, Block};
+use crate::syntax_tree::model::{Expression, Stmt};
 
 #[derive(Debug, PartialEq)]
 pub struct ConditionalBlock<'a> {
 	cond: Expression<'a>,
-	body: Block<'a>,
+	body: Box<Stmt<'a>>,
+}
+
+impl<'a> ConditionalBlock<'a> {
+	pub fn new(cond: Expression<'a>, body: Stmt<'a>) -> Self {
+		Self { cond, body: Box::new(body) }
+	}
+
+	pub fn condition(&self) -> &Expression<'a> {
+		&self.cond
+	}
+
+	pub fn body(&self) -> &Stmt<'a> {
+		&self.body
+	}
 }
 
 impl std::fmt::Display for ConditionalBlock<'_> {

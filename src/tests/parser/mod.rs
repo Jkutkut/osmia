@@ -3,6 +3,7 @@ mod print;
 mod raw;
 mod assign;
 mod loop_blocks;
+mod r#while;
 
 use crate::lexer::Token;
 use crate::syntax_tree::model::Stmt;

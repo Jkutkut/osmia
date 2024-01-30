@@ -1,7 +1,7 @@
 use crate::lexer::Token;
 use crate::syntax_tree::model::{
 	Expression, Binary, Unary, Grouping, Literal, Variable,
-	Stmt, Block, Assign
+	Stmt, Block, Assign, ConditionalBlock
 };
 
 /// Parses a list of tokens into a syntax tree.
@@ -16,8 +16,9 @@ use crate::syntax_tree::model::{
 /// Print          → "{{" "print" expression ";" "}}" ;
 /// Expression     → "{{" expression "}}" ;
 /// Assign         → "{{" "assign" Variable "=" expression "}}" ;
-/// If             → "{{" "if" expression "}}" Stmt ( "{{" "elseif" expression "}}" Stmt )* ( "{{" "else" "}}" Stmt )? "{{" "fi" "}}" ;
-/// While          → "{{" "while" expression "}}" Stmt "{{" "done" "}}" ;
+/// If             → "{{" "if" Conditional ( "{{" "elseif" Conditional )* ( "{{" "else" Block )? "{{" "fi" "}}" ;
+/// Conditional    → expression "}}" Stmt 
+/// While          → "{{" "while" Conditional "{{" "done" "}}" ;
 /// ForEach        → "{{" "foreach" Variable "in" Variable "}}" Stmt "{{" "done" "}}" ;
 /// Break          → "{{" "break" "}}" ;
 /// Continue       → "{{" "continue" "}}" ;
@@ -51,12 +52,12 @@ impl<'a> Parser<'a> {
 		{
 			println!("parse: {:?}", self.tokens);
 		}
-		let result = self.block()?;
+		let result = self.code()?;
 		Ok(result)
 	}
 
 	// TODO move logic
-	fn block(&mut self) -> Result<Stmt<'a>, String> {
+	fn block(&mut self, end_token: Option<Vec<Token>>) -> Result<Stmt<'a>, String> {
 		let mut statements: Vec<Stmt<'a>> = Vec::new();
 		while !self.is_at_end() {
 			match self.advance() {
@@ -68,10 +69,37 @@ impl<'a> Parser<'a> {
 						Token::Print => self.print()?,
 						Token::Assign => self.assign()?,
 						// TODO if
-						// TODO while
+						Token::While => self.while_stmt()?,
 						// TODO for
 						Token::Continue => self.continue_stmt(),
 						Token::Break => self.break_stmt(),
+
+						Token::Done | Token::Fi => {
+							let mut is_end_token = false;
+							if let Some(ref end_tokens) = end_token {
+								#[cfg(debug_assertions)]
+								{
+									println!("checking for end tokens: {:?}", end_tokens);
+									println!("  {:?}", self.get_current());
+								}
+								for end_token in end_tokens {
+									if self.check_current(&end_token) {
+										#[cfg(debug_assertions)]
+										{
+											println!("found end token: {:?}", end_token);
+										}
+										self.advance();
+										is_end_token = true;
+										break;
+									}
+								}
+							}
+							if is_end_token {
+								break;
+							}
+							return Err(format!("Unexpected '{}' in block.", self.get_current()));
+						},
+
 						_ => self.statement()?,
 					};
 					self.consume(
@@ -88,7 +116,37 @@ impl<'a> Parser<'a> {
 		if statements.len() == 1 {
 			return Ok(statements.pop().unwrap());
 		}
+		#[cfg(debug_assertions)]
+		{
+			println!("block: {:?}", statements);
+			println!("  size: {:?}", statements.len());
+		}
 		Ok(Stmt::Block(Block::new(statements)))
+	}
+
+	fn while_stmt(&mut self) -> Result<Stmt<'a>, String> {
+		self.advance();
+		#[cfg(debug_assertions)]
+		{
+			println!("while_stmt");
+			println!("  {:?}", self.get_current());
+		}
+		Ok(Stmt::While(self.conditional(vec![Token::Done])?))
+	}
+
+	fn conditional(&mut self, end_tokens: Vec<Token>) -> Result<ConditionalBlock<'a>, String> {
+		let expr = self.expression()?;
+		self.consume(
+			Token::DelimiterEnd,
+			format!("Unclosed '{}' in conditional statement.", Token::DelimiterEnd).as_str(),
+		)?;
+		let block = self.block(Some(end_tokens))?;
+		#[cfg(debug_assertions)]
+		{
+			println!("ConditionalBlock: {:?} -> {:?}", expr, block);
+			println!("  {:?}", self.get_current());
+		}
+		Ok(ConditionalBlock::new(expr, block))
 	}
 }
 
@@ -158,6 +216,10 @@ impl<'a> Parser<'a> {
 // Grammar: Statements
 
 impl<'a> Parser<'a> {
+	fn code(&mut self) -> Result<Stmt<'a>, String> {
+		self.block(None)
+	}
+
 	fn print(&mut self) -> Result<Stmt<'a>, String> {
 		self.advance();
 		let expression = self.expression()?;

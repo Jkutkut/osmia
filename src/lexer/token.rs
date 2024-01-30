@@ -16,6 +16,7 @@ pub enum Token<'a> {
 	If,
 	ElseIf,
 	Else,
+	Fi, // TODO
 
 	// Loops
 	While,
@@ -23,6 +24,7 @@ pub enum Token<'a> {
 	In,
 	Continue,
 	Break,
+	Done, // TODO
 
 	// Equality
 	Equal,
@@ -59,9 +61,14 @@ impl Token<'_> {
 			"print" => Some(Token::Print),
 			"assign" => Some(Token::Assign),
 			"=" => Some(Token::AssignEq),
+			"if" => Some(Token::If),
+			"elseif" => Some(Token::ElseIf),
+			"else" => Some(Token::Else),
+			"fi" => Some(Token::Fi),
 			"while" => Some(Token::While),
 			"for" => Some(Token::For),
 			"in" => Some(Token::In),
+			"done" => Some(Token::Done),
 			"continue" => Some(Token::Continue),
 			"break" => Some(Token::Break),
 			"==" => Some(Token::Equal),
@@ -125,9 +132,11 @@ impl std::fmt::Display for Token<'_> {
 			Token::If => write!(f, "if"),
 			Token::ElseIf => write!(f, "elseif"),
 			Token::Else => write!(f, "else"),
+			Token::Fi => write!(f, "fi"),
 			Token::While => write!(f, "while"),
 			Token::For => write!(f, "for"),
 			Token::In => write!(f, "in"),
+			Token::Done => write!(f, "done"),
 			Token::Continue => write!(f, "continue"),
 			Token::Break => write!(f, "break"),
 			Token::Equal => write!(f, "=="),
