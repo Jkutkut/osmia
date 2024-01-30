@@ -12,7 +12,7 @@ impl<T> Visitable<T> for Stmt<'_> {
 		match self {
 			Stmt::Block(blocks) => visitor.visit_block(blocks),
 			Stmt::Raw(raw) => visitor.visit_raw(raw),
-			Stmt::Print(print) => print.accept(visitor),
+			Stmt::Print(print) => visitor.visit_print(print),
 			Stmt::Expression(expression) => expression.accept(visitor),
 			Stmt::Assign(assign) => assign.accept(visitor),
 			// Stmt::If(if_stmt) => if_stmt.accept(visitor),

@@ -1,9 +1,9 @@
 use crate::Token;
 use crate::syntax_tree::model::{
-	Expression, Variable, Literal, Binary,
-	Stmt, Assign, ConditionalBlock, Block
+	Expression, Literal,
+	Stmt, ConditionalBlock, Block
 };
-use super::{test_parser, should_fail};
+use super::{test_parser};
 
 #[test]
 fn basic_test() {

@@ -8,6 +8,7 @@ pub trait Visitor<T> {
 	fn visit_stmt(&self, stmt: &Stmt) -> T;
 	fn visit_block(&self, block: &Block) -> T;
 	fn visit_raw(&self, raw: &str) -> T;
+	fn visit_print(&self, print: &Expression) -> T;
 	fn visit_assign(&self, assign: &Assign) -> T;
 	// TODO
 	fn visit_while(&self, block: &ConditionalBlock) -> T;

@@ -26,7 +26,9 @@ impl Visitor<String> for SyntaxTreePrinter {
 		raw.to_string()
 	}
 
-	// TODO print
+	fn visit_print(&self, expr: &Expression) -> String {
+		format!("print {}", expr.accept(self))
+	}
 
 	fn visit_assign(&self, assign: &Assign) -> String {
 		format!("{} = {}", assign.variable(), assign.expression().accept(self))
