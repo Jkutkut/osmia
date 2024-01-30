@@ -4,6 +4,7 @@ mod raw;
 mod assign;
 mod loop_blocks;
 mod r#while;
+mod foreach;
 
 use crate::lexer::Token;
 use crate::syntax_tree::model::Stmt;

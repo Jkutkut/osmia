@@ -1,6 +1,6 @@
 use super::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
-	Stmt, Assign, ConditionalBlock
+	Stmt, Assign, ConditionalBlock, ForEach
 };
 use crate::syntax_tree::visitable::Visitable;
 use crate::syntax_tree::visitor::Visitor;
@@ -17,7 +17,7 @@ impl<T> Visitable<T> for Stmt<'_> {
 			Stmt::Assign(assign) => assign.accept(visitor),
 			// Stmt::If(if_stmt) => if_stmt.accept(visitor),
 			Stmt::While(while_stmt) => visitor.visit_while(while_stmt),
-			// Stmt::ForEach(for_each) => for_each.accept(visitor),
+			Stmt::ForEach(foreach) => foreach.accept(visitor),
 			Stmt::Break => visitor.visit_break(),
 			Stmt::Continue => visitor.visit_continue(),
 			_ => {
@@ -40,6 +40,12 @@ impl<T> Visitable<T> for Assign<'_> {
 impl<T> Visitable<T> for ConditionalBlock<'_> {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_conditional_block(self)
+	}
+}
+
+impl<T> Visitable<T> for ForEach<'_> {
+	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
+		visitor.visit_foreach(self)
 	}
 }
 

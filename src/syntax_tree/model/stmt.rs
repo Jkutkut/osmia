@@ -1,5 +1,5 @@
 use crate::syntax_tree::model::{
-	Expression, Block, Assign, If, ConditionalBlock, Foreach,
+	Expression, Block, Assign, If, ConditionalBlock, ForEach
 };
 
 #[derive(Debug, PartialEq)]
@@ -11,7 +11,7 @@ pub enum Stmt<'a> {
 	Assign(Assign<'a>),
 	If(If<'a>),
 	While(ConditionalBlock<'a>),
-	ForEach(Foreach<'a>),
+	ForEach(ForEach<'a>),
 	Break,
 	Continue,
 }

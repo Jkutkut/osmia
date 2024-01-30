@@ -1,6 +1,6 @@
 use crate::syntax_tree::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
-	Stmt, Block, Assign, ConditionalBlock
+	Stmt, Block, Assign, ConditionalBlock, ForEach
 };
 
 pub trait Visitor<T> {
@@ -12,6 +12,7 @@ pub trait Visitor<T> {
 	fn visit_assign(&self, assign: &Assign) -> T;
 	// TODO
 	fn visit_while(&self, block: &ConditionalBlock) -> T;
+	fn visit_foreach(&self, block: &ForEach) -> T;
 	fn visit_conditional_block(&self, block: &ConditionalBlock) -> T;
 	fn visit_break(&self) -> T;
 	fn visit_continue(&self) -> T;

@@ -1,7 +1,7 @@
 use crate::lexer::Token;
 use crate::syntax_tree::model::{
 	Expression, Binary, Unary, Grouping, Literal, Variable,
-	Stmt, Block, Assign, ConditionalBlock
+	Stmt, Block, Assign, ConditionalBlock, ForEach
 };
 
 /// Parses a list of tokens into a syntax tree.
@@ -64,7 +64,7 @@ impl<'a> Parser<'a> {
 			Token::Assign => self.assign()?,
 			// TODO if
 			Token::While => self.while_stmt()?,
-			// TODO for
+			Token::For => self.foreach()?,
 			Token::Continue => self.continue_stmt(),
 			Token::Break => self.break_stmt(),
 			Token::Done | Token::Fi => {
@@ -81,6 +81,44 @@ impl<'a> Parser<'a> {
 			format!("Expected '{}'", Token::DelimiterEnd).as_str(),
 		)?;
 		Ok(Some(stmt))
+	}
+
+	fn foreach(&mut self) -> Result<Stmt<'a>, String> {
+		self.advance();
+		let variable = match self.get_current() {
+			Token::Value(name) => {
+				let variable = self.variable(name)?;
+				self.advance();
+				variable
+			},
+			_ => return Err(self.error(
+				self.get_current(),
+				&format!("Expected variable after '{}' in {} statement.", Token::For, Token::For)
+			))
+		};
+		self.consume(
+			Token::In,
+			&format!("Expected '{}' after variable in {} statement.", Token::In, Token::For),
+		)?;
+		let list = match self.get_current() {
+			Token::Value(name) => {
+				let variable = self.variable(name)?;
+				self.advance();
+				variable
+			},
+			_ => return Err(self.error(
+				self.get_current(),
+				&format!("Expected variable after '{}' in {} statement.", Token::In, Token::For)
+			))
+		};
+		self.consume(
+			Token::DelimiterEnd,
+			&format!("Expected '{}' in {} statement.", Token::DelimiterEnd, Token::For),
+		)?;
+		let block = self.block(Some(vec![
+			Token::Done
+		]))?;
+		Ok(Stmt::ForEach(ForEach::new(variable, list, block)))
 	}
 
 }

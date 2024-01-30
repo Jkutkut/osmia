@@ -18,7 +18,7 @@ pub use binary::Binary;
 pub use block::Block;
 pub use conditional_block::ConditionalBlock;
 pub use expression::Expression;
-pub use foreach::Foreach;
+pub use foreach::ForEach;
 pub use grouping::Grouping;
 pub use r#if::If;
 pub use literal::Literal;
