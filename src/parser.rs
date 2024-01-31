@@ -56,78 +56,8 @@ impl<'a> Parser<'a> {
 		Ok(result)
 	}
 
-	// TODO move logic
+	
 
-	fn block_stmt(&mut self, end_tokens: &Option<Vec<Token>>) -> Result<Option<Stmt<'a>>, String> {
-		let stmt = match self.get_current() {
-			Token::Print => self.print()?,
-			Token::Assign => self.assign()?,
-			Token::If => self.if_stmt()?,
-			Token::ElseIf | Token::Else => {
-				let mut is_if_end_block = false;
-				if let Some(end_tokens) = end_tokens {
-					for end_token in end_tokens {
-						if end_token == self.get_current() {
-							is_if_end_block = true;
-							break;
-						}
-					}
-				}
-				if is_if_end_block {
-					return Ok(None);
-				}
-				return Err(self.error(
-					self.get_current(),
-					format!("Unexpected '{}' in block", self.get_current()).as_str(),
-				));
-			}
-			Token::While => self.while_stmt()?,
-			Token::For => self.foreach()?,
-			Token::Continue => self.continue_stmt(),
-			Token::Break => self.break_stmt(),
-			Token::Done | Token::Fi => {
-				let block_ended = self.close_block(end_tokens)?;
-				if block_ended {
-					return Ok(None);
-				}
-				return Err(format!("Unexpected '{}' in block.", self.get_current()));
-			},
-			_ => self.statement()?,
-		};
-		self.consume(
-			Token::DelimiterEnd,
-			format!("Expected '{}'", Token::DelimiterEnd).as_str(),
-		)?;
-		Ok(Some(stmt))
-	}
-
-	fn if_stmt(&mut self) -> Result<Stmt<'a>, String> {
-		self.advance();
-		let if_block = self.conditional(vec![Token::Else, Token::ElseIf, Token::Fi])?;
-		let mut else_if_blocks = Vec::new();
-		while self.get_current() == &Token::ElseIf {
-			self.advance();
-			else_if_blocks.push(
-				self.conditional(vec![Token::Else, Token::ElseIf, Token::Fi])?
-			);
-		}
-		let else_if_blocks = match else_if_blocks.len() {
-			0 => None,
-			_ => Some(else_if_blocks)
-		};
-		let mut else_block = None;
-		if self.get_current() == &Token::Else {
-			self.advance();
-			self.consume(
-				Token::DelimiterEnd,
-				&format!("Expected '{}' after else statement.", Token::DelimiterEnd)
-			)?;
-			else_block = Some(self.block(Some(vec![Token::Fi]))?);
-		}
-		Ok(Stmt::If(If::new(
-			if_block, else_if_blocks, else_block
-		)))
-	}
 }
 
 // Tools
@@ -226,6 +156,31 @@ impl<'a> Parser<'a> {
 		Ok(Stmt::Block(Block::new(statements)))
 	}
 
+	fn block_stmt(&mut self, end_tokens: &Option<Vec<Token>>) -> Result<Option<Stmt<'a>>, String> {
+		let stmt = match self.get_current() {
+			Token::Print => self.print()?,
+			Token::Assign => self.assign()?,
+			Token::If => self.if_stmt()?,
+			Token::While => self.while_stmt()?,
+			Token::For => self.foreach()?,
+			Token::Continue => self.continue_stmt(),
+			Token::Break => self.break_stmt(),
+			Token::ElseIf | Token::Else | Token::Fi | Token::Done => {
+				let is_close_block = self.check_current(&Token::Fi) || self.check_current(&Token::Done);
+				if self.close_block(end_tokens, is_close_block)? {
+					return Ok(None);
+				}
+				return Err(self.error(self.get_current(), "Unexpected token in block"));
+			}
+			_ => self.statement()?,
+		};
+		self.consume(
+			Token::DelimiterEnd,
+			format!("Expected '{}'", Token::DelimiterEnd).as_str(),
+		)?;
+		Ok(Some(stmt))
+	}
+
 	fn print(&mut self) -> Result<Stmt<'a>, String> {
 		self.advance();
 		let expression = self.expression()?;
@@ -298,6 +253,34 @@ impl<'a> Parser<'a> {
 		Ok(Stmt::ForEach(ForEach::new(variable, list, block)))
 	}
 
+	fn if_stmt(&mut self) -> Result<Stmt<'a>, String> {
+		self.advance();
+		let if_block = self.conditional(vec![Token::Else, Token::ElseIf, Token::Fi])?;
+		let mut else_if_blocks = Vec::new();
+		while self.check_current(&Token::ElseIf) {
+			self.advance();
+			else_if_blocks.push(
+				self.conditional(vec![Token::Else, Token::ElseIf, Token::Fi])?
+			);
+		}
+		let else_if_blocks = match else_if_blocks.len() {
+			0 => None,
+			_ => Some(else_if_blocks)
+		};
+		let mut else_block = None;
+		if self.check_current(&Token::Else) {
+			self.advance();
+			self.consume(
+				Token::DelimiterEnd,
+				&format!("Expected '{}' after else statement.", Token::DelimiterEnd)
+			)?;
+			else_block = Some(self.block(Some(vec![Token::Fi]))?);
+		}
+		Ok(Stmt::If(If::new(
+			if_block, else_if_blocks, else_block
+		)))
+	}
+
 	fn while_stmt(&mut self) -> Result<Stmt<'a>, String> {
 		self.advance();
 		#[cfg(debug_assertions)]
@@ -323,7 +306,7 @@ impl<'a> Parser<'a> {
 		Ok(ConditionalBlock::new(expr, block))
 	}
 
-	fn close_block(&mut self, end_tokens: &Option<Vec<Token>>) -> Result<bool, String> {
+	fn close_block(&mut self, end_tokens: &Option<Vec<Token>>, advance: bool) -> Result<bool, String> {
 		let mut is_end_token = false;
 		if let Some(ref end_tokens) = end_tokens {
 			#[cfg(debug_assertions)]
@@ -337,7 +320,9 @@ impl<'a> Parser<'a> {
 					{
 						println!("found end token: {:?}", end_token);
 					}
-					self.advance();
+					if advance {
+						self.advance();
+					}
 					is_end_token = true;
 					break;
 				}
