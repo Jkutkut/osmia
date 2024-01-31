@@ -40,6 +40,10 @@ pub struct Parser<'a> {
 // Public methods
 
 impl<'a> Parser<'a> {
+	/// Constructor for the parser.
+	///
+	/// # Arguments
+	/// `tokens` - List of tokens to parse.
 	pub fn new(tokens: &'a [Token<'a>]) -> Self {
 		Self {
 			tokens,
@@ -47,17 +51,13 @@ impl<'a> Parser<'a> {
 		}
 	}
 
+	/// Attempts to parse the list of tokens into a syntax tree.
+	///
+	/// # Returns
+	/// `Result<Stmt, String>` - The syntax tree or an error message.
 	pub fn parse(&mut self) -> Result<Stmt<'a>, String> {
-		#[cfg(debug_assertions)]
-		{
-			println!("parse: {:?}", self.tokens);
-		}
-		let result = self.code()?;
-		Ok(result)
+		Ok(self.code()?)
 	}
-
-	
-
 }
 
 // Tools
@@ -68,10 +68,9 @@ impl<'a> Parser<'a> {
 		operator: Token<'a>,
 		right: Expression<'a>
 	) -> Result<Expression<'a>, String> {
-		let binary = Binary::new(
+		Ok(Expression::Binary(Binary::new(
 			left, operator, right
-		)?;
-		Ok(Expression::Binary(binary))
+		)?))
 	}
 
 	fn match_and_advance(&mut self, types: &[Token<'a>]) -> bool {
@@ -115,11 +114,20 @@ impl<'a> Parser<'a> {
 		if self.check_current(&token) {
 			return Ok(self.advance().clone());
 		}
-		Err(self.error(self.get_current(), message))
+		Err(self.error(message))
 	}
 
-	fn error(&self, token: &Token<'a>, message: &str) -> String {
-		format!("{} at '{}'.", message, token)
+	#[cfg(debug_assertions)]
+	fn error(&self, message: &str) -> String {
+		format!(
+			"parser error: {} at '{}' (Token at index: {}).",
+			message, self.get_current(), self.current
+		)
+	}
+
+	#[cfg(not(debug_assertions))]
+	fn error(&self, message: &str) -> String {
+		format!("parser error: {} at '{}'.", message, self.get_current())
 	}
 }
 
@@ -141,17 +149,12 @@ impl<'a> Parser<'a> {
 					Err(e) => return Err(e)
 				},
 				_ => {
-					return Err(self.error(self.get_current(), "Unexpected token"));
+					return Err(self.error("Unexpected token"));
 				}
 			}
 		}
 		if statements.len() == 1 {
 			return Ok(statements.pop().unwrap());
-		}
-		#[cfg(debug_assertions)]
-		{
-			println!("block: {:?}", statements);
-			println!("  size: {:?}", statements.len());
 		}
 		Ok(Stmt::Block(Block::new(statements)))
 	}
@@ -170,7 +173,7 @@ impl<'a> Parser<'a> {
 				if self.close_block(end_tokens, is_close_block)? {
 					return Ok(None);
 				}
-				return Err(self.error(self.get_current(), "Unexpected token in block"));
+				return Err(self.error("Unexpected token in block"));
 			}
 			_ => self.statement()?,
 		};
@@ -201,10 +204,7 @@ impl<'a> Parser<'a> {
 				variable
 			},
 			_ => {
-				return Err(self.error(
-					self.get_current(),
-					"Expected variable before '=' in assign."
-				));
+				return Err(self.error("Expected variable before '=' in assign"));
 			}
 		};
 		self.consume(
@@ -224,13 +224,12 @@ impl<'a> Parser<'a> {
 				variable
 			},
 			_ => return Err(self.error(
-				self.get_current(),
-				&format!("Expected variable after '{}' in {} statement.", Token::For, Token::For)
+				&format!("Expected variable after '{}' in {} statement", Token::For, Token::For)
 			))
 		};
 		self.consume(
 			Token::In,
-			&format!("Expected '{}' after variable in {} statement.", Token::In, Token::For),
+			&format!("Expected '{}' after variable in {} statement", Token::In, Token::For),
 		)?;
 		let list = match self.get_current() {
 			Token::Value(name) => {
@@ -239,13 +238,12 @@ impl<'a> Parser<'a> {
 				variable
 			},
 			_ => return Err(self.error(
-				self.get_current(),
-				&format!("Expected variable after '{}' in {} statement.", Token::In, Token::For)
+				&format!("Expected variable after '{}' in {} statement", Token::In, Token::For)
 			))
 		};
 		self.consume(
 			Token::DelimiterEnd,
-			&format!("Expected '{}' in {} statement.", Token::DelimiterEnd, Token::For),
+			&format!("Expected '{}' in {} statement", Token::DelimiterEnd, Token::For),
 		)?;
 		let block = self.block(Some(vec![
 			Token::Done
@@ -272,7 +270,7 @@ impl<'a> Parser<'a> {
 			self.advance();
 			self.consume(
 				Token::DelimiterEnd,
-				&format!("Expected '{}' after else statement.", Token::DelimiterEnd)
+				&format!("Expected '{}' after else statement", Token::DelimiterEnd)
 			)?;
 			else_block = Some(self.block(Some(vec![Token::Fi]))?);
 		}
@@ -283,11 +281,6 @@ impl<'a> Parser<'a> {
 
 	fn while_stmt(&mut self) -> Result<Stmt<'a>, String> {
 		self.advance();
-		#[cfg(debug_assertions)]
-		{
-			println!("while_stmt");
-			println!("  {:?}", self.get_current());
-		}
 		Ok(Stmt::While(self.conditional(vec![Token::Done])?))
 	}
 
@@ -295,31 +288,17 @@ impl<'a> Parser<'a> {
 		let expr = self.expression()?;
 		self.consume(
 			Token::DelimiterEnd,
-			format!("Unclosed '{}' in conditional statement.", Token::DelimiterEnd).as_str(),
+			format!("Unclosed '{}' in conditional statement", Token::DelimiterEnd).as_str(),
 		)?;
 		let block = self.block(Some(end_tokens))?;
-		#[cfg(debug_assertions)]
-		{
-			println!("ConditionalBlock: {:?} -> {:?}", expr, block);
-			println!("  {:?}", self.get_current());
-		}
 		Ok(ConditionalBlock::new(expr, block))
 	}
 
 	fn close_block(&mut self, end_tokens: &Option<Vec<Token>>, advance: bool) -> Result<bool, String> {
 		let mut is_end_token = false;
 		if let Some(ref end_tokens) = end_tokens {
-			#[cfg(debug_assertions)]
-			{
-				println!("checking for end tokens: {:?}", end_tokens);
-				println!("  {:?}", self.get_current());
-			}
 			for end_token in end_tokens {
 				if self.check_current(&end_token) {
-					#[cfg(debug_assertions)]
-					{
-						println!("found end token: {:?}", end_token);
-					}
 					if advance {
 						self.advance();
 					}
@@ -354,10 +333,6 @@ impl<'a> Parser<'a> {
 		while self.match_and_advance(&[Token::NotEqual, Token::Equal]) {
 			let operator = self.get_previous().clone();
 			let right = self.comparison()?;
-			#[cfg(debug_assertions)]
-			{
-				println!("equality: {:?} {} {:?}", &expr, &operator, &right);
-			}
 			expr = Self::new_binary(
 				expr, operator, right
 			)?;
@@ -373,10 +348,6 @@ impl<'a> Parser<'a> {
 		]) {
 			let operator = self.get_previous().clone();
 			let right = self.term()?;
-			#[cfg(debug_assertions)]
-			{
-				println!("comparison: {:?} {} {:?}", &expr, &operator, &right);
-			}
 			expr = Self::new_binary(
 				expr, operator, right
 			)?;
@@ -389,10 +360,6 @@ impl<'a> Parser<'a> {
 		while self.match_and_advance(&[Token::Minus, Token::Plus]) {
 			let operator = self.get_previous().clone();
 			let right = self.factor()?;
-			#[cfg(debug_assertions)]
-			{
-				println!("term: {:?} {} {:?}", &expr, &operator, &right);
-			}
 			expr = Self::new_binary(
 				expr, operator, right
 			)?;
@@ -407,10 +374,6 @@ impl<'a> Parser<'a> {
 		]) {
 			let operator = self.get_previous().clone();
 			let right = self.unary()?;
-			#[cfg(debug_assertions)]
-			{
-				println!("factor:\n  {:?}\n  {}\n  {:?}", &expr, operator, &right);
-			}
 			expr = Self::new_binary(
 				expr, operator, right
 			)?;
@@ -422,10 +385,6 @@ impl<'a> Parser<'a> {
 		if self.match_and_advance(&[Token::Not, Token::Minus]) {
 			let operator = self.get_previous().clone();
 			let right = self.unary()?;
-			#[cfg(debug_assertions)]
-			{
-				println!("unary: {} {:?}", operator, right);
-			}
 			let unary = Unary::new(operator, right)?;
 			return Ok(Expression::Unary(unary));
 		}
@@ -443,44 +402,36 @@ impl<'a> Parser<'a> {
 					self.advance();
 					return Ok(Expression::Variable(variable));
 				}
-				Err(self.error(self.get_current(), "Expect literal or variable."))
+				Err(self.error("Expect literal or variable"))
 			},
 			Token::GroupingStart => Ok(self.grouping()?),
-			_ => Err(self.error(self.get_current(), "Expected expression"))
+			_ => Err(self.error("Expected expression"))
 		}
 	}
 
 	fn variable(&self, name: &'a str) -> Result<Variable<'a>, String> {
 		if let Some(variable) = Variable::from_str(name) {
-			#[cfg(debug_assertions)]
-			{
-				println!("variable: {:?}", &variable);
-			}
 			return Ok(variable);
 		}
-		Err(self.error(self.get_current(), "Expected variable."))
+		Err(self.error("Expected variable"))
 	}
 
 	fn literal(&self, text: &'a str) -> Result<Literal, String> {
 		if let Some(literal) = Literal::from_str(text) {
-			#[cfg(debug_assertions)]
-			{
-				println!("literal: {:?}", &literal);
-			}
 			return Ok(literal);
 		}
-		Err(self.error(self.get_current(), "Expected literal."))
+		Err(self.error("Expected literal"))
 	}
 
 	fn grouping(&mut self) -> Result<Expression<'a>, String> {
 		self.consume(
 			Token::GroupingStart,
-			&format!("Expected '{}' before expression.", Token::GroupingStart)
+			&format!("Expected '{}' before expression", Token::GroupingStart)
 		)?;
 		let expr = self.expression()?;
 		self.consume(
 			Token::GroupingEnd,
-			&format!("Expected '{}' after expression.", Token::GroupingEnd)
+			&format!("Expected '{}' after expression", Token::GroupingEnd)
 		)?;
 		Ok(Expression::Grouping(Grouping::new(expr)))
 	}
