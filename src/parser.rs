@@ -1,7 +1,7 @@
 use crate::lexer::Token;
 use crate::syntax_tree::model::{
 	Expression, Binary, Unary, Grouping, Literal, Variable,
-	Stmt, Block, Assign, ConditionalBlock, ForEach
+	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
 /// Parses a list of tokens into a syntax tree.
@@ -62,7 +62,25 @@ impl<'a> Parser<'a> {
 		let stmt = match self.get_current() {
 			Token::Print => self.print()?,
 			Token::Assign => self.assign()?,
-			// TODO if
+			Token::If => self.if_stmt()?,
+			Token::ElseIf | Token::Else => {
+				let mut is_if_end_block = false;
+				if let Some(end_tokens) = end_tokens {
+					for end_token in end_tokens {
+						if end_token == self.get_current() {
+							is_if_end_block = true;
+							break;
+						}
+					}
+				}
+				if is_if_end_block {
+					return Ok(None);
+				}
+				return Err(self.error(
+					self.get_current(),
+					format!("Unexpected '{}' in block", self.get_current()).as_str(),
+				));
+			}
 			Token::While => self.while_stmt()?,
 			Token::For => self.foreach()?,
 			Token::Continue => self.continue_stmt(),
@@ -83,44 +101,33 @@ impl<'a> Parser<'a> {
 		Ok(Some(stmt))
 	}
 
-	fn foreach(&mut self) -> Result<Stmt<'a>, String> {
+	fn if_stmt(&mut self) -> Result<Stmt<'a>, String> {
 		self.advance();
-		let variable = match self.get_current() {
-			Token::Value(name) => {
-				let variable = self.variable(name)?;
-				self.advance();
-				variable
-			},
-			_ => return Err(self.error(
-				self.get_current(),
-				&format!("Expected variable after '{}' in {} statement.", Token::For, Token::For)
-			))
+		let if_block = self.conditional(vec![Token::Else, Token::ElseIf, Token::Fi])?;
+		let mut else_if_blocks = Vec::new();
+		while self.get_current() == &Token::ElseIf {
+			self.advance();
+			else_if_blocks.push(
+				self.conditional(vec![Token::Else, Token::ElseIf, Token::Fi])?
+			);
+		}
+		let else_if_blocks = match else_if_blocks.len() {
+			0 => None,
+			_ => Some(else_if_blocks)
 		};
-		self.consume(
-			Token::In,
-			&format!("Expected '{}' after variable in {} statement.", Token::In, Token::For),
-		)?;
-		let list = match self.get_current() {
-			Token::Value(name) => {
-				let variable = self.variable(name)?;
-				self.advance();
-				variable
-			},
-			_ => return Err(self.error(
-				self.get_current(),
-				&format!("Expected variable after '{}' in {} statement.", Token::In, Token::For)
-			))
-		};
-		self.consume(
-			Token::DelimiterEnd,
-			&format!("Expected '{}' in {} statement.", Token::DelimiterEnd, Token::For),
-		)?;
-		let block = self.block(Some(vec![
-			Token::Done
-		]))?;
-		Ok(Stmt::ForEach(ForEach::new(variable, list, block)))
+		let mut else_block = None;
+		if self.get_current() == &Token::Else {
+			self.advance();
+			self.consume(
+				Token::DelimiterEnd,
+				&format!("Expected '{}' after else statement.", Token::DelimiterEnd)
+			)?;
+			else_block = Some(self.block(Some(vec![Token::Fi]))?);
+		}
+		Ok(Stmt::If(If::new(
+			if_block, else_if_blocks, else_block
+		)))
 	}
-
 }
 
 // Tools
@@ -251,6 +258,44 @@ impl<'a> Parser<'a> {
 		)?;
 		let expression = self.expression()?;
 		Ok(Stmt::Assign(Assign::new(variable, expression)))
+	}
+
+	fn foreach(&mut self) -> Result<Stmt<'a>, String> {
+		self.advance();
+		let variable = match self.get_current() {
+			Token::Value(name) => {
+				let variable = self.variable(name)?;
+				self.advance();
+				variable
+			},
+			_ => return Err(self.error(
+				self.get_current(),
+				&format!("Expected variable after '{}' in {} statement.", Token::For, Token::For)
+			))
+		};
+		self.consume(
+			Token::In,
+			&format!("Expected '{}' after variable in {} statement.", Token::In, Token::For),
+		)?;
+		let list = match self.get_current() {
+			Token::Value(name) => {
+				let variable = self.variable(name)?;
+				self.advance();
+				variable
+			},
+			_ => return Err(self.error(
+				self.get_current(),
+				&format!("Expected variable after '{}' in {} statement.", Token::In, Token::For)
+			))
+		};
+		self.consume(
+			Token::DelimiterEnd,
+			&format!("Expected '{}' in {} statement.", Token::DelimiterEnd, Token::For),
+		)?;
+		let block = self.block(Some(vec![
+			Token::Done
+		]))?;
+		Ok(Stmt::ForEach(ForEach::new(variable, list, block)))
 	}
 
 	fn while_stmt(&mut self) -> Result<Stmt<'a>, String> {

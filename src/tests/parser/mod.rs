@@ -3,6 +3,7 @@ mod print;
 mod raw;
 mod assign;
 mod loop_blocks;
+mod r#if;
 mod r#while;
 mod foreach;
 

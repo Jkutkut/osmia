@@ -3,7 +3,7 @@ use super::visitor::Visitor;
 use super::visitable::Visitable;
 use super::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
-	Stmt, Block, Assign, ConditionalBlock, ForEach
+	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
 pub struct SyntaxTreePrinter;
@@ -32,6 +32,19 @@ impl Visitor<String> for SyntaxTreePrinter {
 
 	fn visit_assign(&self, assign: &Assign) -> String {
 		format!("{} = {}", assign.variable(), assign.expression().accept(self))
+	}
+
+	fn visit_if(&self, block: &If) -> String {
+		let mut result = format!("if {}", block.if_block().accept(self));
+		if let Some(else_ifs) = block.elseifs() {
+			for else_if in else_ifs {
+				result = format!("{} else if {}", result, else_if.accept(self));
+			}
+		}
+		if let Some(else_block) = block.else_block() {
+			result = format!("{} else {{ {} }}", result, else_block.accept(self));
+		}
+		result
 	}
 
 	fn visit_while(&self, block: &ConditionalBlock) -> String {
