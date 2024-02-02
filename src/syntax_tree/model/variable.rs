@@ -1,4 +1,5 @@
 use std::collections::LinkedList;
+use crate::syntax_tree::model::VariableKey;
 
 #[derive(Debug, PartialEq)]
 pub struct Variable<'a> {
@@ -14,6 +15,17 @@ impl<'a> Variable<'a> {
 		}
 	}
 
+	/// Parses a str into a Variable.
+	/// Checks if the variable is valid.
+	pub fn from_str(raw: &'a str) -> Option<Self> {
+		Some(Self::new(
+			raw,
+			Self::lex_variable(raw)?
+		))
+	}
+}
+
+impl<'a> Variable<'a> {
 	fn get_key_str(value: &'a str, start: usize, end: usize) -> Option<&'a str> {
 		if start >= end {
 			return None;
@@ -48,6 +60,8 @@ impl<'a> Variable<'a> {
 		true
 	}
 
+	/// Attempts to get a key as a string.
+	/// The key is validated by the `is_valid_key` function.
 	fn get_as_key(value: &'a str, start: usize, end: usize) -> Option<VariableKey<'a>> {
 		let key = Self::get_key_str(value, start, end)?;
 		match Self::is_valid_key(key) {
@@ -56,6 +70,10 @@ impl<'a> Variable<'a> {
 		}
 	}
 
+	/// Attempts to get a key as a index.
+	///
+	/// ## Example:
+	/// If the variable is `foo[2]`, the only index key is `2`.
 	fn get_as_index(value: &'a str, start: usize, end: usize) -> Option<VariableKey<'a>> {
 		let key = Self::get_key_str(value, start, end)?;
 		match key.parse::<usize>() {
@@ -64,63 +82,56 @@ impl<'a> Variable<'a> {
 		}
 	}
 
-	pub fn from_str(raw: &'a str) -> Option<Self> {
+	/// Lexes a variable.
+	/// During lexing, the variable is validated.
+	fn lex_variable(raw: &'a str) -> Option<LinkedList<VariableKey<'a>>> {
 		let mut keys = LinkedList::new();
-		let mut can_be_index = false;
+		let mut should_be_index = false;
 		let mut i: usize = 0;
-		if let Some(last_char) = raw.chars().last() {
-			if !Self::is_valid_key_start(last_char) && last_char != ']' {
-				return None;
-			}
-		}
+		let mut current_char: char;
+		let chars = raw.chars().collect::<Vec<char>>();
 		while i < raw.len() {
-			let current_char = raw.chars().nth(i).unwrap(); // TODO
+			current_char = chars[i];
 			if current_char == '[' {
-				if !can_be_index {
+				if !should_be_index {
 					return None;
 				}
 				let end: usize = raw[i..].find(']')?;
 				let key = Self::get_as_index(raw, i + 1, i + end)?;
 				keys.push_back(key);
 				i += end + 1;
-				match raw.chars().nth(i) {
-					None => (),
-					Some('.') => {
-						can_be_index = false;
-						i += 1;
-					},
-					Some('[') => {
-						can_be_index = true;
-						i -= 1;
-					},
-					_ => return None
-				}
 			}
 			else if Self::is_valid_key_start(current_char) {
 				let start = i;
-				while i < raw.len() && Self::is_valid_key_char(raw.chars().nth(i).unwrap()) {
+				while i < raw.len() && Self::is_valid_key_char(chars[i]) {
 					i += 1;
 				}
-				let key = Self::get_as_key(raw, start, i)?;
-				keys.push_back(key);
-				match raw.chars().nth(i) {
-					None => (),
-					Some('[') => {
-						can_be_index = true;
-						i -= 1;
-					},
-					Some('.') => can_be_index = false,
-					_ => return None
-				}
+				keys.push_back(
+					Self::get_as_key(raw, start, i)?
+				);
 			}
 			else {
 				return None;
 			}
+			match chars.get(i) {
+				None => (),
+				Some('.') => should_be_index = false,
+				Some('[') => {
+					should_be_index = true;
+					i -= 1;
+				},
+				_ => return None
+			}
 			i += 1;
+		}
+		if let Some(last_char) = chars.last() {
+			if !Self::is_valid_key_start(*last_char) && last_char != &']' {
+				return None;
+			}
 		}
 		match keys.is_empty() {
 			true => None,
-			false => Some(Self::new(raw, keys))
+			false => Some(keys)
 		}
 	}
 }
@@ -131,8 +142,4 @@ impl std::fmt::Display for Variable<'_> {
 	}
 }
 
-#[derive(Debug, PartialEq)]
-pub enum VariableKey<'a> {
-	Key(&'a str),
-	Index(usize),
-}
+

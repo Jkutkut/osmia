@@ -17,7 +17,7 @@ pub enum Token<'a> {
 	If,
 	ElseIf,
 	Else,
-	Fi, // TODO
+	Fi,
 
 	// Loops
 	While,
@@ -25,7 +25,7 @@ pub enum Token<'a> {
 	In,
 	Continue,
 	Break,
-	Done, // TODO
+	Done,
 
 	// Equality
 	Equal,

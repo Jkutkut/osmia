@@ -10,6 +10,7 @@ mod literal;
 mod stmt;
 mod unary;
 mod variable;
+mod variable_key;
 
 mod impl_visitor;
 
@@ -25,3 +26,4 @@ pub use literal::Literal;
 pub use stmt::Stmt;
 pub use unary::Unary;
 pub use variable::Variable;
+pub use variable_key::VariableKey;
