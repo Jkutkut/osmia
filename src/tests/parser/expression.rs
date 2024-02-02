@@ -330,3 +330,9 @@ fn invalid_grouping02() {
 	];
 	should_fail(tokens);
 }
+
+#[test]
+fn empty() {
+	let tokens = vec![];
+	should_fail_expression(tokens);
+}

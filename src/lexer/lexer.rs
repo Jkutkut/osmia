@@ -49,6 +49,7 @@ impl<'a> Lexer<'a> {
 			i += delimiter_end_idx + self.delimiter_end.len();
 			last = i;
 		}
+		tokens.push_back(Token::Eof);
 		#[cfg(test)]
 		{
 			for token in &tokens {

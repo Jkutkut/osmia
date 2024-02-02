@@ -56,7 +56,11 @@ impl<'a> Parser<'a> {
 	/// # Returns
 	/// `Result<Stmt, String>` - The syntax tree or an error message.
 	pub fn parse(&mut self) -> Result<Stmt<'a>, String> {
-		Ok(self.code()?)
+		let code = self.code()?;
+		if !self.is_at_end() {
+			return Err(self.error("Expected end of program"));
+		}
+		Ok(code)
 	}
 }
 
@@ -95,7 +99,7 @@ impl<'a> Parser<'a> {
 	}
 
 	fn is_at_end(&self) -> bool {
-		self.current >= self.tokens.len()
+		self.check_current(&Token::Eof)
 	}
 
 	fn get_current(&self) -> &Token<'a> {

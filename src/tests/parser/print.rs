@@ -3,7 +3,7 @@ use crate::syntax_tree::model::{
 	Expression, Binary, Literal,
 	Stmt
 };
-use super::{test_parser};
+use super::{test_parser, should_fail};
 
 #[cfg(test)]
 fn token_expression_to_token_stmt(tokens: Vec<Token>) -> Vec<Token> {
@@ -48,4 +48,29 @@ fn basic_parser() {
 		Expression::Literal(Literal::Int(7))
 	).unwrap());
 	test_parser_print(tokens, expected);
+}
+
+#[test]
+fn should_fail01() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::Print,
+		Token::Value("1"),
+	]);
+}
+
+#[test]
+fn should_fail02() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::Print,
+		Token::DelimiterEnd
+	]);
+}
+
+#[test]
+fn should_fail03() {
+	should_fail(vec![
+		Token::Print,
+	]);
 }

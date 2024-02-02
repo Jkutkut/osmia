@@ -1,5 +1,6 @@
 use crate::Osmia;
 
+#[cfg(test)]
 fn render(code: &str) -> Result<String, String> {
 	let parser = Osmia::default();
 	parser.render(code)

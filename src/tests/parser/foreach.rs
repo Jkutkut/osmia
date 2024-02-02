@@ -3,7 +3,7 @@ use crate::syntax_tree::model::{
 	Variable, Expression,
 	Stmt, ForEach
 };
-use super::{test_parser};
+use super::{test_parser, should_fail};
 
 #[test]
 fn basic_test() {
@@ -69,4 +69,45 @@ fn nested() {
 			))
 		))
 	);
+}
+
+// Fail tests
+
+#[test]
+fn fail01() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::For,
+		Token::Value("a"),
+		Token::In,
+		Token::Value("lst"),
+		Token::DelimiterEnd
+	]);
+}
+
+#[test]
+fn fail02() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::For,
+		Token::Value("a"),
+		Token::In
+	]);
+}
+
+#[test]
+fn fail03() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::For,
+		Token::Value("a")
+	]);
+}
+
+#[test]
+fn fail04() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::For
+	]);
 }

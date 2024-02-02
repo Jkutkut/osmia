@@ -37,14 +37,15 @@ fn lexer_test(
 fn basics_lexer01() {
 	let tests: Vec<(&str, Vec<Token<'_>>)> = vec![
 		(
-			"", vec![]
+			"", vec![Token::Eof]
 		),
 		(
 			"{{1}}",
 			vec![
 				Token::DelimiterStart,
 				Token::Value("1"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 		(
@@ -52,7 +53,8 @@ fn basics_lexer01() {
 			vec![
 				Token::DelimiterStart,
 				Token::Value("1.0"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 		(
@@ -60,7 +62,8 @@ fn basics_lexer01() {
 			vec![
 				Token::DelimiterStart,
 				Token::Value("true"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 		(
@@ -68,7 +71,8 @@ fn basics_lexer01() {
 			vec![
 				Token::DelimiterStart,
 				Token::Value("false"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 		(
@@ -76,7 +80,8 @@ fn basics_lexer01() {
 			vec![
 				Token::DelimiterStart,
 				Token::Value("null"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 		(
@@ -84,7 +89,8 @@ fn basics_lexer01() {
 			vec![
 				Token::DelimiterStart,
 				Token::Value(r#""hello world""#),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		)
 	];
@@ -102,7 +108,8 @@ fn basics_lexer02() {
 				Token::DelimiterStart,
 				Token::Value("1"),
 				Token::DelimiterEnd,
-				Token::Raw(" test")
+				Token::Raw(" test"),
+				Token::Eof
 			]
 		),
 		(
@@ -111,7 +118,8 @@ fn basics_lexer02() {
 				Token::Raw("test "),
 				Token::DelimiterStart,
 				Token::Value("123"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 		(
@@ -121,7 +129,8 @@ fn basics_lexer02() {
 				Token::DelimiterStart,
 				Token::Value("true"),
 				Token::DelimiterEnd,
-				Token::Raw(" test")
+				Token::Raw(" test"),
+				Token::Eof
 			]
 		),
 		(
@@ -133,7 +142,8 @@ fn basics_lexer02() {
 				Token::Raw(" test "),
 				Token::DelimiterStart,
 				Token::Value("456"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 		(
@@ -151,7 +161,8 @@ fn basics_lexer02() {
 				Token::DelimiterStart,
 				Token::Value("false"),
 				Token::DelimiterEnd,
-				Token::Raw("aaaa")
+				Token::Raw("aaaa"),
+				Token::Eof
 			]
 		)
 	];
@@ -187,7 +198,8 @@ fn advance_tests01() {
 				Token::Value("1"),
 				Token::Plus,
 				Token::Value("1"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 		(
@@ -203,7 +215,8 @@ fn advance_tests01() {
 				Token::Value("1"),
 				Token::Divide,
 				Token::Value("1"),
-				Token::DelimiterEnd
+				Token::DelimiterEnd,
+				Token::Eof
 			]
 		),
 	];

@@ -1,5 +1,6 @@
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token<'a> {
+	Eof,
 	DelimiterStart,
 	DelimiterEnd,
 
@@ -51,7 +52,7 @@ pub enum Token<'a> {
 	Or,
 
 	GroupingStart,
-	GroupingEnd,
+	GroupingEnd
 }
 
 impl Token<'_> {
@@ -122,6 +123,7 @@ impl Token<'_> {
 impl std::fmt::Display for Token<'_> {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
+			Token::Eof => write!(f, "EOF"),
 			Token::DelimiterStart => write!(f, "{{{{"),
 			Token::DelimiterEnd => write!(f, "}}}}"),
 			Token::Raw(s) => write!(f, "{}", s),

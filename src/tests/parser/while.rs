@@ -3,7 +3,7 @@ use crate::syntax_tree::model::{
 	Expression, Literal,
 	Stmt, ConditionalBlock, Block
 };
-use super::{test_parser};
+use super::{test_parser, should_fail};
 
 #[test]
 fn basic_test() {
@@ -109,4 +109,36 @@ fn nested_01() {
 			))
 		))
 	);
+}
+
+#[test]
+fn should_fail01() {
+	// unclosed
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::While,
+		Token::Value("true"),
+		Token::DelimiterEnd,
+		Token::DelimiterStart,
+		Token::Print,
+		Token::Value("\"hello\""),
+		Token::DelimiterEnd
+	]);
+}
+
+#[test]
+fn should_fail02() {
+	// unclosed
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::While,
+		Token::Value("true"),
+		Token::DelimiterEnd,
+		Token::DelimiterStart,
+		Token::Print,
+		Token::Value("\"hello\""),
+		Token::DelimiterEnd,
+		Token::DelimiterStart,
+		Token::Done
+	]);
 }

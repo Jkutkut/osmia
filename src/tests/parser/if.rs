@@ -3,7 +3,7 @@ use crate::syntax_tree::model::{
 	Expression, Literal, Binary, Variable,
 	Stmt, ConditionalBlock, If, Block
 };
-use super::{test_parser};
+use super::{test_parser, should_fail};
 
 #[test]
 fn basic_test01() {
@@ -212,4 +212,68 @@ fn empty_if_block() {
 			None
 		))
 	);
+}
+
+#[test]
+fn invalid01() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::If,
+		Token::Value("condition"),
+		Token::Equal,
+		Token::Value(r#""if""#),
+		Token::DelimiterEnd,
+		Token::DelimiterStart,
+		Token::Fi
+	]);
+}
+
+#[test]
+fn invalid02() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::If,
+		Token::Value("condition"),
+		Token::Equal,
+		Token::Value(r#""if""#),
+		Token::DelimiterEnd
+	]);
+}
+
+#[test]
+fn invalid03() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::If,
+		Token::Value("condition"),
+		Token::Equal,
+		Token::Value(r#""if""#),
+	]);
+}
+
+#[test]
+fn invalid04() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::If,
+		Token::Value("condition"),
+		Token::Equal
+	]);
+}
+
+#[test]
+fn invalid05() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::If
+	]);
+}
+
+#[test]
+fn invalid06() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::If,
+		Token::DelimiterEnd
+	]);
 }

@@ -14,10 +14,21 @@ use crate::syntax_tree::syntax_tree_printer::SyntaxTreePrinter;
 use crate::syntax_tree::visitable::{Visitable};
 
 #[cfg(test)]
+fn add_eof(
+	tokens: Vec<Token>
+) -> Vec<Token> {
+	let mut new_tokens = Vec::new();
+	new_tokens.extend(tokens);
+	new_tokens.push(Token::Eof);
+	new_tokens
+}
+
+#[cfg(test)]
 fn test_parser(
 	tokens: Vec<Token>,
 	expected: Stmt
 ) {
+	let tokens = add_eof(tokens);
 	let parsed_result = match Parser::new(&tokens).parse() {
 		Ok(expr) => expr,
 		Err(err) => panic!("Parser threw an error:\n{}", err),
@@ -37,6 +48,7 @@ fn test_parser(
 fn should_fail(
 	code: Vec<Token>,
 ) {
+	let code = add_eof(code);
 	let parsed_result = Parser::new(&code).parse();
 	let printer = SyntaxTreePrinter;
 	if let Ok(ref parsed_result) = parsed_result {

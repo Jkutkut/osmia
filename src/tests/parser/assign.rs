@@ -3,11 +3,11 @@ use crate::syntax_tree::model::{
 	Expression, Variable, Literal, Binary,
 	Stmt, Assign
 };
-use super::{test_parser};
+use super::{test_parser, should_fail};
 
 #[test]
 fn basic_test01() {
-	test_parser(
+	test_parser( // foo = "bar"
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
@@ -27,7 +27,7 @@ fn basic_test01() {
 
 #[test]
 fn basic_test02() {
-	test_parser(
+	test_parser( // foo = bar
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
@@ -47,7 +47,7 @@ fn basic_test02() {
 
 #[test]
 fn basic_test03() {
-	test_parser(
+	test_parser( // foo = 2 + 2
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
@@ -69,4 +69,62 @@ fn basic_test03() {
 			)
 		)
 	);
+}
+
+#[test]
+fn fail01() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::Assign,
+		Token::Value("foo"),
+		Token::AssignEq,
+		Token::DelimiterEnd
+	]);
+}
+
+#[test]
+fn fail02() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::Assign,
+		Token::Value("foo"),
+		Token::AssignEq
+	]);
+}
+
+#[test]
+fn fail03() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::Assign,
+		Token::Value("foo")
+	]);
+}
+
+#[test]
+fn fail04() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::Assign
+	]);
+}
+
+#[test]
+fn fail05() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::Assign,
+		Token::Value("foo"),
+		Token::AssignEq,
+		Token::DelimiterEnd
+	]);
+}
+
+#[test]
+fn fail06() {
+	should_fail(vec![
+		Token::DelimiterStart,
+		Token::Assign,
+		Token::DelimiterEnd
+	]);
 }
