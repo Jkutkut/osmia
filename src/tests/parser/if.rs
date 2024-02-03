@@ -4,10 +4,12 @@ use crate::syntax_tree::model::{
 	Stmt, ConditionalBlock, If, Block
 };
 use super::{test_parser, should_fail};
+use crate::macro_tests;
 
-#[test]
-fn basic_test01() {
-	test_parser( // {{if condition == "if"}}{{print "condition is if"}}{{fi}}
+macro_tests!(
+	test_parser,
+	( // {{if condition == "if"}}{{print "condition is if"}}{{fi}}
+		basic_test01,
 		vec![
 			Token::DelimiterStart,
 			Token::If,
@@ -37,17 +39,14 @@ fn basic_test01() {
 			None,
 			None
 		))
-	);
-}
-
-#[test]
-fn basic_test02() {
+	),
 	//	{{if condition == "if"}}
 	//		{{print "condition is if"}}
 	//	{{else}}
 	//		{{print "condition is else"}}
 	//	{{fi}}
-	test_parser(
+	(
+		basic_test02,
 		vec![
 			Token::DelimiterStart,
 			Token::If,
@@ -86,11 +85,7 @@ fn basic_test02() {
 				Literal::from_str(r#""condition is else""#).unwrap())
 			))
 		))
-	);
-}
-
-#[test]
-fn basic_test03() {
+	),
 	//	{{if condition == "if"}}
 	//		{{print "condition is if"}}
 	//	{{elseif condition == "elseif01"}}
@@ -100,7 +95,8 @@ fn basic_test03() {
 	//	{{else}}
 	//		{{print "condition is else"}}
 	//	{{fi}}
-	test_parser(
+	(
+		basic_test03,
 		vec![
 			Token::DelimiterStart,
 			Token::If,
@@ -122,7 +118,6 @@ fn basic_test03() {
 			Token::Print,
 			Token::Value(r#""condition is elseif01""#),
 			Token::DelimiterEnd,
-
 			Token::DelimiterStart,
 			Token::ElseIf,
 			Token::Value("condition"),
@@ -133,7 +128,6 @@ fn basic_test03() {
 			Token::Print,
 			Token::Value(r#""condition is elseif02""#),
 			Token::DelimiterEnd,
-
 			Token::DelimiterStart,
 			Token::Else,
 			Token::DelimiterEnd,
@@ -182,12 +176,10 @@ fn basic_test03() {
 				Literal::from_str(r#""condition is else""#).unwrap())
 			))
 		))
-	);
-}
-
-#[test]
-fn empty_if_block() {
-	test_parser( // {{if condition == "if"}}{{fi}}
+	),
+	// {{if condition == "if"}}{{fi}}
+	(
+		empty_if_block,
 		vec![
 			Token::DelimiterStart,
 			Token::If,
@@ -211,69 +203,67 @@ fn empty_if_block() {
 			None,
 			None
 		))
-	);
-}
+	)
+);
 
-#[test]
-fn invalid01() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::If,
-		Token::Value("condition"),
-		Token::Equal,
-		Token::Value(r#""if""#),
-		Token::DelimiterEnd,
-		Token::DelimiterStart,
-		Token::Fi
-	]);
-}
-
-#[test]
-fn invalid02() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::If,
-		Token::Value("condition"),
-		Token::Equal,
-		Token::Value(r#""if""#),
-		Token::DelimiterEnd
-	]);
-}
-
-#[test]
-fn invalid03() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::If,
-		Token::Value("condition"),
-		Token::Equal,
-		Token::Value(r#""if""#),
-	]);
-}
-
-#[test]
-fn invalid04() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::If,
-		Token::Value("condition"),
-		Token::Equal
-	]);
-}
-
-#[test]
-fn invalid05() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::If
-	]);
-}
-
-#[test]
-fn invalid06() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::If,
-		Token::DelimiterEnd
-	]);
-}
+macro_tests!(
+	should_fail,
+	(
+		invalid01,
+		vec![
+			Token::DelimiterStart,
+			Token::If,
+			Token::Value("condition"),
+			Token::Equal,
+			Token::Value(r#""if""#),
+			Token::DelimiterEnd,
+			Token::DelimiterStart,
+			Token::Fi
+		]
+	),
+	(
+		invalid02,
+		vec![
+			Token::DelimiterStart,
+			Token::If,
+			Token::Value("condition"),
+			Token::Equal,
+			Token::Value(r#""if""#),
+			Token::DelimiterEnd
+		]
+	),
+	(
+		invalid03,
+		vec![
+			Token::DelimiterStart,
+			Token::If,
+			Token::Value("condition"),
+			Token::Equal,
+			Token::Value(r#""if""#),
+		]
+	),
+	(
+		invalid04,
+		vec![
+			Token::DelimiterStart,
+			Token::If,
+			Token::Value("condition"),
+			Token::Equal
+		]
+	),
+	(
+		invalid05,
+		vec![
+			Token::DelimiterStart,
+			Token::If
+		]
+	),
+	(
+		invalid06,
+		vec![
+			Token::DelimiterStart,
+			Token::If,
+			Token::DelimiterEnd
+		]
+	)
+);
