@@ -4,10 +4,12 @@ use crate::syntax_tree::model::{
 	Stmt, ForEach
 };
 use super::{test_parser, should_fail};
+use crate::macro_tests;
 
-#[test]
-fn basic_test() {
-	test_parser( // {{for a in lst}}This line is constant{{end}}
+macro_tests!(
+	test_parser,
+	(
+		test_parser01, // {{for a in lst}}This line is constant{{end}}
 		vec![
 			Token::DelimiterStart,
 			Token::For,
@@ -25,12 +27,9 @@ fn basic_test() {
 			Variable::from_str("lst").unwrap(),
 			Stmt::Raw("This line is constant")
 		))
-	);
-}
-
-#[test]
-fn nested() {
-	test_parser( // {{for arr in matrix}}{{for cell in arr}}{{print cell}}{{end}}{{end}}
+	),
+	(
+		nested, // {{for arr in matrix}}{{for cell in arr}}{{print cell}}{{end}}{{end}}
 		vec![
 			Token::DelimiterStart,
 			Token::For,
@@ -68,46 +67,45 @@ fn nested() {
 				)
 			))
 		))
-	);
-}
+	)
+);
 
 // Fail tests
-
-#[test]
-fn fail01() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::For,
-		Token::Value("a"),
-		Token::In,
-		Token::Value("lst"),
-		Token::DelimiterEnd
-	]);
-}
-
-#[test]
-fn fail02() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::For,
-		Token::Value("a"),
-		Token::In
-	]);
-}
-
-#[test]
-fn fail03() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::For,
-		Token::Value("a")
-	]);
-}
-
-#[test]
-fn fail04() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::For
-	]);
-}
+macro_tests!(
+	should_fail,
+	(
+		should_fail01,
+			vec![
+			Token::DelimiterStart,
+			Token::For,
+			Token::Value("a"),
+			Token::In,
+			Token::Value("lst"),
+			Token::DelimiterEnd
+		]
+	),
+	(
+		fail02,
+		vec![
+			Token::DelimiterStart,
+			Token::For,
+			Token::Value("a"),
+			Token::In
+		]
+	),
+	(
+		fail03,
+		vec![
+			Token::DelimiterStart,
+			Token::For,
+			Token::Value("a")
+		]
+	),
+	(
+		fail04,
+		vec![
+			Token::DelimiterStart,
+			Token::For
+		]
+	)
+);
