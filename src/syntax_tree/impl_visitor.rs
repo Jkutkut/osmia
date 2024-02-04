@@ -1,4 +1,4 @@
-use super::{
+use crate::syntax_tree::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
 	Stmt, Assign, ConditionalBlock, ForEach, If
 };

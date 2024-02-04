@@ -10,7 +10,7 @@ mod foreach;
 use crate::lexer::Token;
 use crate::syntax_tree::model::Stmt;
 use crate::parser::Parser;
-use crate::syntax_tree::syntax_tree_printer::SyntaxTreePrinter;
+use crate::tree_walker::SyntaxTreePrinter;
 use crate::syntax_tree::visitable::{Visitable};
 
 #[cfg(test)]

@@ -2,6 +2,8 @@ mod macros;
 mod parser;
 mod lexer;
 mod syntax_tree;
+mod tree_walker;
+mod interpreter;
 
 // use lexer::{Lexer, Token};
 

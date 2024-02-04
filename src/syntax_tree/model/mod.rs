@@ -12,8 +12,6 @@ mod unary;
 mod variable;
 mod variable_key;
 
-mod impl_visitor;
-
 pub use assign::Assign;
 pub use binary::Binary;
 pub use block::Block;

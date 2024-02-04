@@ -1,7 +1,7 @@
 use crate::Token;
-use super::visitor::Visitor;
-use super::visitable::Visitable;
-use super::model::{
+use crate::syntax_tree::visitor::Visitor;
+use crate::syntax_tree::visitable::Visitable;
+use crate::syntax_tree::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
