@@ -4,6 +4,7 @@ use crate::syntax_tree::model::{
 	Stmt
 };
 use super::{test_parser, should_fail};
+use crate::macro_tests;
 
 #[cfg(test)]
 fn token_expression_to_token_stmt(tokens: Vec<Token>) -> Vec<Token> {
@@ -30,309 +31,365 @@ fn should_fail_expression(tokens: Vec<Token>) {
 
 // Valid tests
 
-#[test]
-fn basic_parser() {
-	let tokens = vec![ // 1 + 2 * 3 == 7
-		Token::Value("1"),
-		Token::Plus,
-		Token::Value("2"),
-		Token::Multiply,
-		Token::Value("3"),
-		Token::Equal,
-		Token::Value("7")
-	];
-	let expected = Expression::Binary(Binary::new(
-		Expression::Binary(Binary::new(
-			Expression::Literal(Literal::Int(1)),
+macro_tests!(
+	test_parser_expression,
+	(
+		basic_parser, // 1 + 2 * 3 == 7
+		vec![ // 1 + 2 * 3 == 7
+			Token::Value("1"),
 			Token::Plus,
-			Expression::Binary(Binary::new(
-				Expression::Literal(Literal::Int(2)),
-				Token::Multiply,
-				Expression::Literal(Literal::Int(3))
-			).unwrap())
-		).unwrap()),
-		Token::Equal,
-		Expression::Literal(Literal::Int(7))
-	).unwrap());
-	test_parser_expression(tokens, expected);
-}
-
-#[test]
-fn precedence() {
-	// 1 + 2 * 3 * (4 + 5) == 1 + (2 * 3) * 9 == true
-	let tokens = vec![
-		Token::Value("1"),
-		Token::Plus,
-		Token::Value("2"),
-		Token::Multiply,
-		Token::Value("3"),
-		Token::Multiply,
-		Token::GroupingStart,
-		Token::Value("4"),
-		Token::Plus,
-		Token::Value("5"),
-		Token::GroupingEnd,
-		Token::Equal,
-		Token::Value("1"),
-		Token::Plus,
-		Token::GroupingStart,
-		Token::Value("2"),
-		Token::Multiply,
-		Token::Value("3"),
-		Token::GroupingEnd,
-		Token::Multiply,
-		Token::Value("9"),
-		Token::Equal,
-		Token::Value("true")
-	];
-	let expected = Expression::Binary(Binary::new(
+			Token::Value("2"),
+			Token::Multiply,
+			Token::Value("3"),
+			Token::Equal,
+			Token::Value("7")
+		],
 		Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
 				Expression::Literal(Literal::Int(1)),
 				Token::Plus,
 				Expression::Binary(Binary::new(
-					Expression::Binary(Binary::new(
-						Expression::Literal(Literal::Int(2)),
-						Token::Multiply,
-						Expression::Literal(Literal::Int(3))
-					).unwrap()),
+					Expression::Literal(Literal::Int(2)),
 					Token::Multiply,
-					Expression::Grouping(Grouping::new(
+					Expression::Literal(Literal::Int(3))
+				).unwrap())
+			).unwrap()),
+			Token::Equal,
+			Expression::Literal(Literal::Int(7))
+		).unwrap())
+	),
+	(
+		precedence, // 1 + 2 * 3 / (4 + 5) == 1 + (2 * 3) % 9 == true
+		vec![
+			Token::Value("1"),
+			Token::Plus,
+			Token::Value("2"),
+			Token::Multiply,
+			Token::Value("3"),
+			Token::Divide,
+			Token::GroupingStart,
+			Token::Value("4"),
+			Token::Plus,
+			Token::Value("5"),
+			Token::GroupingEnd,
+			Token::Equal,
+			Token::Value("1"),
+			Token::Plus,
+			Token::GroupingStart,
+			Token::Value("2"),
+			Token::Multiply,
+			Token::Value("3"),
+			Token::GroupingEnd,
+			Token::Modulo,
+			Token::Value("9"),
+			Token::Equal,
+			Token::Value("true")
+		],
+		Expression::Binary(Binary::new(
+			Expression::Binary(Binary::new(
+				Expression::Binary(Binary::new(
+					Expression::Literal(Literal::Int(1)),
+					Token::Plus,
+					Expression::Binary(Binary::new(
 						Expression::Binary(Binary::new(
-							Expression::Literal(Literal::Int(4)),
-							Token::Plus,
-							Expression::Literal(Literal::Int(5))
+							Expression::Literal(Literal::Int(2)),
+							Token::Multiply,
+							Expression::Literal(Literal::Int(3))
+						).unwrap()),
+						Token::Divide,
+						Expression::Grouping(Grouping::new(
+							Expression::Binary(Binary::new(
+								Expression::Literal(Literal::Int(4)),
+								Token::Plus,
+								Expression::Literal(Literal::Int(5))
+							).unwrap())
+						))
+					).unwrap())
+				).unwrap()),
+				Token::Equal,
+				Expression::Binary(Binary::new(
+					Expression::Literal(Literal::Int(1)),
+					Token::Plus,
+					Expression::Binary(Binary::new(
+						Expression::Grouping(Grouping::new(
+							Expression::Binary(Binary::new(
+								Expression::Literal(Literal::Int(2)),
+								Token::Multiply,
+								Expression::Literal(Literal::Int(3))
+							).unwrap())
+						)),
+						Token::Modulo,
+						Expression::Literal(Literal::Int(9))
+					).unwrap())
+				).unwrap())
+			).unwrap()),
+			Token::Equal,
+			Expression::Literal(Literal::Bool(true))
+		).unwrap())
+	),
+	(
+		unary_operators01, // !!true == !false == (-(-1) == 1) != false
+		vec![
+			Token::Not,
+			Token::Not,
+			Token::Value("true"),
+			Token::Equal,
+			Token::Not,
+			Token::Value("false"),
+			Token::Equal,
+			Token::GroupingStart,
+			Token::Minus,
+			Token::GroupingStart,
+			Token::Minus,
+			Token::Value("1"),
+			Token::GroupingEnd,
+			Token::Equal,
+			Token::Value("1"),
+			Token::GroupingEnd,
+			Token::NotEqual,
+			Token::Value("false")
+		],
+		Expression::Binary(Binary::new(
+			Expression::Binary(Binary::new(
+				Expression::Binary(Binary::new(
+					Expression::Unary(Unary::new(
+						Token::Not,
+						Expression::Unary(Unary::new(
+							Token::Not,
+							Expression::Literal(Literal::Bool(true))
+						).unwrap())
+					).unwrap()),
+					Token::Equal,
+					Expression::Unary(Unary::new(
+						Token::Not,
+						Expression::Literal(Literal::Bool(false))
+					).unwrap())
+				).unwrap()),
+				Token::Equal,
+				Expression::Grouping(Grouping::new(
+					Expression::Binary(Binary::new(
+						Expression::Unary(Unary::new(
+							Token::Minus,
+							Expression::Grouping(Grouping::new(
+								Expression::Unary(Unary::new(
+									Token::Minus,
+									Expression::Literal(Literal::Int(1))
+								).unwrap())
+							))
+						).unwrap()),
+						Token::Equal,
+						Expression::Literal(Literal::Int(1))
+					).unwrap())
+				))
+			).unwrap()),
+			Token::NotEqual,
+			Expression::Literal(Literal::Bool(false))
+		).unwrap())
+	),
+	(
+		unary_operators02, // ---1 == -(-(-1)) == -1
+		vec![
+			Token::Minus,
+			Token::Minus,
+			Token::Minus,
+			Token::Value("1"),
+			Token::Equal,
+			Token::Minus,
+			Token::GroupingStart,
+			Token::Minus,
+			Token::GroupingStart,
+			Token::Minus,
+			Token::GroupingStart,
+			Token::Value("1"),
+			Token::GroupingEnd,
+			Token::GroupingEnd,
+			Token::GroupingEnd,
+			Token::Equal,
+			Token::Minus,
+			Token::Value("1")
+		],
+		Expression::Binary(Binary::new(
+			Expression::Binary(Binary::new(
+				Expression::Unary(Unary::new(
+					Token::Minus,
+					Expression::Unary(Unary::new(
+						Token::Minus,
+						Expression::Unary(Unary::new(
+							Token::Minus,
+							Expression::Literal(Literal::Int(1))
+						).unwrap())
+					).unwrap())
+				).unwrap()),
+				Token::Equal,
+				Expression::Unary(Unary::new(
+					Token::Minus,
+					Expression::Grouping(Grouping::new(
+						Expression::Unary(Unary::new(
+							Token::Minus,
+							Expression::Grouping(Grouping::new(
+								Expression::Unary(Unary::new(
+									Token::Minus,
+									Expression::Grouping(Grouping::new(
+										Expression::Literal(Literal::Int(1))
+									))
+								).unwrap())
+							))
 						).unwrap())
 					))
 				).unwrap())
 			).unwrap()),
 			Token::Equal,
-			Expression::Binary(Binary::new(
-				Expression::Literal(Literal::Int(1)),
-				Token::Plus,
-				Expression::Binary(Binary::new(
-					Expression::Grouping(Grouping::new(
-						Expression::Binary(Binary::new(
-							Expression::Literal(Literal::Int(2)),
-							Token::Multiply,
-							Expression::Literal(Literal::Int(3))
-						).unwrap())
-					)),
-					Token::Multiply,
-					Expression::Literal(Literal::Int(9))
-				).unwrap())
-			).unwrap())
-		).unwrap()),
-		Token::Equal,
-		Expression::Literal(Literal::Bool(true))
-	).unwrap());
-	test_parser_expression(tokens, expected);
-}
-
-#[test]
-fn unary_operators01() {
-	// !!true == !false == (-(-1) == 1) != false
-	let tokens = vec![
-		Token::Not,
-		Token::Not,
-		Token::Value("true"),
-		Token::Equal,
-		Token::Not,
-		Token::Value("false"),
-		Token::Equal,
-		Token::GroupingStart,
-		Token::Minus,
-		Token::GroupingStart,
-		Token::Minus,
-		Token::Value("1"),
-		Token::GroupingEnd,
-		Token::Equal,
-		Token::Value("1"),
-		Token::GroupingEnd,
-		Token::NotEqual,
-		Token::Value("false")
-	];
-	let expected = Expression::Binary(Binary::new(
-		Expression::Binary(Binary::new(
-			Expression::Binary(Binary::new(
-				Expression::Unary(Unary::new(
-					Token::Not,
-					Expression::Unary(Unary::new(
-						Token::Not,
-						Expression::Literal(Literal::Bool(true))
-					).unwrap())
-				).unwrap()),
-				Token::Equal,
-				Expression::Unary(Unary::new(
-					Token::Not,
-					Expression::Literal(Literal::Bool(false))
-				).unwrap())
-			).unwrap()),
-			Token::Equal,
-			Expression::Grouping(Grouping::new(
-				Expression::Binary(Binary::new(
-					Expression::Unary(Unary::new(
-						Token::Minus,
-						Expression::Grouping(Grouping::new(
-							Expression::Unary(Unary::new(
-								Token::Minus,
-								Expression::Literal(Literal::Int(1))
-							).unwrap())
-						))
-					).unwrap()),
-					Token::Equal,
-					Expression::Literal(Literal::Int(1))
-				).unwrap())
-			))
-		).unwrap()),
-		Token::NotEqual,
-		Expression::Literal(Literal::Bool(false))
-	).unwrap());
-	test_parser_expression(tokens, expected);
-}
-
-#[test]
-fn unary_operators02() {
-	// ---1 == -(-(-1)) == -1
-	let tokens = vec![
-		Token::Minus,
-		Token::Minus,
-		Token::Minus,
-		Token::Value("1"),
-		Token::Equal,
-		Token::Minus,
-		Token::GroupingStart,
-		Token::Minus,
-		Token::GroupingStart,
-		Token::Minus,
-		Token::GroupingStart,
-		Token::Value("1"),
-		Token::GroupingEnd,
-		Token::GroupingEnd,
-		Token::GroupingEnd,
-		Token::Equal,
-		Token::Minus,
-		Token::Value("1")
-	];
-	let expected = Expression::Binary(Binary::new(
-		Expression::Binary(Binary::new(
 			Expression::Unary(Unary::new(
 				Token::Minus,
-				Expression::Unary(Unary::new(
-					Token::Minus,
-					Expression::Unary(Unary::new(
-						Token::Minus,
-						Expression::Literal(Literal::Int(1))
-					).unwrap())
-				).unwrap())
-			).unwrap()),
-			Token::Equal,
-			Expression::Unary(Unary::new(
-				Token::Minus,
-				Expression::Grouping(Grouping::new(
-					Expression::Unary(Unary::new(
-						Token::Minus,
-						Expression::Grouping(Grouping::new(
-							Expression::Unary(Unary::new(
-								Token::Minus,
-								Expression::Grouping(Grouping::new(
-									Expression::Literal(Literal::Int(1))
-								))
-							).unwrap())
-						))
-					).unwrap())
-				))
+				Expression::Literal(Literal::Int(1))
 			).unwrap())
-		).unwrap()),
-		Token::Equal,
-		Expression::Unary(Unary::new(
-			Token::Minus,
-			Expression::Literal(Literal::Int(1))
 		).unwrap())
-	).unwrap());
-	test_parser_expression(tokens, expected);
-}
-
-#[test]
-fn grouping() {
-	// (1 + 2) * 3 == 9
-	let tokens = vec![
-		Token::GroupingStart,
-		Token::Value("1"),
-		Token::Plus,
-		Token::Value("2"),
-		Token::GroupingEnd,
-		Token::Multiply,
-		Token::Value("3"),
-		Token::Equal,
-		Token::Value("9")
-	];
-	let expected = Expression::Binary(Binary::new(
-		Expression::Binary(Binary::new(
-			Expression::Grouping(Grouping::new(
-				Expression::Binary(Binary::new(
-					Expression::Literal(Literal::Int(1)),
-					Token::Plus,
-					Expression::Literal(Literal::Int(2))
-				).unwrap())
-			)),
+	),
+	(
+		grouping, // (1 + 2) * 3 == 9
+		vec![
+			Token::GroupingStart,
+			Token::Value("1"),
+			Token::Plus,
+			Token::Value("2"),
+			Token::GroupingEnd,
 			Token::Multiply,
-			Expression::Literal(Literal::Int(3))
-		).unwrap()),
-		Token::Equal,
-		Expression::Literal(Literal::Int(9))
-	).unwrap());
-	test_parser_expression(tokens, expected);
-}
-
-#[test]
-fn json_value01() {
-	// user.age == 42
-	let tokens = vec![Token::Value("user.age"), Token::Equal, Token::Value("42")];
-	let expected = Expression::Binary(Binary::new(
-		Expression::Variable(Variable::from_str("user.age").unwrap()),
-		Token::Equal,
-		Expression::Literal(Literal::Int(42))
-	).unwrap());
-	test_parser_expression(tokens, expected);
-}
+			Token::Value("3"),
+			Token::Equal,
+			Token::Value("9")
+		],
+		Expression::Binary(Binary::new(
+			Expression::Binary(Binary::new(
+				Expression::Grouping(Grouping::new(
+					Expression::Binary(Binary::new(
+						Expression::Literal(Literal::Int(1)),
+						Token::Plus,
+						Expression::Literal(Literal::Int(2))
+					).unwrap())
+				)),
+				Token::Multiply,
+				Expression::Literal(Literal::Int(3))
+			).unwrap()),
+			Token::Equal,
+			Expression::Literal(Literal::Int(9))
+		).unwrap())
+	),
+	(
+		json_value01, // user.age == 42
+		vec![Token::Value("user.age"), Token::Equal, Token::Value("42")],
+		Expression::Binary(Binary::new(
+			Expression::Variable(Variable::from_str("user.age").unwrap()),
+			Token::Equal,
+			Expression::Literal(Literal::Int(42))
+		).unwrap())
+	)
+);
 
 // Invalid tests
 
-#[test]
-fn invalid_grouping01() {
-	// (1 + 2 * 3 == 7
-	let tokens = vec![
-		Token::GroupingStart,
-		Token::Value("1"),
-		Token::Plus,
-		Token::Value("2"),
-		Token::Multiply,
-		Token::Value("3"),
-		Token::Equal,
-		Token::Value("7")
-	];
-	should_fail_expression(tokens);
-}
-
-#[test]
-fn invalid_grouping02() {
-	// 1 + 2 * 3) == 7
-	let tokens = vec![
-		Token::Value("1"),
-		Token::Plus,
-		Token::Value("2"),
-		Token::Multiply,
-		Token::Value("3"),
-		Token::GroupingEnd,
-		Token::Equal,
-		Token::Value("7")
-	];
-	should_fail(tokens);
-}
-
-#[test]
-fn empty() {
-	let tokens = vec![];
-	should_fail_expression(tokens);
-}
+macro_tests!(
+	should_fail_expression,
+	(
+		invalid_grouping01, // (1 + 2 * 3 == 7
+		vec![
+			Token::GroupingStart,
+			Token::Value("1"),
+			Token::Plus,
+			Token::Value("2"),
+			Token::Multiply,
+			Token::Value("3"),
+			Token::Equal,
+			Token::Value("7")
+		]
+	),
+	(
+		invalid_grouping02, // 1 + 2 * 3) == 7
+		vec![
+			Token::Value("1"),
+			Token::Plus,
+			Token::Value("2"),
+			Token::Multiply,
+			Token::Value("3"),
+			Token::GroupingEnd,
+			Token::Equal,
+			Token::Value("7")
+		]
+	),
+	(empty, vec![]),
+	(
+		invalid_operator01, // + == 1
+		vec![
+			Token::Plus,
+			Token::Equal,
+			Token::Value("1")
+		]
+	),
+	(
+		invalid_operator02, // - == 1
+		vec![Token::Minus]
+	),
+	(
+		invalid_operator03, // * == 1
+		vec![Token::Multiply]
+	),
+	(
+		invalid_operator04, // / == 1
+		vec![Token::Divide]
+	),
+	(
+		invalid_operator05, // % == 1
+		vec![Token::Modulo]
+	),
+	(
+		invalid_operator06, // * 3 == 2
+		vec![
+			Token::Multiply,
+			Token::Value("3"),
+			Token::Equal,
+			Token::Value("2")
+		]
+	),
+	(
+		invalid_operator07, // 3 * == 2
+		vec![
+			Token::Value("3"),
+			Token::Multiply,
+			Token::Equal,
+			Token::Value("2")
+		]
+	),
+	(
+		invalid_operator08, // 3 + == 2
+		vec![
+			Token::Value("3"),
+			Token::Plus,
+			Token::Equal,
+			Token::Value("2")
+		]
+	),
+	(
+		invalid_operator09, // 3 -
+		vec![Token::Value("3"), Token::Minus]
+	),
+	(
+		invalid_operator10, // 3 *
+		vec![Token::Value("3"), Token::Multiply]
+	),
+	(
+		invalid_operator11, // 3 /
+		vec![Token::Value("3"), Token::Divide]
+	),
+	(
+		invalid_operator12, // 3 %
+		vec![Token::Value("3"), Token::Modulo]
+	),
+	(
+		invalid_operator13, // 3 == == 2
+		vec![
+			Token::Value("3"),
+			Token::Equal,
+			Token::Equal,
+			Token::Value("2")
+		]
+	)
+);
