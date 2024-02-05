@@ -33,7 +33,7 @@ use crate::syntax_tree::model::{
 /// grouping       →  "(" expression ")" ;
 /// ```
 pub struct Parser<'a> {
-	tokens: &'a [Token<'a>],
+	tokens: Vec<Token<'a>>,
 	current: usize,
 }
 
@@ -44,7 +44,7 @@ impl<'a> Parser<'a> {
 	///
 	/// # Arguments
 	/// `tokens` - List of tokens to parse.
-	pub fn new(tokens: &'a [Token<'a>]) -> Self {
+	pub fn new(tokens: Vec<Token<'a>>) -> Self {
 		Self {
 			tokens,
 			current: 0,

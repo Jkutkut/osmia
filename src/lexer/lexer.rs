@@ -16,10 +16,6 @@ impl<'a> Lexer<'a> {
 	}
 
 	pub fn scan(&self, input: &'a str) -> Result<LinkedList<Token>, String> {
-		#[cfg(test)]
-		{
-			println!("** Scanning input **\n{}\n", input);
-		}
 		let mut tokens = LinkedList::new();
 		let mut last = 0;
 		let mut i = 0;
@@ -50,13 +46,6 @@ impl<'a> Lexer<'a> {
 			last = i;
 		}
 		tokens.push_back(Token::Eof);
-		#[cfg(test)]
-		{
-			for token in &tokens {
-				println!("{:?}", token);
-			}
-			println!("** Scanning done **\n");
-		}
 		Ok(tokens)
 	}
 }

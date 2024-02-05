@@ -8,6 +8,7 @@ mod interpreter;
 // use lexer::{Lexer, Token};
 
 pub use parser::Parser;
+pub use interpreter::Interpreter;
 
 #[cfg(test)]
 mod tests;

@@ -29,7 +29,7 @@ fn test_parser(
 	expected: Stmt
 ) {
 	let tokens = add_eof(tokens);
-	let parsed_result = match Parser::new(&tokens).parse() {
+	let parsed_result = match Parser::new(tokens).parse() {
 		Ok(expr) => expr,
 		Err(err) => panic!("Parser threw an error:\n{}", err),
 	};
@@ -49,7 +49,7 @@ fn should_fail(
 	code: Vec<Token>,
 ) {
 	let code = add_eof(code);
-	let parsed_result = Parser::new(&code).parse();
+	let parsed_result = Parser::new(code).parse();
 	let printer = SyntaxTreePrinter;
 	if let Ok(ref parsed_result) = parsed_result {
 		println!("Parsed: {}", parsed_result.accept(&printer));

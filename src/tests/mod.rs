@@ -1,4 +1,5 @@
 mod parser;
+mod interpreter;
 mod model;
 
 mod lexer;
