@@ -4,7 +4,7 @@ use crate::syntax_tree::model::{
 	Stmt, Variable, ForEach, If, Block, ConditionalBlock, Assign
 };
 use crate::tree_walker::SyntaxTreePrinter;
-use crate::syntax_tree::visitable::{Visitable};
+use crate::syntax_tree::Visitable;
 use crate::macro_tests;
 
 #[cfg(test)]

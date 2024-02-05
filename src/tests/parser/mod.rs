@@ -11,7 +11,7 @@ use crate::lexer::Token;
 use crate::syntax_tree::model::Stmt;
 use crate::parser::Parser;
 use crate::tree_walker::SyntaxTreePrinter;
-use crate::syntax_tree::visitable::{Visitable};
+use crate::syntax_tree::Visitable;
 
 #[cfg(test)]
 fn add_eof(

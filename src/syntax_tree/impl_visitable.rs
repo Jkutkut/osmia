@@ -2,8 +2,9 @@ use crate::syntax_tree::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
 	Stmt, Assign, ConditionalBlock, ForEach, If
 };
-use crate::syntax_tree::visitable::Visitable;
-use crate::syntax_tree::visitor::Visitor;
+use crate::syntax_tree::{
+	Visitable, Visitor
+};
 
 // Stmt
 
@@ -13,7 +14,7 @@ impl<T> Visitable<T> for Stmt<'_> {
 			Stmt::Block(blocks) => visitor.visit_block(blocks),
 			Stmt::Raw(raw) => visitor.visit_raw(raw),
 			Stmt::Print(print) => visitor.visit_print(print),
-			Stmt::Expression(expression) => expression.accept(visitor),
+			Stmt::Expression(expression) => visitor.visit_expression(expression),
 			Stmt::Assign(assign) => assign.accept(visitor),
 			Stmt::If(if_stmt) => if_stmt.accept(visitor),
 			Stmt::While(while_stmt) => visitor.visit_while(while_stmt),
