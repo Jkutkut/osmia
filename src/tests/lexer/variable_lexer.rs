@@ -86,5 +86,51 @@ macro_tests!(
 		test18,
 		"foo.bar.one.two.three",
 		Some("foo.bar.one.two.three".split('.').map(VariableKey::Key).collect())
+	),
+	(
+		test19,
+		"snake_case",
+		Some(vec![
+			VariableKey::Key("snake_case")
+		])
+	),
+	(
+		test20,
+		"camelCase",
+		Some(vec![
+			VariableKey::Key("camelCase")
+		])
+	),
+	(
+		test21,
+		"combined_case",
+		Some(vec![
+			VariableKey::Key("combined_case")
+		])
+	),
+	(
+		test22,
+		"camelCase",
+		Some(vec![
+			VariableKey::Key("camelCase")
+		])
+	),
+	(
+		test23,
+		"v1",
+		Some(vec![
+			VariableKey::Key("v1")
+		])
+	),
+	(
+		test24,
+		"combined_case.cammelCase[0].v1.l1_l2",
+		Some(vec![
+			VariableKey::Key("combined_case"),
+			VariableKey::Key("cammelCase"),
+			VariableKey::Index(0),
+			VariableKey::Key("v1"),
+			VariableKey::Key("l1_l2")
+		])
 	)
 );

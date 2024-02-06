@@ -110,7 +110,7 @@ impl<'a> VariableLexer {
 			i += 1;
 		}
 		if let Some(last_char) = chars.last() {
-			if !Self::is_valid_key_start(*last_char) && last_char != &']' {
+			if !Self::is_valid_key_char(*last_char) && last_char != &']' {
 				return None;
 			}
 		}

@@ -57,7 +57,11 @@ fn json_value02() {
 		"user.surnames[0].length",
 		"user.first_name",
 		"this.key.is.really.long.arr[0][120][14560].key",
-		"u[1].key[2][3].hola"
+		"u[1].key[2][3].hola",
+		"v1",
+		"snake_case",
+		"camelCase",
+		"snake_case.with.some_dots",
 	];
 	for test in tests.iter() {
 		match Variable::from_str(test) {
