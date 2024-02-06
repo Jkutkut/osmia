@@ -34,6 +34,9 @@ fn invalid_json_values() {
 		"u[0[0]]",
 		"u[]",
 		"u[0][0]]",
+		"u[-1]",
+		"u[0][-1]",
+		"u.foo[-1]"
 	];
 	for test in tests.iter() {
 		match Variable::from_str(test) {

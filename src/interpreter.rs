@@ -7,7 +7,7 @@ use crate::syntax_tree::{
 	StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
 };
 use crate::syntax_tree::model::{
-	Expression, Literal, Binary, Unary, Grouping, Variable,
+	Expression, Literal, Binary, Unary, Grouping, Variable, VariableKey,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach
 };
 
@@ -111,13 +111,6 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 }
 
-/*
-	Float(f64),
-	Int(i64),
-	Str(String),
-	Bool(bool),
-	Null
- * */
 impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 	fn visit_expression(&self, expression: &Expression) -> Result<Literal, String> {
 		expression.accept(self)
@@ -127,8 +120,50 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 		Ok(literal.clone())
 	}
 
-	fn visit_variable(&self, literal: &Variable) -> Result<Literal, String> {
-		todo!(); // TODO
+	fn visit_variable(&self, variable: &Variable) -> Result<Literal, String> {
+		let keys = variable.keys().iter();
+		let mut v = Value::Object(self.ctx.clone());
+		for key in keys {
+			match v {
+				Value::Object(o) => {
+					let key = match key {
+						VariableKey::Key(k) => k,
+						VariableKey::Index(i) => return Err(format!("Attempt to access index in object: {}", i))
+					};
+					v = match o.get(&key.to_string()) {
+						Some(v) => v.clone(),
+						None => return Err(format!("Key \"{}\" not found in object", key))
+					}
+				},
+				Value::Array(a) => {
+					let index = match key {
+						VariableKey::Index(i) => i,
+						VariableKey::Key(k) => return Err(format!("Attempt to access key in array: {}", k))
+					};
+					v = match a.get(*index) {
+						Some(v) => v.clone(),
+						None => return Err(format!("Invalid index {} in array", index))
+					}
+				}
+				_ => return Err(format!("Invalid variable: {}", variable))
+			}
+		}
+		match v {
+			Value::Null => Ok(Literal::Null),
+			Value::Bool(b) => Ok(Literal::Bool(b)),
+			Value::Number(n) => {
+				if let Some(n) = n.as_i64() {
+					return Ok(Literal::Int(n))
+				}
+				else if let Some(n) = n.as_f64() {
+					return Ok(Literal::Float(n))
+				}
+				Err(format!("Unsupported number: {}", n))
+			},
+			Value::String(s) => Ok(Literal::Str(s.clone())),
+			Value::Array(_) => Err(format!("Variable {} is an array", variable)),
+			Value::Object(_) => Err(format!("Variable {} is an object", variable))
+		}
 	}
 
 	fn visit_grouping(&self, grouping: &Grouping) -> Result<Literal, String> {
@@ -168,7 +203,12 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 					Token::Plus => return Ok(Literal::Float(left.as_float()? + right.as_float()?)),
 					Token::Minus => return Ok(Literal::Float(left.as_float()? - right.as_float()?)),
 					Token::Multiply => return Ok(Literal::Float(left.as_float()? * right.as_float()?)),
-					Token::Divide => return Ok(Literal::Float(left.as_float()? / right.as_float()?)),
+					Token::Divide => {
+						if right.as_float()? == 0.0 {
+							return Err("Division by zero".to_string())
+						}
+						return Ok(Literal::Float(left.as_float()? / right.as_float()?))
+					},
 					Token::Modulo => return Ok(Literal::Float(left.as_float()? % right.as_float()?)),
 					Token::GreaterThan => return Ok(Literal::Bool(left.as_float()? > right.as_float()?)),
 					Token::GreaterEqual => return Ok(Literal::Bool(left.as_float()? >= right.as_float()?)),
@@ -181,10 +221,27 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 			}
 			else {
 				match binary.operator {
-					Token::Plus => return Ok(Literal::Int(left.as_int()? + right.as_int()?)),
-					Token::Minus => return Ok(Literal::Int(left.as_int()? - right.as_int()?)),
-					Token::Multiply => return Ok(Literal::Int(left.as_int()? * right.as_int()?)),
-					Token::Divide => return Ok(Literal::Int(left.as_int()? / right.as_int()?)),
+					Token::Plus => return Ok(Literal::Int(
+						left.as_int()?
+						.checked_add(right.as_int()?)
+						.ok_or("Overflow in addition".to_string())?
+					)),
+					Token::Minus => return Ok(Literal::Int(
+						left.as_int()?
+						.checked_sub(right.as_int()?)
+						.ok_or("Overflow in subtraction".to_string())?
+					)),
+					Token::Multiply => return Ok(Literal::Int(
+						left.as_int()?
+						.checked_mul(right.as_int()?)
+						.ok_or("Overflow in multiplication".to_string())?
+					)),
+					Token::Divide => {
+						if right.as_int()? == 0 {
+							return Err("Division by zero".to_string())
+						}
+						return Ok(Literal::Int(left.as_int()? / right.as_int()?))
+					}
 					Token::Modulo => return Ok(Literal::Int(left.as_int()? % right.as_int()?)),
 					Token::GreaterThan => return Ok(Literal::Bool(left.as_int()? > right.as_int()?)),
 					Token::GreaterEqual => return Ok(Literal::Bool(left.as_int()? >= right.as_int()?)),

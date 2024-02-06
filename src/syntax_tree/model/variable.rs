@@ -24,6 +24,10 @@ impl<'a> Variable<'a> {
 			VariableLexer::lex(raw)?
 		))
 	}
+
+	pub fn keys(&self) -> &LinkedList<VariableKey<'a>> {
+		&self.keys
+	}
 }
 
 impl std::fmt::Display for Variable<'_> {

@@ -18,13 +18,16 @@ use crate::interpreter::{
 use crate::macro_tests;
 
 #[cfg(test)]
-fn test_interpreter(code: &str, mut ctx: Value, expected: &str) {
-	println!("Testing interpreter:");
+fn run_interpreter(
+	code: &str,
+	mut ctx: Value
+) -> Result<(ExitStatus, InterpreterValue), String> {
+	println!("Running interpreter: {}", code);
 	println!("  - Code: {}", &code);
 	let lexer = Lexer::new("{{", "}}");
 	let tokens = lexer.scan(code).unwrap();
-	let tokens = tokens.iter().map(|t| t.clone()).collect::<Vec<Token>>();
 	println!("  - Tokens: {:?}", tokens);
+	let tokens = tokens.iter().map(|t| t.clone()).collect::<Vec<Token>>();
 	let mut parser = Parser::new(tokens);
 	let code = parser.parse().unwrap();
 	println!("  - Code: {:?}", code);
@@ -33,12 +36,17 @@ fn test_interpreter(code: &str, mut ctx: Value, expected: &str) {
 		None => panic!("ctx must be a JSON object")
 	};
 	let mut interpreter = Interpreter::new(code, ctx);
-	let (status, result) = match interpreter.run() {
+	interpreter.run()
+}
+
+#[cfg(test)]
+fn test_interpreter(code: &str, mut ctx: Value, expected: &str) {
+	let (status, result) = match run_interpreter(code, ctx) {
+		Ok(r) => r,
 		Err(e) => {
 			println!("  - Error: {}", e);
-			panic!("Unexpected error in interpreter");
-		},
-		Ok(r) => r
+			panic!("Unexpected error in interpreter:\n{}", e);
+		}
 	};
 	println!("  - Status: {:?}", status);
 	println!("  - Result: {:?}", result);
@@ -48,6 +56,14 @@ fn test_interpreter(code: &str, mut ctx: Value, expected: &str) {
 	match result {
 		InterpreterValue::String(s) => assert_eq!(s, expected),
 		_ => panic!("Unexpected result: {:?}", result)
+	}
+}
+
+#[cfg(test)]
+fn expect_error(code: &str, ctx: Value) {
+	match run_interpreter(code, ctx) {
+		Ok(_) => panic!("Expected error in interpreter"),
+		Err(_) => ()
 	}
 }
 
@@ -148,5 +164,112 @@ macro_tests!(
 		"{{ !!3 }} {{ !!-3 }} {{ !!0 }}",
 		json!({}),
 		"true true false"
+	)
+);
+
+macro_tests!(
+	expect_error,
+	(
+		invalid_div01,
+		"{{ 1 / 0 }}",
+		json!({})
+	),
+	(
+		invalid_div02,
+		"{{ 1.0 / 0 }}",
+		json!({})
+	),
+	(
+		invalid_div03,
+		"{{ 1 / 0.0 }}",
+		json!({})
+	),
+	(
+		invalid_div04,
+		"{{ 1.0 / 0.0 }}",
+		json!({})
+	),
+	(
+		overflow01,
+		"{{ 9223372036854775807 + 1 }}",
+		json!({})
+	),
+	(
+		overflow02,
+		"{{ -9223372036854775807 - 2 }}",
+		json!({})
+	),
+	(
+		overflow03,
+		"{{ 9223372036854775807 * 2 }}",
+		json!({})
+	),
+	(
+		overflow04,
+		"{{ -9223372036854775807 * 2 }}",
+		json!({})
+	)
+);
+
+macro_tests!(
+	test_interpreter,
+	(
+		variable01,
+		"{{ foo }}",
+		json!({"foo": "bar"}),
+		"bar"
+	),
+	(
+		variable02,
+		"{{ foo.bar }}",
+		json!({"foo": {"bar": "baz"}}),
+		"baz"
+	),
+	(
+		variable03,
+		"{{ foo.bar.baz }}",
+		json!({"foo": {"bar": {"baz": "qux"}}}),
+		"qux"
+	),
+	(
+		variable04,
+		"{{ arr[0] }} {{ arr[1] }}",
+		json!({"arr": ["foo", "bar"]}),
+		"foo bar"
+	),
+	(
+		variable05,
+		"{{ arr[0].name }} {{ arr[1].surname }}",
+		json!({"arr": [{"name": "foo"}, {"name": "bar", "surname": "baz"}]}),
+		"foo baz"
+	)
+);
+
+macro_tests!(
+	expect_error,
+	(
+		invalid_variable01,
+		"{{ foo }}",
+		json!({})
+	),
+	(
+		invalid_variable02,
+		"{{ foo.bar }}",
+		json!({"foo": []})
+	),
+	(
+		invalid_variable03,
+		"{{ foo.bar }}",
+		json!({"foo": {"other": 42}})
+	),
+	(
+		invalid_variable_index01,
+		"{{ arr[0] }}",
+		json!({"arr": []})
+	),
+	(
+		invalid_variable_index02,
+		"{{ arr[12] }}",
+		json!({"arr": [1, 2, 3]})
 	)
 );
