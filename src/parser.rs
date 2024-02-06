@@ -419,7 +419,7 @@ impl<'a> Parser<'a> {
 					self.advance();
 					return Ok(Expression::Variable(variable));
 				}
-				Err(self.error("Expect literal or variable"))
+				Err(self.error("Invalid variable name"))
 			},
 			Token::GroupingStart => Ok(self.grouping()?),
 			_ => Err(self.error("Expected expression"))

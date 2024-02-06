@@ -8,9 +8,7 @@ use crate::{
 	Lexer
 };
 use crate::interpreter::{
-	ExitStatus,
 	Interpreter,
-	InterpreterValue,
 };
 // use crate::syntax_tree::model::{
 // 	Stmt
@@ -21,7 +19,7 @@ use crate::macro_tests;
 fn run_interpreter(
 	code: &str,
 	mut ctx: Value
-) -> Result<(ExitStatus, InterpreterValue), String> {
+) -> Result<String, String> {
 	println!("Running interpreter: {}", code);
 	println!("  - Code: {}", &code);
 	let lexer = Lexer::new("{{", "}}");
@@ -41,22 +39,16 @@ fn run_interpreter(
 
 #[cfg(test)]
 fn test_interpreter(code: &str, mut ctx: Value, expected: &str) {
-	let (status, result) = match run_interpreter(code, ctx) {
+	let result = match run_interpreter(code, ctx) {
 		Ok(r) => r,
 		Err(e) => {
 			println!("  - Error: {}", e);
 			panic!("Unexpected error in interpreter:\n{}", e);
 		}
 	};
-	println!("  - Status: {:?}", status);
-	println!("  - Result: {:?}", result);
-	if status != ExitStatus::Okay {
-		panic!("Unexpected exit status: {:?}", status);
-	}
-	match result {
-		InterpreterValue::String(s) => assert_eq!(s, expected),
-		_ => panic!("Unexpected result: {:?}", result)
-	}
+	println!("  - Result  : {}", result);
+	println!("  - Expected: {}", expected);
+	assert_eq!(result, expected);
 }
 
 #[cfg(test)]
@@ -164,6 +156,24 @@ macro_tests!(
 		"{{ !!3 }} {{ !!-3 }} {{ !!0 }}",
 		json!({}),
 		"true true false"
+	),
+	(
+		grouping01,
+		"{{ (1 + 2) * 3 }}",
+		json!({}),
+		"9"
+	),
+	(
+		grouping02,
+		"{{ 1 + (2 * 3) }}",
+		json!({}),
+		"7"
+	),
+	(
+		grouping03,
+		"{{ (1 + 2) * (3 + 4) }}",
+		json!({}),
+		"21"
 	)
 );
 
@@ -271,5 +281,88 @@ macro_tests!(
 		invalid_variable_index02,
 		"{{ arr[12] }}",
 		json!({"arr": [1, 2, 3]})
+	)
+);
+
+// Stmt
+macro_tests!(
+	test_interpreter,
+	(
+		print01,
+		"print: {{print 1 }}",
+		json!({}),
+		"print: "
+	),
+	(
+		if01,
+		"{{ if true}}i{{ fi }}",
+		json!({}),
+		"i"
+	),
+	(
+		if02,
+		"{{ if false}}i{{ fi }}",
+		json!({}),
+		""
+	),
+	(
+		if03,
+		"{{ if true}}i{{ else }}e{{ fi }}",
+		json!({}),
+		"i"
+	),
+	(
+		if04,
+		"{{ if false}}i{{ else }}e{{ fi }}",
+		json!({}),
+		"e"
+	),
+	(
+		if05,
+		"{{ if v==1}}if{{elseif v==2}}elseif{{else}}else{{fi}}",
+		json!({"v": 1}),
+		"if"
+	),
+	(
+		if06,
+		"{{ if v==1}}if{{elseif v==2}}elseif{{else}}else{{fi}}",
+		json!({"v": 2}),
+		"elseif"
+	),
+	(
+		if07,
+		"{{ if v==1}}if{{elseif v==2}}elseif{{else}}else{{fi}}",
+		json!({"v": 3}),
+		"else"
+	),
+	(
+		if08,
+		"{{ if v==1}}if{{elseif v==2}}elseif01{{elseif v==3}}elseif02{{else}}else{{fi}}",
+		json!({"v": 3}),
+		"elseif02"
+	),
+	(
+		if09,
+		"{{ if v1}}if{{if v2}}if01{{else}}else01{{fi}}{{else}}else02{{fi}}",
+		json!({"v1": true, "v2": true}),
+		"ifif01"
+	),
+	(
+		if10,
+		"{{ if v1}}if{{if v2}}if01{{else}}else01{{fi}}{{else}}else02{{fi}}",
+		json!({"v1": true, "v2": false}),
+		"ifelse01"
+	),
+	(
+		if11,
+		"{{ if v1}}if{{if v2}}if01{{else}}else01{{fi}}{{else}}else02{{fi}}",
+		json!({"v1": false, "v2": true}),
+		"else02"
+	),
+	(
+		if12,
+		"{{ if v1}}if{{if v2}}if01{{else}}else01{{fi}}{{else}}else02{{fi}}",
+		json!({"v1": false, "v2": false}),
+		"else02"
 	)
 );

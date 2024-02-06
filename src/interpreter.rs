@@ -25,7 +25,8 @@ type InterpreterResult = Result<(ExitStatus, InterpreterValue), String>;
 pub enum ExitStatus {
 	Okay,
 	Break,
-	Continue
+	Continue,
+	False
 }
 
 pub struct Interpreter<'a> {
@@ -38,9 +39,19 @@ impl<'a> Interpreter<'a> {
 		Self { code, ctx }
 	}
 
-	pub fn run(&mut self) -> InterpreterResult {
+	pub fn run(&mut self) -> Result<String, String> {
 		println!("Running interpreter...");
-		self.visit_stmt(&self.code)
+		let (exit_status, value) = self.visit_stmt(&self.code)?;
+		match exit_status {
+			ExitStatus::Okay | ExitStatus::False => (),
+			ExitStatus::Break | ExitStatus::Continue => return Err(
+				"Cannot continue or break from the program".to_string()
+			)
+		}
+		match value {
+			InterpreterValue::String(s) => Ok(s),
+			InterpreterValue::Void => Ok("".to_string())
+		}
 	}
 }
 
@@ -61,7 +72,7 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 			else if exit_status == ExitStatus::Break {
 				break;
 			}
-			// Continue
+			// Continue, False -> do nothing
 		}
 		Ok((ExitStatus::Okay, InterpreterValue::String(s)))
 	}
@@ -74,7 +85,9 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 
 	fn visit_print(&self, print: &Expression) -> InterpreterResult {
-		todo!(); // TODO
+		let expr = print.accept(self)?;
+		println!("{}", expr);
+		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
 
 	fn visit_assign(&self, assign: &Assign) -> InterpreterResult {
@@ -82,7 +95,28 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 
 	fn visit_if(&self, block: &If) -> InterpreterResult {
-		todo!(); // TODO
+		let (if_status, if_result) = block.if_block().accept(self)?;
+		match if_status {
+			ExitStatus::False => (),
+			_ => return Ok((if_status, if_result))
+		}
+		if let Some(elseifs) = block.elseifs() {
+			for elseif in elseifs {
+				let (elseif_status, elseif_result) = elseif.accept(self)?;
+				match elseif_status {
+					ExitStatus::False => (),
+					_ => return Ok((elseif_status, elseif_result))
+				}
+			}
+		}
+		if let Some(else_block) = block.else_block() {
+			let (else_status, else_result) = else_block.accept(self)?;
+			match else_status {
+				ExitStatus::False => (),
+				_ => return Ok((else_status, else_result))
+			}
+		}
+		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
 
 	fn visit_while(&self, block: &ConditionalBlock) -> InterpreterResult {
@@ -94,7 +128,17 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 
 	fn visit_conditional_block(&self, block: &ConditionalBlock) -> InterpreterResult {
-		todo!(); // TODO
+		let condition = block.condition().accept(self)?;
+		if condition.as_bool() {
+			let result = block.body().accept(self)?;
+			return match result.0 {
+				ExitStatus::Continue | ExitStatus::Break => Err(
+					"Cannot continue or break in conditional block".to_string()
+				),
+				_ => Ok(result)
+			}
+		}
+		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
 
 	fn visit_break(&self) -> InterpreterResult {
