@@ -136,57 +136,81 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 	}
 
 	fn visit_unary(&self, unary: &Unary) -> Result<Literal, String> {
-		todo!(); // TODO
+		let right = unary.right.accept(self)?;
+		match unary.operator {
+			Token::Minus => match right {
+				Literal::Int(i) => return Ok(Literal::Int(-i)),
+				Literal::Float(f) => return Ok(Literal::Float(-f)),
+				_ => ()
+			},
+			Token::Plus => match right {
+				Literal::Int(_) | Literal::Float(_) => return Ok(right),
+				_ => ()
+			},
+			Token::Not => return Ok(Literal::Bool(!right.as_bool())),
+			_ => ()
+		};
+		Err(format!("Unsupported unary operation: {}{}", unary.operator, right))
 	}
 
 	fn visit_binary(&self, binary: &Binary) -> Result<Literal, String> {
 		let left = binary.left.accept(self)?;
 		let right = binary.right.accept(self)?;
-
-		// TODO int-int, int-float, float-int, float-float
-		if let (Literal::Int(l), Literal::Int(r)) = (&left, &right) {
-			Ok(match binary.operator {
-				Token::Plus => Literal::Int(l + r),
-				Token::Minus => Literal::Int(l - r),
-				Token::Multiply => Literal::Int(l * r),
-				Token::Divide => Literal::Int(l / r),
-				Token::Modulo => Literal::Int(l % r),
-				Token::GreaterThan => Literal::Bool(l > r),
-				Token::GreaterEqual => Literal::Bool(l >= r),
-				Token::LessThan => Literal::Bool(l < r),
-				Token::LessEqual => Literal::Bool(l <= r),
-				Token::Equal => Literal::Bool(l == r),
-				Token::NotEqual => Literal::Bool(l != r),
-				Token::And => Literal::Int(l & r),
-				Token::Or => Literal::Int(l | r),
-				_ => return Err(format!("Unsupported operator: {} {} {}", l, binary.operator, r))
-			})
+		let err = format!("Unsupported binary operation: {} {} {}", left, binary.operator, right);
+		if left.is_numeric() && right.is_numeric() {
+			match binary.operator {
+				Token::And => return Ok(Literal::Int(left.as_int()? & right.as_int()?)),
+				Token::Or  => return Ok(Literal::Int(left.as_int()? | right.as_int()?)),
+				_ => ()
+			};
+			if left.is_float() || right.is_float() {
+				match binary.operator {
+					Token::Plus => return Ok(Literal::Float(left.as_float()? + right.as_float()?)),
+					Token::Minus => return Ok(Literal::Float(left.as_float()? - right.as_float()?)),
+					Token::Multiply => return Ok(Literal::Float(left.as_float()? * right.as_float()?)),
+					Token::Divide => return Ok(Literal::Float(left.as_float()? / right.as_float()?)),
+					Token::Modulo => return Ok(Literal::Float(left.as_float()? % right.as_float()?)),
+					Token::GreaterThan => return Ok(Literal::Bool(left.as_float()? > right.as_float()?)),
+					Token::GreaterEqual => return Ok(Literal::Bool(left.as_float()? >= right.as_float()?)),
+					Token::LessThan => return Ok(Literal::Bool(left.as_float()? < right.as_float()?)),
+					Token::LessEqual => return Ok(Literal::Bool(left.as_float()? <= right.as_float()?)),
+					Token::Equal => return Ok(Literal::Bool(left.as_float()? == right.as_float()?)),
+					Token::NotEqual => return Ok(Literal::Bool(left.as_float()? != right.as_float()?)),
+					_ => ()
+				};
+			}
+			else {
+				match binary.operator {
+					Token::Plus => return Ok(Literal::Int(left.as_int()? + right.as_int()?)),
+					Token::Minus => return Ok(Literal::Int(left.as_int()? - right.as_int()?)),
+					Token::Multiply => return Ok(Literal::Int(left.as_int()? * right.as_int()?)),
+					Token::Divide => return Ok(Literal::Int(left.as_int()? / right.as_int()?)),
+					Token::Modulo => return Ok(Literal::Int(left.as_int()? % right.as_int()?)),
+					Token::GreaterThan => return Ok(Literal::Bool(left.as_int()? > right.as_int()?)),
+					Token::GreaterEqual => return Ok(Literal::Bool(left.as_int()? >= right.as_int()?)),
+					Token::LessThan => return Ok(Literal::Bool(left.as_int()? < right.as_int()?)),
+					Token::LessEqual => return Ok(Literal::Bool(left.as_int()? <= right.as_int()?)),
+					Token::Equal => return Ok(Literal::Bool(left.as_int()? == right.as_int()?)),
+					Token::NotEqual => return Ok(Literal::Bool(left.as_int()? != right.as_int()?)),
+					_ => ()
+				};
+			}
 		}
-		else if let Literal::Str(l) = &left {
-			let r = right.to_string();
-			Ok(Literal::Str(match binary.operator {
-				Token::Plus => l.to_owned() + &r,
-				_ => return Err(format!("Unsupported operation: {} {} {}", l, binary.operator, r))
-			}))
+		else if (left.is_bool() || right.is_bool()) && !(left.is_str() || right.is_str()) {
+			return Ok(Literal::Bool(match binary.operator {
+				Token::Equal=> left.as_bool() == right.as_bool(),
+				Token::NotEqual => left.as_bool() != right.as_bool(),
+				Token::And | Token::Minus => left.as_bool() && right.as_bool(),
+				Token::Or | Token::Plus => left.as_bool() || right.as_bool(),
+				_ => Err(err)?
+			}));
 		}
-		else if let Literal::Str(r) = &right {
-			let l = left.to_string();
-			Ok(Literal::Str(match binary.operator {
-				Token::Plus => l.to_owned() + &r,
-				_ => return Err(format!("Unsupported operation: {} {} {}", l, binary.operator, r))
-			}))
+		else if left.is_str() || right.is_str() {
+			return Ok(Literal::Str(match binary.operator {
+				Token::Plus => left.as_str() + &right.as_str(),
+				_ => Err(err)?
+			}));
 		}
-		else if let (Literal::Bool(l), Literal::Bool(r)) = (left, right) {
-			Ok(Literal::Bool(match binary.operator {
-				Token::Equal=> l == r,
-				Token::NotEqual => l != r,
-				Token::And => l && r,
-				Token::Or => l || r,
-				_ => return Err(format!("Unsupported operation: {} {} {}", l, binary.operator, r))
-			}))
-		}
-		else {
-			Err(format!("Unsupported operation: {} {} {}", binary.left, binary.operator, binary.right))
-		}
+		Err(err)
 	}
 }

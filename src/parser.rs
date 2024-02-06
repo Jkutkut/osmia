@@ -25,10 +25,11 @@ use crate::syntax_tree::model::{
 ///
 /// expression     → equality ;
 /// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-/// comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+/// comparison     → bool_op ( ( ">" | ">=" | "<" | "<=" ) bool_op )* ;
+/// bool_op        → term ( ( "&&" | "||" ) term )* ;
 /// term           → factor ( ( "-" | "+" ) factor )* ;
 /// factor         → unary ( ( "/" | "*" ) unary )* ;
-/// unary          → ( "!" | "-" ) unary | primary ;
+/// unary          → ( "!" | "-" | "+" ) unary | primary ;
 /// primary        →  Literal | Variable | grouping;
 /// grouping       →  "(" expression ")" ;
 /// ```
@@ -345,11 +346,23 @@ impl<'a> Parser<'a> {
 	}
 
 	fn comparison(&mut self) -> Result<Expression<'a>, String> {
-		let mut expr = self.term()?;
+		let mut expr = self.bool_op()?;
 		while self.match_and_advance(&[
 			Token::GreaterThan, Token::GreaterEqual,
 			Token::LessThan, Token::LessEqual
 		]) {
+			let operator = self.get_previous().clone();
+			let right = self.bool_op()?;
+			expr = Self::new_binary(
+				expr, operator, right
+			)?;
+		}
+		Ok(expr)
+	}
+
+	fn bool_op(&mut self) -> Result<Expression<'a>, String> {
+		let mut expr = self.term()?;
+		while self.match_and_advance(&[Token::And, Token::Or]) {
 			let operator = self.get_previous().clone();
 			let right = self.term()?;
 			expr = Self::new_binary(
@@ -386,7 +399,7 @@ impl<'a> Parser<'a> {
 	}
 
 	fn unary(&mut self) -> Result<Expression<'a>, String> {
-		if self.match_and_advance(&[Token::Not, Token::Minus]) {
+		if self.match_and_advance(&[Token::Not, Token::Minus, Token::Plus]) {
 			let operator = self.get_previous().clone();
 			let right = self.unary()?;
 			let unary = Unary::new(operator, right)?;

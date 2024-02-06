@@ -10,7 +10,7 @@ pub struct Unary<'a> {
 impl<'a> Unary<'a> {
 	pub fn new(operator: Token<'a>, right: Expression<'a>) -> Result<Unary<'a>, String> {
 		match operator {
-			Token::Minus | Token::Not => Ok(Unary {
+			Token::Minus | Token::Not | Token::Plus => Ok(Unary {
 				operator: operator,
 				right: Box::new(right)
 			}),
