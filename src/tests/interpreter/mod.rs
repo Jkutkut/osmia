@@ -10,7 +10,7 @@ use crate::{
 use crate::interpreter::{
 	Interpreter,
 };
-// use crate::syntax_tree::model::{
+// use crate::model::{
 // 	Stmt
 // };
 use crate::macro_tests;

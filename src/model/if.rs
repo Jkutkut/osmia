@@ -1,4 +1,4 @@
-use crate::syntax_tree::model::{Stmt, ConditionalBlock};
+use crate::model::{Stmt, ConditionalBlock};
 
 #[derive(Debug, PartialEq)]
 pub struct If<'a> {

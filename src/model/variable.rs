@@ -1,6 +1,6 @@
 use std::collections::LinkedList;
 use crate::lexer::VariableLexer;
-use crate::syntax_tree::model::VariableKey;
+use crate::model::VariableKey;
 
 #[derive(Debug, PartialEq)]
 pub struct Variable<'a> {

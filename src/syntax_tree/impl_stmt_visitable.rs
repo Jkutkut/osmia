@@ -1,4 +1,4 @@
-use crate::syntax_tree::model::{
+use crate::model::{
 	Stmt, Assign, ConditionalBlock, ForEach, If
 };
 use crate::syntax_tree::{

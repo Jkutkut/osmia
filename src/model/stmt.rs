@@ -1,4 +1,4 @@
-use crate::syntax_tree::model::{
+use crate::model::{
 	Expression, Block, Assign, If, ConditionalBlock, ForEach
 };
 

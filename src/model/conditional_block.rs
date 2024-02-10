@@ -1,4 +1,4 @@
-use crate::syntax_tree::model::{Expression, Stmt};
+use crate::model::{Expression, Stmt};
 
 #[derive(Debug, PartialEq)]
 pub struct ConditionalBlock<'a> {

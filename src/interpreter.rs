@@ -6,7 +6,7 @@ use crate::Token;
 use crate::syntax_tree::{
 	StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
 };
-use crate::syntax_tree::model::{
+use crate::model::{
 	Expression, Literal, Binary, Unary, Grouping, Variable, VariableKey,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach
 };

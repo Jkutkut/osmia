@@ -1,5 +1,5 @@
 use crate::Token;
-use crate::syntax_tree::model::{
+use crate::model::{
 	Stmt
 };
 use super::{test_parser, should_fail};

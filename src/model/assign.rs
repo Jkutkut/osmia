@@ -1,4 +1,4 @@
-use crate::syntax_tree::model::{Expression, Variable};
+use crate::model::{Expression, Variable};
 
 #[derive(Debug, PartialEq)]
 pub struct Assign<'a> {

@@ -1,5 +1,5 @@
 use crate::lexer::Token;
-use crate::syntax_tree::model::{
+use crate::model::{
 	Expression, Literal, Binary, Grouping, Unary,
 	Stmt, Variable, ForEach, If, Block, ConditionalBlock, Assign
 };

@@ -1,4 +1,4 @@
-use crate::syntax_tree::model::{Variable, Stmt};
+use crate::model::{Variable, Stmt};
 
 #[derive(Debug, PartialEq)]
 pub struct ForEach<'a> {

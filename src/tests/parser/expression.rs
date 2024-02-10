@@ -1,5 +1,5 @@
 use crate::Token;
-use crate::syntax_tree::model::{
+use crate::model::{
 	Expression, Binary, Unary, Grouping, Literal, Variable,
 	Stmt
 };

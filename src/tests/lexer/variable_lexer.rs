@@ -1,5 +1,5 @@
 use crate::lexer::VariableLexer;
-use crate::syntax_tree::model::VariableKey;
+use crate::model::VariableKey;
 use crate::macro_tests;
 
 #[cfg(test)]

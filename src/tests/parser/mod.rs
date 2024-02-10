@@ -8,7 +8,7 @@ mod r#while;
 mod foreach;
 
 use crate::lexer::Token;
-use crate::syntax_tree::model::Stmt;
+use crate::model::Stmt;
 use crate::parser::Parser;
 use crate::tree_walker::SyntaxTreePrinter;
 use crate::syntax_tree::Visitable;

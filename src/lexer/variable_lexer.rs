@@ -1,5 +1,5 @@
 use std::collections::LinkedList;
-use crate::syntax_tree::model::VariableKey;
+use crate::model::VariableKey;
 
 pub struct VariableLexer;
 

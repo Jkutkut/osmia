@@ -1,4 +1,5 @@
 mod macros;
+mod model;
 mod parser;
 mod lexer;
 mod syntax_tree;

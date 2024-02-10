@@ -1,4 +1,4 @@
-use crate::syntax_tree::model::{
+use crate::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable
 };
 

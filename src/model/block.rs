@@ -1,4 +1,4 @@
-use crate::syntax_tree::model::{Stmt};
+use crate::model::{Stmt};
 
 #[derive(Debug, PartialEq)]
 pub struct Block<'a> {
