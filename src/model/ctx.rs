@@ -12,9 +12,7 @@ pub struct Ctx {
 }
 
 impl Ctx {
-	fn new(
-		tree: JsonTree
-	) -> Ctx {
+	fn new(tree: JsonTree) -> Ctx {
 		Ctx { tree }
 	}
 
@@ -29,14 +27,15 @@ impl Ctx {
 	}
 
 	pub fn set(&mut self, key: Variable, value: Literal) -> Result<(), String> {
+		self.set_value(key, value)
+	}
+}
+
+impl Ctx {
+	fn set_value(&mut self, key: Variable, value: Literal) -> Result<(), String> {
 		let value = JsonTree::from_literal(&value);
-		// self.tree.as_mut_map().unwrap().insert(
-		// 	key.to_string(),
-		// 	value
-		// );
 		let mut keys = key.keys().iter();
 		let mut var = &mut self.tree;
-		let mut next: &VariableKey;
 		let mut current_key = keys.next().unwrap();
 		loop {
 			let next = match keys.next() {
@@ -44,34 +43,10 @@ impl Ctx {
 				None => break
 			};
 			match var {
-				JsonTree::Object(ref mut map) => {
-					let current_key = match current_key {
-						VariableKey::Key(k) => k,
-						VariableKey::Index(i) => return Err(
-							format!("Attempted to set index {} in object", i)
-						)
-					};
-					match map.get_mut(current_key.clone()) {
-						None => return Err(
-							format!("Key {} not found in object", current_key)
-						),
-						Some(v) => var = v
-					};
-				},
-				JsonTree::Array(ref mut array) => {
-					let current_key = match current_key {
-						VariableKey::Index(i) => i,
-						VariableKey::Key(k) => return Err(
-							format!("Attempted to set key {} in array", k)
-						)
-					};
-					match array.get_mut(*current_key) {
-						None => return Err(
-							format!("Index {} not found in array", current_key)
-						),
-						Some(v) => var = v
-					}
-				},
+				JsonTree::Object(ref mut map) =>
+					var = Self::visit_obj(current_key, map)?,
+				JsonTree::Array(ref mut array) =>
+					var = Self::visit_arr(current_key, array)?,
 				_ => return Err(
 					format!("{} is not an object or array", var)
 				)
@@ -88,9 +63,57 @@ impl Ctx {
 				}
 				array.insert(*index, *Box::new(value));
 			},
-			_ => todo!()
+			(JsonTree::Array(_), VariableKey::Key(key)) => {
+				return Err(
+					format!("Attempted to use key {} in array", key)
+				);
+			},
+			(JsonTree::Object(_), VariableKey::Index(index)) => {
+				return Err(
+					format!("Attempted to use index {} in object", index)
+				);
+			},
+			_ => return Err(
+				"Error while attempting to set a non object or array".to_string()
+			)
 		}
 		Ok(())
+	}
+
+	fn visit_obj<'a>(
+		key: &'a VariableKey,
+		map: &'a mut HashMap<String, Box<JsonTree>>
+	) -> Result<&'a mut JsonTree, String> {
+		let key = match key {
+			VariableKey::Key(k) => k,
+			VariableKey::Index(i) => return Err(
+				format!("Attempted to use index {} in object", i)
+			)
+		};
+		match map.get_mut(*key) {
+			None => Err(
+				format!("Key {} not found in object", key)
+			),
+			Some(v) => Ok(v)
+		}
+	}
+
+	fn visit_arr<'a>(
+		key: &'a VariableKey,
+		array: &'a mut Vec<JsonTree>
+	) -> Result<&'a mut JsonTree, String> {
+		let idx = match key {
+			VariableKey::Index(i) => i,
+			VariableKey::Key(k) => return Err(
+				format!("Attempted to use key {} in array", k)
+			)
+		};
+		match array.get_mut(*idx) {
+			None => Err(
+				format!("Index {} not found in array", idx)
+			),
+			Some(v) => Ok(v)
+		}
 	}
 }
 
@@ -118,19 +141,12 @@ enum JsonTree {
 }
 
 impl JsonTree {
-	pub fn from_str(json: &str) -> Result<Self, String> {
+	fn from_str(json: &str) -> Result<Self, String> {
 		serde_json::from_str(json)
 			.map_err(|err| err.to_string())
 	}
 
-	pub fn as_mut_map(&mut self) -> Result<&mut HashMap<String, Box<JsonTree>>, String> {
-		match self {
-			JsonTree::Object(map) => Ok(map),
-			_ => return Err("Not an object".to_string()),
-		}
-	}
-
-	pub fn from_literal(literal: &Literal) -> JsonTree {
+	fn from_literal(literal: &Literal) -> JsonTree {
 		match literal {
 			Literal::Str(s) => JsonTree::Str(s.to_string()),
 			Literal::Int(i) => JsonTree::Number(*i),

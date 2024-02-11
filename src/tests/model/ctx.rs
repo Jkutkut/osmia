@@ -1,5 +1,3 @@
-use serde_json::json;
-
 use crate::macro_tests;
 use crate::model::{
 	Ctx, Variable, Literal
@@ -25,6 +23,7 @@ fn test_compile(
 	println!("  - ctx: {:?}", ctx);
 }
 
+#[cfg(test)]
 fn set(
 	ctx: &str,
 	sets: Vec<(&str, &str)>,
@@ -47,11 +46,41 @@ fn set(
 	assert_eq!(ctx, expected_ctx);
 }
 
+#[cfg(test)]
+fn invalid_set(
+	ctx: &str,
+	set: (&str, &str)
+) {
+	let mut ctx = str2ctx(ctx);
+	println!("Test invalid set:");
+	let variable = Variable::from_str(set.0).unwrap();
+	let literal = Literal::from_str(set.1).unwrap();
+	println!("  - set({}, {:?})", set.0, set.1);
+	let result = ctx.set(variable, literal);
+	assert!(result.is_err());
+}
+
 macro_tests!(
 	test_compile,
 	(
 		compile01,
 		r#"{"key": "value"}"#
+	),
+	(
+		compile02,
+		r#"{"key": {"key": "value"}}"#
+	),
+	(
+		compile03,
+		r#"{}"#
+	),
+	(
+		compile04,
+		r#"{"key": [1, 2, 3]}"#
+	),
+	(
+		compile05,
+		r#"{"key": {"key": [1, 2, 3]}}"#
 	)
 );
 
@@ -138,19 +167,77 @@ macro_tests!(
 			("key[4]", r#""baz""#)
 		],
 		r#"{"key":["foo","bar",null,null,"baz"]}"#
+	),
+	(
+		setarr03,
+		r#"{"foo": [{"bar": []}]}"#,
+		vec![
+			("foo[0].bar[0]", r#""baz""#),
+			("foo[1]", r#""quux""#)
+		],
+		r#"{"foo":[{"bar":["baz"]},"quux"]}"#
+	),
+	(
+		override_arr,
+		r#"{"key": [1,2,3]}"#,
+		vec![
+			("key", "21")
+		],
+		r#"{"key":21}"#
+	),
+	(
+		override_obj,
+		r#"{"key": {"key": [1,2,3]}}"#,
+		vec![
+			("key", "21")
+		],
+		r#"{"key":21}"#
 	)
 );
 
-// TODO create obj if not exists
-// TODO create arr if not exists
 // TODO valid tests
 //  - get
-//  - set with index + key
-//  - override arr with value
-//  - override obj with value
-//  - override obj with arr
-//  - override arr with obj
-// TODO invalid
-//   - find exceptions
-//   - invalid index
-//   - invalid key
+
+macro_tests!(
+	invalid_set,
+	(
+		unset_obj,
+		r#"{}"#,
+		("key.foo", r#""bar""#)
+	),
+	(
+		unset_arr,
+		r#"{}"#,
+		("key[0]", r#""bar""#)
+	),
+	(
+		key_in_arr,
+		r#"{"key": []}"#,
+		("key.foo", r#""bar""#)
+	),
+	(
+		idx_in_obj,
+		r#"{"key": {}}"#,
+		("key[0]", r#""bar""#)
+	),
+	(
+		invalid_idx,
+		r#"{"key": [{"foo": 12}]}"#,
+		("key[1].foo", r#""bar""#)
+	),
+	(
+		idx_in_middle_obj,
+		r#"{"key": {"foo": 12}}"#,
+		("key[0].foo", r#""bar""#)
+	),
+	(
+		invalid_key,
+		r#"{"key": {"foo": 12}}"#,
+		("key.bar.foo", r#""bar""#)
+	),
+	(
+		invalid_key2,
+		r#"{"key": {"foo": 12}}"#,
+		("key[0].bar", r#""bar""#)
+	)
+);
