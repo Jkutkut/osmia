@@ -10,7 +10,10 @@ fn str2ctx(
 	json: &str
 ) -> Ctx {
 	println!("  - json: {}", json);
-	Ctx::from_str(json).unwrap()
+	match Ctx::from_str(json) {
+		Ok(ctx) => ctx,
+		Err(e) => panic!("Unable to parse json: {}", e)
+	}
 }
 
 #[cfg(test)]
@@ -28,6 +31,7 @@ fn set(
 	expected: &str
 ) {
 	let mut ctx = str2ctx(ctx);
+	let expected_ctx = str2ctx(expected);
 	println!("Test set:");
 	for (key, value) in sets {
 		let variable = Variable::from_str(key).unwrap();
@@ -39,7 +43,6 @@ fn set(
 		}
 	}
 	println!("  - ctx:  {}", ctx);
-	let expected_ctx = str2ctx(expected);
 	println!("  - ectx: {}", expected_ctx);
 	assert_eq!(ctx, expected_ctx);
 }
@@ -90,5 +93,64 @@ macro_tests!(
 			("keyfloat2", "-0.1"),
 		],
 		"{\"keyfloat\":0.1,\"keyfloat2\":-0.1}"
+	),
+	(
+		setobj01,
+		r#"{"key": {}}"#,
+		vec![
+			("key.foo", r#""bar""#),
+		],
+		r#"{"key":{"foo":"bar"}}"#
+	),
+	(
+		setobj02,
+		r#"{"key": {},"keytwo": {"foo": {}}}"#,
+		vec![
+			("key.foo", r#""bar""#),
+			("keytwo.foo.bar", r#""baz""#),
+		],
+		r#"{"key":{"foo":"bar"},"keytwo":{"foo":{"bar":"baz"}}}"#
+	),
+	(
+		setobj03,
+		r#"{"objone": {"objtwo": {}}}"#,
+		vec![
+			("valcero", "0"),
+			("objone.valone", "null"),
+			("objone.objtwo.valtwo", "-3.3"),
+		],
+		r#"{"valcero":0,"objone":{"valone":null,"objtwo":{"valtwo":-3.3}}}"#
+	),
+	(
+		setarr01,
+		r#"{"key": []}"#,
+		vec![
+			("key[0]", r#""foo""#),
+		],
+		r#"{"key":["foo"]}"#
+	),
+	(
+		setarr02,
+		r#"{"key": []}"#,
+		vec![
+			("key[0]", r#""foo""#),
+			("key[1]", r#""bar""#),
+			("key[4]", r#""baz""#)
+		],
+		r#"{"key":["foo","bar",null,null,"baz"]}"#
 	)
 );
+
+// TODO create obj if not exists
+// TODO create arr if not exists
+// TODO valid tests
+//  - get
+//  - set with index + key
+//  - override arr with value
+//  - override obj with value
+//  - override obj with arr
+//  - override arr with obj
+// TODO invalid
+//   - find exceptions
+//   - invalid index
+//   - invalid key
