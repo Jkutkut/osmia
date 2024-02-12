@@ -118,7 +118,33 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 
 	fn visit_while(&mut self, block: &ConditionalBlock) -> InterpreterResult {
-		todo!(); // TODO
+		let mut string = String::new();
+		let mut exit_status = ExitStatus::False;
+		loop {
+			let condition = block.condition().accept(self)?;
+			if !condition.as_bool() {
+				break;
+			}
+			let result = block.body().accept(self)?;
+			match result.0 {
+				ExitStatus::Continue => continue,
+				ExitStatus::Break => {
+					exit_status = ExitStatus::Break;
+					break;
+				},
+				_ => {
+					exit_status = ExitStatus::Okay;
+					if let InterpreterValue::String(v) = result.1 {
+						string.push_str(&v);
+					}
+				}
+			}
+		}
+		let result = match string.is_empty() {
+			true => InterpreterValue::Void,
+			false => InterpreterValue::String(string)
+		};
+		Ok((exit_status, result))
 	}
 
 	fn visit_foreach(&mut self, block: &ForEach) -> InterpreterResult {
