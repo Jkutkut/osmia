@@ -12,6 +12,7 @@ mod unary;
 mod variable;
 mod variable_key;
 mod ctx;
+mod json_tree;
 
 pub use assign::Assign;
 pub use binary::Binary;
@@ -27,3 +28,4 @@ pub use unary::Unary;
 pub use variable::Variable;
 pub use variable_key::VariableKey;
 pub use ctx::Ctx;
+pub use json_tree::JsonTree;
