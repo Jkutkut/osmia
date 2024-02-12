@@ -47,6 +47,35 @@ fn set(
 }
 
 #[cfg(test)]
+fn get(
+	ctx: &str,
+	var: &str,
+	expected: Result<&str, ()>
+) {
+	let ctx = str2ctx(ctx);
+	let var = Variable::from_str(var).unwrap();
+	println!("Test get");
+	println!("  - get({})", var);
+	let get = ctx.get(var);
+	match expected {
+		Ok(expected) => {
+			let expected = Literal::from_str(expected).unwrap();
+			match get {
+				Ok(literal) => assert_eq!(literal, expected),
+				Err(e) => panic!("Error obtaining value: {}", e)
+			}
+		},
+		Err(_) => {
+			match get {
+				Err(_) => assert!(true),
+				Ok(r) => panic!("This code should've failed: {}", r)
+			}
+		}
+	}
+}
+
+
+#[cfg(test)]
 fn invalid_set(
 	ctx: &str,
 	set: (&str, &str)
@@ -195,8 +224,70 @@ macro_tests!(
 	)
 );
 
-// TODO valid tests
-//  - get
+macro_tests!(
+	get,
+	(
+		get01,
+		r#"{"foo": "bar"}"#,
+		"foo",
+		Ok(r#""bar""#)
+	),
+	(
+		get03,
+		r#"{"foo": {"bar": "baz"}}"#,
+		"foo.bar",
+		Ok(r#""baz""#)
+	),
+	(
+		get04,
+		r#"{"foo": {"bar": ["baz"]}}"#,
+		"foo.bar[0]",
+		Ok(r#""baz""#)
+	),
+	(
+		get05,
+		r#"{"foo": {"bar": [{"baz": "quux"}]}}"#,
+		"foo.bar[0].baz",
+		Ok(r#""quux""#)
+	),
+	(
+		get_invalid_key01,
+		r#"{"foo": "bar"}"#,
+		"other",
+		Err(())
+	),
+	(
+		get_invalid_key02,
+		r#"{"foo": {"bar": "baz"}}"#,
+		"foo.other",
+		Err(())
+	),
+	(
+		get_invalid_index01,
+		r#"{"foo": {"bar": [{"baz": "quux"}]}}"#,
+		"foo.bar[1].baz",
+		Err(())
+	),
+	(
+		get_invalid_index02,
+		r#"{"foo": {"bar": ["baz"]}}"#,
+		"foo.bar[2]",
+		Err(())
+	),
+	(
+		get_invalid_idx_obj,
+		r#"{"foo": {"bar": ["baz"]}}"#,
+		"foo[0]",
+		Err(())
+	),
+	(
+		get_invalid_key_arr,
+		r#"{"foo": {"bar": ["baz"]}}"#,
+		"foo.bar.baz",
+		Err(())
+	)
+);
+
 
 macro_tests!(
 	invalid_set,

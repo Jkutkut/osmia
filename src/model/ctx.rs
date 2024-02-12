@@ -29,6 +29,39 @@ impl Ctx {
 	pub fn set(&mut self, key: Variable, value: Literal) -> Result<(), String> {
 		self.set_value(key, value)
 	}
+
+	pub fn get(&self, key: Variable) -> Result<Literal, String> {
+		self.get_value(key)
+	}
+
+	pub fn get_value(&self, key: Variable) -> Result<Literal, String> {
+		let keys = &mut key.keys().iter();
+		let mut var = &self.tree;
+		let mut current_key = keys.next().unwrap();
+		loop {
+			match var {
+				JsonTree::Object(ref map) =>
+					var = Self::visit_obj(current_key, map)?,
+				JsonTree::Array(ref array) =>
+					var = Self::visit_arr(current_key, array)?,
+				_ => return Err(
+					format!("{} is not an object or array", var)
+				)
+			};
+			current_key = match keys.next() {
+				Some(k) => k,
+				None => break
+			};
+		}
+		match var {
+			JsonTree::Str(s) => Ok(Literal::Str(s.to_string())),
+			JsonTree::Number(n) => Ok(Literal::Int(*n)),
+			JsonTree::Float(f) => Ok(Literal::Float(*f)),
+			JsonTree::Null => Ok(Literal::Null),
+			JsonTree::Bool(b) => Ok(Literal::Bool(*b)),
+			_ => Err("Cannot get a array or object".to_string())
+		}
+	}
 }
 
 impl Ctx {
@@ -44,9 +77,9 @@ impl Ctx {
 			};
 			match var {
 				JsonTree::Object(ref mut map) =>
-					var = Self::visit_obj(current_key, map)?,
+					var = Self::visit_mut_obj(current_key, map)?,
 				JsonTree::Array(ref mut array) =>
-					var = Self::visit_arr(current_key, array)?,
+					var = Self::visit_mut_arr(current_key, array)?,
 				_ => return Err(
 					format!("{} is not an object or array", var)
 				)
@@ -82,6 +115,24 @@ impl Ctx {
 
 	fn visit_obj<'a>(
 		key: &'a VariableKey,
+		map: &'a HashMap<String, Box<JsonTree>>
+	) -> Result<&'a JsonTree, String> {
+		let key = match key {
+			VariableKey::Key(k) => k,
+			VariableKey::Index(i) => return Err(
+				format!("Attempted to use index {} in object", i)
+			)
+		};
+		match map.get(*key) {
+			None => Err(
+				format!("Key {} not found in object", key)
+			),
+			Some(v) => Ok(v)
+		}
+	}
+
+	fn visit_mut_obj<'a>(
+		key: &'a VariableKey,
 		map: &'a mut HashMap<String, Box<JsonTree>>
 	) -> Result<&'a mut JsonTree, String> {
 		let key = match key {
@@ -99,6 +150,24 @@ impl Ctx {
 	}
 
 	fn visit_arr<'a>(
+		key: &'a VariableKey,
+		array: &'a Vec<JsonTree>
+	) -> Result<&'a JsonTree, String> {
+		let idx = match key {
+			VariableKey::Index(i) => i,
+			VariableKey::Key(k) => return Err(
+				format!("Attempted to use key {} in array", k)
+			)
+		};
+		match array.get(*idx) {
+			None => Err(
+				format!("Index {} not found in array", idx)
+			),
+			Some(v) => Ok(v)
+		}
+	}
+
+	fn visit_mut_arr<'a>(
 		key: &'a VariableKey,
 		array: &'a mut Vec<JsonTree>
 	) -> Result<&'a mut JsonTree, String> {
