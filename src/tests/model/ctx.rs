@@ -56,7 +56,7 @@ fn get(
 	let var = Variable::from_str(var).unwrap();
 	println!("Test get");
 	println!("  - get({})", var);
-	let get = ctx.get(var);
+	let get = ctx.get(&var);
 	match expected {
 		Ok(expected) => {
 			let expected = Literal::from_str(expected).unwrap();

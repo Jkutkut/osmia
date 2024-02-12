@@ -26,15 +26,17 @@ impl Ctx {
 		}
 	}
 
-	pub fn set(&mut self, key: Variable, value: Literal) -> Result<(), String> {
-		self.set_value(key, value)
-	}
-
-	pub fn get(&self, key: Variable) -> Result<Literal, String> {
+	pub fn get(&self, key: &Variable) -> Result<Literal, String> {
 		self.get_value(key)
 	}
 
-	pub fn get_value(&self, key: Variable) -> Result<Literal, String> {
+	pub fn set(&mut self, key: Variable, value: Literal) -> Result<(), String> {
+		self.set_value(key, value)
+	}
+}
+
+impl Ctx {
+	pub fn get_value(&self, key: &Variable) -> Result<Literal, String> {
 		let keys = &mut key.keys().iter();
 		let mut var = &self.tree;
 		let mut current_key = keys.next().unwrap();
@@ -62,9 +64,7 @@ impl Ctx {
 			_ => Err("Cannot get a array or object".to_string())
 		}
 	}
-}
 
-impl Ctx {
 	fn set_value(&mut self, key: Variable, value: Literal) -> Result<(), String> {
 		let value = JsonTree::from_literal(&value);
 		let mut keys = key.keys().iter();

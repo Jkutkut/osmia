@@ -1,17 +1,12 @@
-use serde_json::{
-	Map,
-	Value
-};
 use crate::Token;
 use crate::syntax_tree::{
 	StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
 };
 use crate::model::{
-	Expression, Literal, Binary, Unary, Grouping, Variable, VariableKey,
-	Stmt, ConditionalBlock, Block, Assign, If, ForEach
+	Expression, Literal, Binary, Unary, Grouping, Variable,
+	Stmt, ConditionalBlock, Block, Assign, If, ForEach,
+	Ctx
 };
-
-pub type Ctx = Map<String, Value>;
 
 #[derive(Debug)]
 pub enum InterpreterValue {
@@ -31,7 +26,7 @@ pub enum ExitStatus {
 
 pub struct Interpreter<'a> {
 	code: Stmt<'a>,
-	ctx: &'a mut Ctx 
+	ctx: &'a mut Ctx
 }
 
 impl<'a> Interpreter<'a> {
@@ -165,49 +160,7 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 	}
 
 	fn visit_variable(&self, variable: &Variable) -> Result<Literal, String> {
-		let keys = variable.keys().iter();
-		let mut v = Value::Object(self.ctx.clone());
-		for key in keys {
-			match v {
-				Value::Object(o) => {
-					let key = match key {
-						VariableKey::Key(k) => k,
-						VariableKey::Index(i) => return Err(format!("Attempt to access index in object: {}", i))
-					};
-					v = match o.get(&key.to_string()) {
-						Some(v) => v.clone(),
-						None => return Err(format!("Key \"{}\" not found in object", key))
-					}
-				},
-				Value::Array(a) => {
-					let index = match key {
-						VariableKey::Index(i) => i,
-						VariableKey::Key(k) => return Err(format!("Attempt to access key in array: {}", k))
-					};
-					v = match a.get(*index) {
-						Some(v) => v.clone(),
-						None => return Err(format!("Invalid index {} in array", index))
-					}
-				}
-				_ => return Err(format!("Invalid variable: {}", variable))
-			}
-		}
-		match v {
-			Value::Null => Ok(Literal::Null),
-			Value::Bool(b) => Ok(Literal::Bool(b)),
-			Value::Number(n) => {
-				if let Some(n) = n.as_i64() {
-					return Ok(Literal::Int(n))
-				}
-				else if let Some(n) = n.as_f64() {
-					return Ok(Literal::Float(n))
-				}
-				Err(format!("Unsupported number: {}", n))
-			},
-			Value::String(s) => Ok(Literal::Str(s.clone())),
-			Value::Array(_) => Err(format!("Variable {} is an array", variable)),
-			Value::Object(_) => Err(format!("Variable {} is an object", variable))
-		}
+		self.ctx.get(variable)
 	}
 
 	fn visit_grouping(&self, grouping: &Grouping) -> Result<Literal, String> {
