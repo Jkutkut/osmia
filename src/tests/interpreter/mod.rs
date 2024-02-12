@@ -25,8 +25,8 @@ fn run_interpreter(
 	let mut parser = Parser::new(tokens);
 	let code = parser.parse().unwrap();
 	println!("  - Code: {:?}", code);
-	let mut interpreter = Interpreter::new(code, &mut ctx);
-	interpreter.run()
+	let mut interpreter = Interpreter::new(&mut ctx);
+	interpreter.run(&code)
 }
 
 #[cfg(test)]
@@ -358,5 +358,93 @@ macro_tests!(
 		"{{ if v1}}if{{if v2}}if01{{else}}else01{{fi}}{{else}}else02{{fi}}",
 		r#"{"v1": false, "v2": false}"#,
 		"else02"
+	)
+);
+
+macro_tests!(
+	test_interpreter,
+	(
+		assign01,
+		"{{assign v = 1 }}{{ v }}",
+		r#"{}"#,
+		"1"
+	),
+	(
+		assign02,
+		"{{assign v = 1 }}{{ v }}",
+		r#"{"v": 2}"#,
+		"1"
+	),
+	(
+		assign_string,
+		"{{assign v = \"foo\" }}{{ v }}",
+		r#"{}"#,
+		"foo"
+	),
+	(
+		assign_int,
+		"{{assign v = 1 }}{{ v }}",
+		r#"{}"#,
+		"1"
+	),
+	(
+		assign_float,
+		"{{assign v = 1.1 }}{{ v }}",
+		r#"{}"#,
+		"1.1"
+	),
+	(
+		assign_bool,
+		"{{assign v = true }}{{ v }} -- {{assign v = false }}{{ v }}",
+		r#"{}"#,
+		"true -- false"
+	),
+	(
+		assign_null,
+		"{{assign v = null }}{{ v }}",
+		r#"{}"#,
+		"null"
+	),
+	(
+		assign_array,
+		"{{assign v[2] = 2 }}{{ v[0] }}{{ v[1] }}{{ v[2] }}",
+		r#"{"v": [1, 2, 3]}"#,
+		"122"
+	),
+	(
+		assign_override01,
+		"{{assign v = 1 }}{{v}}",
+		r#"{"v": {}}"#,
+		"1"
+	),
+	(
+		assign_override02,
+		"{{assign v = 1 }}{{v}}",
+		r#"{"v": [123, 2, 3]}"#,
+		"1"
+	)
+);
+
+macro_tests!(
+	expect_error,
+	(
+		invalid_assign01,
+		"{{assign v.foo = 1 }}",
+		r#"{}"#
+	),
+	(
+		invalid_assign02,
+		"{{assign v[1] = 1 }}",
+		r#"{}"#
+	),
+	(
+		invalid_assign03,
+		"{{assign v[1] = 1 }}",
+		r#"{"v": {"h": 2}}"#
+	),
+	(
+		invalid_assign04,
+		"{{assign v.foo = 1 }}",
+		r#"{"v": [123, 2, 3]}"#
 	)
 );

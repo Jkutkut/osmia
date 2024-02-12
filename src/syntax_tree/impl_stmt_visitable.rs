@@ -6,7 +6,7 @@ use crate::syntax_tree::{
 };
 
 impl<T> StmtVisitable<T> for Stmt<'_> {
-	fn accept(&self, visitor: &dyn StmtVisitor<T>) -> T {
+	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		match self {
 			Stmt::Block(blocks) => visitor.visit_block(blocks),
 			Stmt::Raw(raw) => visitor.visit_raw(raw),
@@ -23,25 +23,25 @@ impl<T> StmtVisitable<T> for Stmt<'_> {
 }
 
 impl<T> StmtVisitable<T> for Assign<'_> {
-	fn accept(&self, visitor: &dyn StmtVisitor<T>) -> T {
+	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		visitor.visit_assign(self)
 	}
 }
 
 impl<T> StmtVisitable<T> for If<'_> {
-	fn accept(&self, visitor: &dyn StmtVisitor<T>) -> T {
+	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		visitor.visit_if(self)
 	}
 }
 
 impl<T> StmtVisitable<T> for ConditionalBlock<'_> {
-	fn accept(&self, visitor: &dyn StmtVisitor<T>) -> T {
+	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		visitor.visit_conditional_block(self)
 	}
 }
 
 impl<T> StmtVisitable<T> for ForEach<'_> {
-	fn accept(&self, visitor: &dyn StmtVisitor<T>) -> T {
+	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		visitor.visit_foreach(self)
 	}
 }

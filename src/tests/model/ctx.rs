@@ -36,7 +36,7 @@ fn set(
 		let variable = Variable::from_str(key).unwrap();
 		let literal = Literal::from_str(value).unwrap();
 		println!("  - set({}, {:?})", key, value);
-		let result = ctx.set(variable, literal);
+		let result = ctx.set(&variable, literal);
 		if let Err(e) = result {
 			panic!("{}", e);
 		}
@@ -85,7 +85,7 @@ fn invalid_set(
 	let variable = Variable::from_str(set.0).unwrap();
 	let literal = Literal::from_str(set.1).unwrap();
 	println!("  - set({}, {:?})", set.0, set.1);
-	let result = ctx.set(variable, literal);
+	let result = ctx.set(&variable, literal);
 	assert!(result.is_err());
 }
 

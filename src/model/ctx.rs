@@ -30,7 +30,7 @@ impl Ctx {
 		self.get_value(key)
 	}
 
-	pub fn set(&mut self, key: Variable, value: Literal) -> Result<(), String> {
+	pub fn set(&mut self, key: &Variable, value: Literal) -> Result<(), String> {
 		self.set_value(key, value)
 	}
 }
@@ -65,7 +65,7 @@ impl Ctx {
 		}
 	}
 
-	fn set_value(&mut self, key: Variable, value: Literal) -> Result<(), String> {
+	fn set_value(&mut self, key: &Variable, value: Literal) -> Result<(), String> {
 		let value = JsonTree::from_literal(&value);
 		let mut keys = key.keys().iter();
 		let mut var = &mut self.tree;

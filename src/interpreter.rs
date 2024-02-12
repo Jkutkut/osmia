@@ -25,18 +25,19 @@ pub enum ExitStatus {
 }
 
 pub struct Interpreter<'a> {
-	code: Stmt<'a>,
+	// code: Stmt<'a>,
 	ctx: &'a mut Ctx
 }
 
 impl<'a> Interpreter<'a> {
-	pub fn new(code: Stmt<'a>, ctx: &'a mut Ctx) -> Self {
-		Self { code, ctx }
+	// pub fn new(code: Stmt<'a>, ctx: &'a mut Ctx) -> Self {
+	pub fn new(ctx: &'a mut Ctx) -> Self {
+		Self { ctx }
 	}
 
-	pub fn run(&mut self) -> Result<String, String> {
+	pub fn run(&mut self, code: &Stmt<'a>) -> Result<String, String> {
 		println!("Running interpreter...");
-		let (exit_status, value) = self.visit_stmt(&self.code)?;
+		let (exit_status, value) = self.visit_stmt(code)?;
 		match exit_status {
 			ExitStatus::Okay | ExitStatus::False => (),
 			ExitStatus::Break | ExitStatus::Continue => return Err(
@@ -51,11 +52,11 @@ impl<'a> Interpreter<'a> {
 }
 
 impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
-	fn visit_stmt(&self, stmt: &Stmt) -> InterpreterResult {
+	fn visit_stmt(&mut self, stmt: &Stmt) -> InterpreterResult {
 		stmt.accept(self)
 	}
 
-	fn visit_block(&self, block: &Block) -> InterpreterResult {
+	fn visit_block(&mut self, block: &Block) -> InterpreterResult {
 		let mut s = String::new();
 		for stmt in block.stmts() {
 			let (exit_status, value) = self.visit_stmt(stmt)?;
@@ -85,11 +86,13 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
 
-	fn visit_assign(&self, assign: &Assign) -> InterpreterResult {
-		todo!(); // TODO
+	fn visit_assign(&mut self, assign: &Assign) -> InterpreterResult {
+		let expr = assign.expression().accept(self)?;
+		self.ctx.set(assign.variable(), expr)?;
+		Ok((ExitStatus::Okay, InterpreterValue::Void))
 	}
 
-	fn visit_if(&self, block: &If) -> InterpreterResult {
+	fn visit_if(&mut self, block: &If) -> InterpreterResult {
 		let (if_status, if_result) = block.if_block().accept(self)?;
 		match if_status {
 			ExitStatus::False => (),
@@ -114,15 +117,15 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
 
-	fn visit_while(&self, block: &ConditionalBlock) -> InterpreterResult {
+	fn visit_while(&mut self, block: &ConditionalBlock) -> InterpreterResult {
 		todo!(); // TODO
 	}
 
-	fn visit_foreach(&self, block: &ForEach) -> InterpreterResult {
+	fn visit_foreach(&mut self, block: &ForEach) -> InterpreterResult {
 		todo!(); // TODO
 	}
 
-	fn visit_conditional_block(&self, block: &ConditionalBlock) -> InterpreterResult {
+	fn visit_conditional_block(&mut self, block: &ConditionalBlock) -> InterpreterResult {
 		let condition = block.condition().accept(self)?;
 		if condition.as_bool() {
 			let result = block.body().accept(self)?;
