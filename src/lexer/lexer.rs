@@ -17,12 +17,14 @@ impl<'a> Lexer<'a> {
 
 	pub fn scan(&self, input: &'a str) -> Result<LinkedList<Token>, String> {
 		let mut tokens = LinkedList::new();
-		let mut last = 0;
 		let mut i = 0;
 		while i < input.len() {
 			let delimiter_start_idx = input[i..].find(self.delimiter_start).unwrap_or(input.len() - i);
 			if delimiter_start_idx > 0 {
-				tokens.push_back(Token::Raw(&input[last..i + delimiter_start_idx]));
+				let chunk = &input[i..i + delimiter_start_idx];
+				if !self.can_be_omitted(chunk) {
+					tokens.push_back(Token::Raw(chunk));
+				}
 				i += delimiter_start_idx;
 				if i >= input.len() {
 					break;
@@ -43,9 +45,35 @@ impl<'a> Lexer<'a> {
 			}
 			tokens.push_back(Token::DelimiterEnd);
 			i += delimiter_end_idx + self.delimiter_end.len();
-			last = i;
 		}
 		tokens.push_back(Token::Eof);
 		Ok(tokens)
+	}
+
+	fn can_be_omitted(&self, chunk: &str) -> bool {
+		let mut omit = false;
+		let mut chunk_chars = chunk.chars();
+		loop {
+			match chunk_chars.next() {
+				Some(c) => match c {
+					'\n' => {
+						omit = true;
+						break;
+					},
+					c => if !c.is_whitespace() {
+						break;
+					}
+				},
+				None => break
+			};
+		}
+		if omit {
+			for c in chunk.chars() {
+				if !c.is_whitespace() && c != '\n' {
+					return false;
+				}
+			}
+		}
+		omit
 	}
 }
