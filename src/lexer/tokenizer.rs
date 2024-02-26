@@ -144,9 +144,10 @@ impl<'a> std::iter::Iterator for Tokenizer<'a> {
 				self.current += 1;
 			}
 			else {
+				let c = self.text.chars().nth(self.current).unwrap();
 				return Some(Err(format!(
-					r#"Unexpected character: {}"#,
-					self.text.chars().nth(self.current).unwrap()
+					r#"Unexpected character: '{}', ascii: {:#x}"#,
+					c, c as u32
 				)));
 			}
 		}

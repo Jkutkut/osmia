@@ -33,7 +33,15 @@ impl<'a> Lexer<'a> {
 			tokens.push_back(Token::DelimiterStart);
 			i += self.delimiter_start.len();
 			let delimiter_end_idx = match input[i..].find(self.delimiter_end) {
-				Some(idx) => idx,
+				Some(idx) => {
+					let mut idx = idx;
+					while i + idx + self.delimiter_end.len() < input.len() && 
+						input[i + idx + 1..].starts_with(self.delimiter_end)
+					{ // TODO refactor to work with multiple delimiters
+						idx += 1;
+					}
+					idx
+				},
 				None => return Err("Unclosed delimiter".to_string())
 			};
 			for token in Tokenizer::new(&input[i..i + delimiter_end_idx]) {
