@@ -24,7 +24,7 @@ use crate::model::{
 /// Continue       → "{{" "continue" "}}" ;
 ///
 /// json           → object | array | expression ;
-/// jsonObject         → "{" ( Variable ":" json "," )* ( Variable ":" json )? "}" ;
+/// jsonObject         → "{" ( Literal ":" json "," )* ( Literal ":" json )? "}" ;
 /// jsonArray          → "[" ( json "," )* ( json )? "]" ;
 /// expression     → equality ;
 /// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -65,6 +65,42 @@ impl<'a> Parser<'a> {
 			return Err(self.error("Expected end of program"));
 		}
 		Ok(code)
+	}
+
+	fn json_expression(&mut self) -> Result<JsonExpression<'a>, String> {
+		match self.get_current() {
+			Token::ObjectStart => self.json_object(),
+			Token::ArrayStart => self.json_array(),
+			_ => Ok(JsonExpression::Expression(
+				self.expression()?
+			))
+		}
+	}
+
+	fn json_array(&mut self) -> Result<JsonExpression<'a>, String> {
+		self.consume(
+			Token::ArrayStart,
+			&format!("Expected '{}' before array", Token::ArrayStart)
+		)?;
+		let mut elements = Vec::new();
+		while !self.check_current(&Token::ArrayEnd) && !self.is_at_end() {
+			elements.push(self.json_expression()?);
+			if !self.check_current(&Token::ArrayEnd) && !self.is_at_end() {
+				self.consume(
+					Token::Comma,
+					&format!("Expected '{}' after array element", Token::Comma)
+				)?;
+			}
+		}
+		self.consume(
+			Token::ArrayEnd,
+			&format!("Expected '{}' after array", Token::ArrayEnd)
+		)?;
+		Ok(JsonExpression::Array(elements))
+	}
+
+	fn json_object(&mut self) -> Result<JsonExpression<'a>, String> {
+		todo!()
 	}
 }
 
@@ -219,9 +255,8 @@ impl<'a> Parser<'a> {
 			Token::AssignEq,
 			&format!("Expected '{}' after variable", Token::AssignEq),
 		)?;
-		let expression = self.expression()?;
-		let expression = JsonExpression::Expression(expression);
-		Ok(Stmt::Assign(Assign::new(variable, expression)))
+		let json = self.json_expression()?;
+		Ok(Stmt::Assign(Assign::new(variable, json)))
 	}
 
 	fn foreach(&mut self) -> Result<Stmt<'a>, String> {
@@ -249,7 +284,7 @@ impl<'a> Parser<'a> {
 			_ => return Err(self.error(
 				&format!("Expected variable after '{}' in {} statement", Token::In, Token::For)
 			))
-		};
+		}; // TODO implement with json \\ variable
 		self.consume(
 			Token::DelimiterEnd,
 			&format!("Expected '{}' in {} statement", Token::DelimiterEnd, Token::For),

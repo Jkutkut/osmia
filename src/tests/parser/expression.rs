@@ -391,5 +391,41 @@ macro_tests!(
 			Token::Equal,
 			Token::Value("2")
 		]
+	),
+	(
+		invalid_number01, // 1.0.0
+		vec![Token::Value("1.0.0")]
+	),
+	(
+		invalid_number02, // 1.0.0.0
+		vec![Token::Value("1.0.0.0")]
+	),
+	(
+		invalid_number03, // 1a
+		vec![Token::Value("1a")]
+	),
+	(
+		invalid_number04, // 1.0a
+		vec![Token::Value("1.0a")]
+	),
+	(
+		invalid_number05, // 1.a0
+		vec![Token::Value("1.a0")]
+	),
+	(
+		invalid_variable01, // foo.
+		vec![Token::Value("foo.")]
+	),
+	(
+		invalid_variable02, // foo.0
+		vec![Token::Value("foo.0")]
+	),
+	(
+		invalid_variable03, // foo[
+		vec![Token::Value("foo[")]
+	),
+	(
+		invalid_variable04, // foo[0
+		vec![Token::Value("foo[0")]
 	)
 );

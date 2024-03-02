@@ -1,5 +1,5 @@
 use crate::model::{
-	Expression, Literal, Unary, Binary, Grouping, Variable,
+	Expression, Literal, Unary, Binary, Grouping, Variable, JsonExpression,
 	Stmt, Assign, ConditionalBlock, ForEach, If
 };
 use crate::syntax_tree::{
@@ -46,6 +46,16 @@ impl<T> Visitable<T> for ConditionalBlock<'_> {
 impl<T> Visitable<T> for ForEach<'_> {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_foreach(self)
+	}
+}
+
+impl<T> Visitable<T> for JsonExpression<'_> {
+	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
+		match self {
+			JsonExpression::Expression(expr) => expr.accept(visitor),
+			JsonExpression::Array(arr) => visitor.visit_array(arr),
+			JsonExpression::Object(obj) => visitor.visit_object(obj)
+		}
 	}
 }
 

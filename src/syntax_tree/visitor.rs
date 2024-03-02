@@ -1,5 +1,6 @@
+use std::collections::HashMap;
 use crate::model::{
-	Expression, Literal, Unary, Binary, Grouping, Variable,
+	Expression, Literal, Unary, Binary, Grouping, Variable, JsonExpression,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
@@ -16,6 +17,8 @@ pub trait Visitor<T> {
 	fn visit_conditional_block(&self, block: &ConditionalBlock) -> T;
 	fn visit_break(&self) -> T;
 	fn visit_continue(&self) -> T;
+	fn visit_array(&self, arr: &Vec<JsonExpression<'_>>) -> T;
+	fn visit_object(&self, obj: &HashMap<&str, JsonExpression<'_>>) -> T;
 
 	// Expression
 	fn visit_expression(&self, expression: &Expression) -> T;

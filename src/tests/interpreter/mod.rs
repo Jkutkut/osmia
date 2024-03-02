@@ -422,6 +422,18 @@ macro_tests!(
 		"{{assign v = 1 }}{{v}}",
 		r#"{"v": [123, 2, 3]}"#,
 		"1"
+	),
+	(
+		assign_variable01,
+		"{{assign foo = bar }}{{foo}}",
+		r#"{"bar": 2}"#,
+		"2"
+	),
+	(
+		assign_variable02,
+		"{{assign foo = bar * foo }}{{foo}}",
+		r#"{"bar": 2, "foo": 2}"#,
+		"4"
 	)
 );
 

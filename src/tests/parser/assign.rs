@@ -4,10 +4,12 @@ use crate::model::{
 	Stmt, Assign, JsonExpression
 };
 use super::{test_parser, should_fail};
+use crate::macro_tests;
 
-#[test]
-fn basic_test01() {
-	test_parser( // foo = "bar"
+macro_tests!(
+	test_parser,
+	(
+		basic_test01, // foo = "bar"
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
@@ -16,18 +18,13 @@ fn basic_test01() {
 			Token::Value("\"bar\""),
 			Token::DelimiterEnd
 		],
-		Stmt::Assign(
-			Assign::new(
-				Variable::from_str("foo").unwrap(),
-				JsonExpression::Expression(Expression::Literal(Literal::from_str("\"bar\"").unwrap()))
-			)
-		)
-	);
-}
-
-#[test]
-fn basic_test02() {
-	test_parser( // foo = bar
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Expression(Expression::Literal(Literal::from_str("\"bar\"").unwrap()))
+		))
+	),
+	(
+		basic_test02, // foo = bar
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
@@ -36,18 +33,13 @@ fn basic_test02() {
 			Token::Value("bar"),
 			Token::DelimiterEnd
 		],
-		Stmt::Assign(
-			Assign::new(
-				Variable::from_str("foo").unwrap(),
-				JsonExpression::Expression(Expression::Variable(Variable::from_str("bar").unwrap()))
-			)
-		)
-	);
-}
-
-#[test]
-fn basic_test03() {
-	test_parser( // foo = 2 + 2
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Expression(Expression::Variable(Variable::from_str("bar").unwrap()))
+		))
+	),
+	(
+		basic_test03, // foo = 2 + 2
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
@@ -58,73 +50,262 @@ fn basic_test03() {
 			Token::Value("2"),
 			Token::DelimiterEnd
 		],
-		Stmt::Assign(
-			Assign::new(
-				Variable::from_str("foo").unwrap(),
-				JsonExpression::Expression(Expression::Binary(Binary::new(
-					Expression::Literal(Literal::from_str("2").unwrap()),
-					Token::Plus,
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Expression(Expression::Binary(Binary::new(
+				Expression::Literal(Literal::from_str("2").unwrap()),
+				Token::Plus,
+				Expression::Literal(Literal::from_str("2").unwrap())
+			).unwrap()))
+		))
+	),
+	(
+		basic_test04, // foo = bar
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::Value("bar"),
+			Token::DelimiterEnd
+		],
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Expression(Expression::Variable(
+				Variable::from_str("bar").unwrap()
+			))
+		))
+	),
+	(
+		basic_test05, // foo = bar * foo
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::Value("bar"),
+			Token::Multiply,
+			Token::Value("foo"),
+			Token::DelimiterEnd
+		],
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Expression(Expression::Binary(Binary::new(
+				Expression::Variable(Variable::from_str("bar").unwrap()),
+				Token::Multiply,
+				Expression::Variable(Variable::from_str("foo").unwrap())
+			).unwrap()))
+		))
+	),
+	(
+		array01, // foo = [1, 2]
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::ArrayStart,
+			Token::Value("1"),
+			Token::Comma,
+			Token::Value("2"),
+			Token::ArrayEnd,
+			Token::DelimiterEnd
+		],
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Array(vec![
+				JsonExpression::Expression(
+					Expression::Literal(Literal::from_str("1").unwrap())
+				),
+				JsonExpression::Expression(
 					Expression::Literal(Literal::from_str("2").unwrap())
-				).unwrap()))
-			)
-		)
-	);
-}
+				)
+			])
+		))
+	),
+	(
+		array02, // foo = [1, 2,]
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::ArrayStart,
+			Token::Value("1"),
+			Token::Comma,
+			Token::Value("2"),
+			Token::Comma,
+			Token::ArrayEnd,
+			Token::DelimiterEnd
+		],
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Array(vec![
+				JsonExpression::Expression(
+					Expression::Literal(Literal::from_str("1").unwrap())
+				),
+				JsonExpression::Expression(
+					Expression::Literal(Literal::from_str("2").unwrap())
+				)
+			])
+		))
+	),
+	(
+		array03, // foo = []
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::ArrayStart,
+			Token::ArrayEnd,
+			Token::DelimiterEnd
+		],
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Array(vec![])
+		))
+	),
+	(
+		array04, // foo = [1,[2, 3]]
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::ArrayStart,
+			Token::Value("1"),
+			Token::Comma,
+			Token::ArrayStart,
+			Token::Value("2"),
+			Token::Comma,
+			Token::Value("3"),
+			Token::ArrayEnd,
+			Token::ArrayEnd,
+			Token::DelimiterEnd
+		],
+		Stmt::Assign(Assign::new(
+			Variable::from_str("foo").unwrap(),
+			JsonExpression::Array(vec![
+				JsonExpression::Expression(
+					Expression::Literal(Literal::from_str("1").unwrap())
+				),
+				JsonExpression::Array(vec![
+						JsonExpression::Expression(
+							Expression::Literal(Literal::from_str("2").unwrap())
+						),
+						JsonExpression::Expression(
+							Expression::Literal(Literal::from_str("3").unwrap())
+						)
+					]
+				)
+			])
+		))
+	)
+);
 
-#[test]
-fn fail01() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::Assign,
-		Token::Value("foo"),
-		Token::AssignEq,
-		Token::DelimiterEnd
-	]);
-}
 
-#[test]
-fn fail02() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::Assign,
-		Token::Value("foo"),
-		Token::AssignEq
-	]);
-}
-
-#[test]
-fn fail03() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::Assign,
-		Token::Value("foo")
-	]);
-}
-
-#[test]
-fn fail04() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::Assign
-	]);
-}
-
-#[test]
-fn fail05() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::Assign,
-		Token::Value("foo"),
-		Token::AssignEq,
-		Token::DelimiterEnd
-	]);
-}
-
-#[test]
-fn fail06() {
-	should_fail(vec![
-		Token::DelimiterStart,
-		Token::Assign,
-		Token::DelimiterEnd
-	]);
-}
+macro_tests!(
+	should_fail,
+	(
+		fail01,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::DelimiterEnd
+		]
+	),
+	(
+		fail02,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq
+		]
+	),
+	(
+		fail03,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo")
+		]
+	),
+	(
+		fail04,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign
+		]
+	),
+	(
+		fail05,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::DelimiterEnd
+		]
+	),
+	(
+		fail06,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::DelimiterEnd
+		]
+	),
+	(
+		fail_array01,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::ArrayStart,
+			Token::DelimiterEnd
+		]
+	),
+	(
+		fail_array02,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::ArrayStart,
+			Token::Value("foo"),
+			Token::DelimiterEnd
+		]
+	),
+	(
+		fail_array03,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::ArrayStart,
+			Token::Value("foo"),
+			Token::Comma,
+			Token::DelimiterEnd,
+		]
+	),
+	(
+		fail_array04,
+		vec![
+			Token::DelimiterStart,
+			Token::Assign,
+			Token::Value("foo"),
+			Token::AssignEq,
+			Token::ArrayStart,
+			Token::Comma,
+			Token::ArrayEnd,
+			Token::DelimiterEnd
+		]
+	)
+);

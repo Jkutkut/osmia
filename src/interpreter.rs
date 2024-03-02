@@ -3,7 +3,7 @@ use crate::syntax_tree::{
 	StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
 };
 use crate::model::{
-	Expression, Literal, Binary, Unary, Grouping, Variable,
+	Expression, Literal, Binary, Unary, Grouping, Variable, JsonExpression,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach,
 	Ctx
 };
@@ -85,9 +85,14 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 
 	fn visit_assign(&mut self, assign: &Assign) -> InterpreterResult {
-		let expr = assign.expression().accept(self)?;
-		self.ctx.set(assign.variable(), expr)?;
-		Ok((ExitStatus::Okay, InterpreterValue::Void))
+		match assign.expression() {
+			JsonExpression::Expression(expr) => {
+				let expr = expr.accept(self)?;
+				self.ctx.set(assign.variable(), expr)?;
+				Ok((ExitStatus::Okay, InterpreterValue::Void))
+			},
+			_ => todo!() // TODO implement
+		}
 	}
 
 	fn visit_if(&mut self, block: &If) -> InterpreterResult {

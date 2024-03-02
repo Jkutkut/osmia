@@ -1,9 +1,10 @@
+use std::collections::HashMap;
 use crate::Token;
 use crate::syntax_tree::{
 	Visitor, Visitable
 };
 use crate::model::{
-	Expression, Literal, Unary, Binary, Grouping, Variable,
+	Expression, Literal, Unary, Binary, Grouping, Variable, JsonExpression,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
@@ -32,7 +33,11 @@ impl Visitor<String> for SyntaxTreePrinter {
 	}
 
 	fn visit_assign(&self, assign: &Assign) -> String {
-		format!("{} = {}", assign.variable(), assign.expression().accept(self))
+		format!(
+			"{} = {}",
+			assign.variable(),
+			assign.expression().accept(self)
+		)
 	}
 
 	fn visit_if(&self, block: &If) -> String {
@@ -75,6 +80,28 @@ impl Visitor<String> for SyntaxTreePrinter {
 
 	fn visit_continue(&self) -> String {
 		Token::Continue.to_string()
+	}
+
+
+	// Json
+	fn visit_array(&self, array: &Vec<JsonExpression>) -> String {
+		format!(
+			"[{}]",
+			array.iter()
+				.map(|expr| expr.accept(self))
+				.collect::<Vec<String>>()
+				.join(", ")
+		)
+	}
+
+	fn visit_object(&self, object: &HashMap<&str, JsonExpression>) -> String {
+		format!(
+			"{{{}}}",
+			object.iter()
+				.map(|(k, v)| format!("{}: {}", k, v.accept(self)))
+				.collect::<Vec<String>>()
+				.join(", ")
+		)
 	}
 
 	// Expression
