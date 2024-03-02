@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::lexer::Token;
 use crate::model::{
 	Expression, Binary, Unary, Grouping, Literal, Variable, JsonExpression,
@@ -100,7 +101,33 @@ impl<'a> Parser<'a> {
 	}
 
 	fn json_object(&mut self) -> Result<JsonExpression<'a>, String> {
-		todo!()
+		self.consume(
+			Token::ObjectStart,
+			&format!("Expected '{}' before object", Token::ObjectStart)
+		)?;
+		let mut object = HashMap::new();
+		while !self.check_current(&Token::ObjectEnd) && !self.is_at_end() {
+			let key = match self.primary() {
+				Ok(Expression::Literal(Literal::Str(s))) => s,
+				_ => return Err(self.error("Expected string literal as key in object"))
+			};
+			self.consume(
+				Token::Colon,
+				&format!("Expected '{}' after key in object", Token::Colon)
+			)?;
+			object.insert(key, self.json_expression()?);
+			if !self.check_current(&Token::ObjectEnd) && !self.is_at_end() {
+				self.consume(
+					Token::Comma,
+					&format!("Expected '{}' after object element", Token::Comma)
+				)?;
+			}
+		}
+		self.consume(
+			Token::ObjectEnd,
+			&format!("Expected '{}' after object", Token::ObjectEnd)
+		)?;
+		Ok(JsonExpression::Object(object))
 	}
 }
 

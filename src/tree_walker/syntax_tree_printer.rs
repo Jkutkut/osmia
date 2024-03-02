@@ -94,14 +94,14 @@ impl Visitor<String> for SyntaxTreePrinter {
 		)
 	}
 
-	fn visit_object(&self, object: &HashMap<&str, JsonExpression>) -> String {
-		format!(
-			"{{{}}}",
-			object.iter()
-				.map(|(k, v)| format!("{}: {}", k, v.accept(self)))
-				.collect::<Vec<String>>()
-				.join(", ")
-		)
+	fn visit_object(&self, object: &HashMap<String, JsonExpression>) -> String {
+		let mut sorted_obj_arr = object.iter().collect::<Vec<_>>();
+		sorted_obj_arr.sort_by(|(k1, _), (k2, _)| k2.cmp(k1));
+		let obj = sorted_obj_arr.iter()
+			.map(|(k, v)| format!(r#"{}: {}"#, k, v.accept(self)))
+			.collect::<Vec<String>>()
+			.join(", ");
+		format!("{{{}}}", obj)
 	}
 
 	// Expression

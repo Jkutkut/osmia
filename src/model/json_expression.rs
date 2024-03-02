@@ -8,7 +8,7 @@ use crate::model::{
 pub enum JsonExpression<'a> {
 	Expression(Expression<'a>),
 	Array(Vec<JsonExpression<'a>>),
-	Object(HashMap<&'a str, JsonExpression<'a>>)
+	Object(HashMap<String, JsonExpression<'a>>)
 }
 
 impl std::fmt::Display for JsonExpression<'_> {

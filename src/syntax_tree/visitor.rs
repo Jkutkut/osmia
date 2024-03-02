@@ -18,7 +18,7 @@ pub trait Visitor<T> {
 	fn visit_break(&self) -> T;
 	fn visit_continue(&self) -> T;
 	fn visit_array(&self, arr: &Vec<JsonExpression<'_>>) -> T;
-	fn visit_object(&self, obj: &HashMap<&str, JsonExpression<'_>>) -> T;
+	fn visit_object(&self, obj: &HashMap<String, JsonExpression<'_>>) -> T;
 
 	// Expression
 	fn visit_expression(&self, expression: &Expression) -> T;

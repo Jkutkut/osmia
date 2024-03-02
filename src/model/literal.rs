@@ -114,3 +114,5 @@ impl std::fmt::Display for Literal {
 		}
 	}
 }
+
+impl Eq for Literal {}
