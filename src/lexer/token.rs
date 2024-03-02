@@ -11,7 +11,6 @@ pub enum Token<'a> {
 	// Statements
 	Print,
 	Assign,
-	AssignEq,
 
 	// Conditionals
 	If,
@@ -28,6 +27,7 @@ pub enum Token<'a> {
 	Done,
 
 	// Equality
+	AssignEq,
 	Equal,
 	NotEqual,
 
@@ -52,7 +52,15 @@ pub enum Token<'a> {
 	Or,
 
 	GroupingStart,
-	GroupingEnd
+	GroupingEnd,
+
+	// JSON
+	ObjectStart,
+	ObjectEnd,
+	Colon,
+	Comma,
+	ArrayStart,
+	ArrayEnd,
 }
 
 impl Token<'_> {
@@ -88,6 +96,12 @@ impl Token<'_> {
 			"||" => Some(Token::Or),
 			"(" => Some(Token::GroupingStart),
 			")" => Some(Token::GroupingEnd),
+			"{" => Some(Token::ObjectStart),
+			"}" => Some(Token::ObjectEnd),
+			":" => Some(Token::Colon),
+			"," => Some(Token::Comma),
+			"[" => Some(Token::ArrayStart),
+			"]" => Some(Token::ArrayEnd),
 			_ => None
 		}
 	}
@@ -157,6 +171,12 @@ impl std::fmt::Display for Token<'_> {
 			Token::Or => write!(f, "||"),
 			Token::GroupingStart => write!(f, "("),
 			Token::GroupingEnd => write!(f, ")"),
+			Token::ObjectStart => write!(f, "{{"),
+			Token::ObjectEnd => write!(f, "}}"),
+			Token::Colon => write!(f, ":"),
+			Token::Comma => write!(f, ","),
+			Token::ArrayStart => write!(f, "["),
+			Token::ArrayEnd => write!(f, "]"),
 		}
 	}
 }

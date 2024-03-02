@@ -72,7 +72,7 @@ impl<'a> Tokenizer<'a> {
 				_ => ()
 			}
 		}
-		let single_char_tokens = "+-*/=()<>!%";
+		let single_char_tokens = "+-*/=()<>!%{}[],:";
 		if single_char_tokens.contains(c) {
 			let token = &self.text[self.current..self.current + 1];
 			self.current += 1;
@@ -88,17 +88,31 @@ impl<'a> Tokenizer<'a> {
 	///
 	/// Note: a dynamic token is a variable.
 	/// Note: the validity of the token is not checked and must be handled by the executor.
+	/// TODO Use stack to allow dynamic tokens to be nested
 	fn get_dynamic_token(&mut self) -> Option<&'a str> {
 		let mut chars = self.text.chars();
 		let mut some_c = chars.nth(self.current);
+		let mut in_array: bool = false;
 		let mut i = 0;
 		while let Some(c) = some_c {
-			if self.is_token_value(c) || c.is_alphanumeric() {
-				i += 1;
-				some_c = chars.next()
-			}
-			else {
+			if !self.is_token_value(c) && !c.is_alphanumeric() {
 				break;
+			}
+			i += 1;
+			some_c = chars.next();
+			if c == '[' {
+				if in_array {
+					i -= 1;
+					break;
+				}
+				in_array = true;
+			}
+			else if c == ']' {
+				if !in_array {
+					i -= 1;
+					break;
+				}
+				in_array = false;
 			}
 		}
 		if i > 0 {
@@ -122,7 +136,8 @@ impl<'a> std::iter::Iterator for Tokenizer<'a> {
 			let previous_char = chars.nth(self.current - 1)?;
 			let current = chars.next()?;
 			if !(current.is_whitespace() || previous_char.is_whitespace()) &&
-				("\"'".contains(previous_char) || "\"'".contains(current))
+				("\"'".contains(previous_char) || "\"'".contains(current)) &&
+				(!":,[{".contains(previous_char) && !":,]})".contains(current))
 			{
 				return Some(Err("Missing whitespace before token!".to_string()));
 			}

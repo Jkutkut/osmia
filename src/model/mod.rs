@@ -11,6 +11,7 @@ mod stmt;
 mod unary;
 mod variable;
 mod variable_key;
+mod json_expression;
 mod ctx;
 mod json_tree;
 
@@ -27,5 +28,6 @@ pub use stmt::Stmt;
 pub use unary::Unary;
 pub use variable::Variable;
 pub use variable_key::VariableKey;
+pub use json_expression::JsonExpression;
 pub use ctx::Ctx;
 pub use json_tree::JsonTree;

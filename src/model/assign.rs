@@ -1,13 +1,13 @@
-use crate::model::{Expression, Variable};
+use crate::model::{JsonExpression, Expression, Variable};
 
 #[derive(Debug, PartialEq)]
 pub struct Assign<'a> {
 	var: Variable<'a>,
-	expr: Expression<'a>,
+	expr: JsonExpression<'a>,
 }
 
 impl<'a> Assign<'a> {
-	pub fn new(var: Variable<'a>, expr: Expression<'a>) -> Self {
+	pub fn new(var: Variable<'a>, expr: JsonExpression<'a>) -> Self {
 		Self { var, expr }
 	}
 
@@ -16,7 +16,10 @@ impl<'a> Assign<'a> {
 	}
 
 	pub fn expression(&self) -> &Expression<'a> {
-		&self.expr
+		match self.expr {
+			JsonExpression::Expression(ref e) => e,
+			_ => todo!() // TODO
+		}
 	}
 }
 

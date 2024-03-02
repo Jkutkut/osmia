@@ -1,6 +1,6 @@
 use crate::lexer::Token;
 use crate::model::{
-	Expression, Binary, Unary, Grouping, Literal, Variable,
+	Expression, Binary, Unary, Grouping, Literal, Variable, JsonExpression,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
@@ -15,14 +15,17 @@ use crate::model::{
 /// Raw            → "..." ;
 /// Print          → "{{" "print" expression ";" "}}" ;
 /// Expression     → "{{" expression "}}" ;
-/// Assign         → "{{" "assign" Variable "=" expression "}}" ;
+/// Assign         → "{{" "assign" Variable "=" json "}}" ;
 /// If             → "{{" "if" Conditional ( "{{" "elseif" Conditional )* ( "{{" "else" Block )? "{{" "fi" "}}" ;
 /// Conditional    → expression "}}" Stmt 
 /// While          → "{{" "while" Conditional "{{" "done" "}}" ;
-/// ForEach        → "{{" "foreach" Variable "in" Variable "}}" Stmt "{{" "done" "}}" ;
+/// ForEach        → "{{" "foreach" Variable "in" Variable | json "}}" Stmt "{{" "done" "}}" ;
 /// Break          → "{{" "break" "}}" ;
 /// Continue       → "{{" "continue" "}}" ;
 ///
+/// json           → object | array | expression ;
+/// jsonObject         → "{" ( Variable ":" json "," )* ( Variable ":" json )? "}" ;
+/// jsonArray          → "[" ( json "," )* ( json )? "]" ;
 /// expression     → equality ;
 /// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 /// comparison     → bool_op ( ( ">" | ">=" | "<" | "<=" ) bool_op )* ;
@@ -217,6 +220,7 @@ impl<'a> Parser<'a> {
 			&format!("Expected '{}' after variable", Token::AssignEq),
 		)?;
 		let expression = self.expression()?;
+		let expression = JsonExpression::Expression(expression);
 		Ok(Stmt::Assign(Assign::new(variable, expression)))
 	}
 

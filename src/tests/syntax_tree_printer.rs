@@ -1,6 +1,6 @@
 use crate::lexer::Token;
 use crate::model::{
-	Expression, Literal, Binary, Grouping, Unary,
+	Expression, Literal, Binary, Grouping, Unary, JsonExpression,
 	Stmt, Variable, ForEach, If, Block, ConditionalBlock, Assign
 };
 use crate::tree_walker::SyntaxTreePrinter;
@@ -153,7 +153,7 @@ macro_tests!(
 		Stmt::Assign(
 			Assign::new(
 				Variable::from_str("x").unwrap(),
-				Expression::Variable(Variable::from_str("y").unwrap())
+				JsonExpression::Expression(Expression::Variable(Variable::from_str("y").unwrap()))
 			)
 		)
 	),

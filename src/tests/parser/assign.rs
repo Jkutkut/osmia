@@ -1,7 +1,7 @@
 use crate::Token;
 use crate::model::{
 	Expression, Variable, Literal, Binary,
-	Stmt, Assign
+	Stmt, Assign, JsonExpression
 };
 use super::{test_parser, should_fail};
 
@@ -19,7 +19,7 @@ fn basic_test01() {
 		Stmt::Assign(
 			Assign::new(
 				Variable::from_str("foo").unwrap(),
-				Expression::Literal(Literal::from_str("\"bar\"").unwrap())
+				JsonExpression::Expression(Expression::Literal(Literal::from_str("\"bar\"").unwrap()))
 			)
 		)
 	);
@@ -39,7 +39,7 @@ fn basic_test02() {
 		Stmt::Assign(
 			Assign::new(
 				Variable::from_str("foo").unwrap(),
-				Expression::Variable(Variable::from_str("bar").unwrap())
+				JsonExpression::Expression(Expression::Variable(Variable::from_str("bar").unwrap()))
 			)
 		)
 	);
@@ -61,11 +61,11 @@ fn basic_test03() {
 		Stmt::Assign(
 			Assign::new(
 				Variable::from_str("foo").unwrap(),
-				Expression::Binary(Binary::new(
+				JsonExpression::Expression(Expression::Binary(Binary::new(
 					Expression::Literal(Literal::from_str("2").unwrap()),
 					Token::Plus,
 					Expression::Literal(Literal::from_str("2").unwrap())
-				).unwrap())
+				).unwrap()))
 			)
 		)
 	);

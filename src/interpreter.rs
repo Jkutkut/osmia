@@ -25,12 +25,10 @@ pub enum ExitStatus {
 }
 
 pub struct Interpreter<'a> {
-	// code: Stmt<'a>,
 	ctx: &'a mut Ctx
 }
 
 impl<'a> Interpreter<'a> {
-	// pub fn new(code: Stmt<'a>, ctx: &'a mut Ctx) -> Self {
 	pub fn new(ctx: &'a mut Ctx) -> Self {
 		Self { ctx }
 	}
