@@ -3,7 +3,8 @@ use crate::syntax_tree::{
 	StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
 };
 use crate::model::{
-	Expression, Literal, Binary, Unary, Grouping, Variable, JsonExpression,
+	Expression, Literal, Binary, Unary, Grouping, Variable,
+	JsonExpression, ListOrVariable,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach,
 	Ctx
 };
@@ -151,7 +152,44 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 
 	fn visit_foreach(&mut self, block: &ForEach) -> InterpreterResult {
-		todo!(); // TODO
+		let mut string = String::new();
+		let mut exit_status = ExitStatus::False;
+		let mut iterable = match block.list() {
+			ListOrVariable::List(json) => match json {
+				JsonExpression::Array(arr) => arr.iter(),
+				_ => todo!()
+			},
+			ListOrVariable::Variable(var) => {
+				let value = self.ctx.get(var)?;
+				todo!()
+			}
+		};
+		while let Some(item) = iterable.next() {
+			let item = match item {
+				JsonExpression::Expression(expr) => expr.accept(self)?,
+				_ => todo!()
+			};
+			self.ctx.set(block.variable(), item)?;
+			let result = block.body().accept(self)?;
+			match result.0 {
+				ExitStatus::Continue => continue, // TODO do nothing
+				ExitStatus::Break => {
+					exit_status = ExitStatus::Break;
+					break;
+				},
+				_ => {
+					exit_status = ExitStatus::Okay;
+					if let InterpreterValue::String(v) = result.1 {
+						string.push_str(&v);
+					}
+				}
+			}
+		}
+		let result = match string.is_empty() {
+			true => InterpreterValue::Void,
+			false => InterpreterValue::String(string)
+		};
+		Ok((exit_status, result))
 	}
 
 	fn visit_conditional_block(&mut self, block: &ConditionalBlock) -> InterpreterResult {

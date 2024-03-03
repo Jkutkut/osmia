@@ -489,6 +489,42 @@ macro_tests!(
 	)
 );
 
+macro_tests!(
+	test_interpreter,
+	(
+		foreach01,
+		"{{for v in [1, 2, 3]}}{{ v }}{{done}}",
+		r#"{}"#,
+		"123"
+	),
+	(
+		foreach02,
+		"{{for v in [1, 2, 3]}}{{ v }}{{done}}",
+		r#"{"v": 3}"#,
+		"123"
+	),
+	(
+		foreach03,
+		r#"{{for v in [true, false, null, "hello world"]}}{{ v }}{{done}}"#,
+		r#"{"v": 3}"#,
+		"truefalsenullhello world"
+	),
+	(
+		foreach04,
+		"{{for v in []}}{{ v }}{{done}}",
+		r#"{}"#,
+		""
+	),
+	(
+		foreach05,
+		"{{for v in [1 + v, 2, 3]}}{{ v }}{{done}}",
+		r#"{"v": 3}"#,
+		"423"
+	)
+	// TODO loop array of objects
+	// TODO loop variable
+);
+
 
 // TODO: Allow this advanced tests
 // macro_tests!(
