@@ -60,8 +60,8 @@ impl Visitor<String> for SyntaxTreePrinter {
 	fn visit_foreach(&self, block: &ForEach) -> String {
 		format!(
 			"for ( {} in {} ) {{ {} }}",
-			block.variable(),
-			block.list(),
+			block.variable().accept(self),
+			block.list().accept(self),
 			block.body().accept(self)
 		)
 	}

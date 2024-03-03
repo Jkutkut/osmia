@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use crate::lexer::Token;
 use crate::model::{
-	Expression, Binary, Unary, Grouping, Literal, Variable, JsonExpression,
+	Expression, Binary, Unary, Grouping, Literal, Variable,
+	JsonExpression, ListOrVariable,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
@@ -20,13 +21,15 @@ use crate::model::{
 /// If             → "{{" "if" Conditional ( "{{" "elseif" Conditional )* ( "{{" "else" Block )? "{{" "fi" "}}" ;
 /// Conditional    → expression "}}" Stmt 
 /// While          → "{{" "while" Conditional "{{" "done" "}}" ;
-/// ForEach        → "{{" "foreach" Variable "in" Variable | json "}}" Stmt "{{" "done" "}}" ;
+/// ForEach        → "{{" "foreach" Variable "in" ListOrVariable "}}" Stmt "{{" "done" "}}" ;
 /// Break          → "{{" "break" "}}" ;
 /// Continue       → "{{" "continue" "}}" ;
 ///
 /// json           → object | array | expression ;
 /// jsonObject         → "{" ( Literal ":" json "," )* ( Literal ":" json )? "}" ;
 /// jsonArray          → "[" ( json "," )* ( json )? "]" ;
+/// ListOrVariable → Variable | array ;
+///
 /// expression     → equality ;
 /// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 /// comparison     → bool_op ( ( ">" | ">=" | "<" | "<=" ) bool_op )* ;
@@ -66,68 +69,6 @@ impl<'a> Parser<'a> {
 			return Err(self.error("Expected end of program"));
 		}
 		Ok(code)
-	}
-
-	fn json_expression(&mut self) -> Result<JsonExpression<'a>, String> {
-		match self.get_current() {
-			Token::ObjectStart => self.json_object(),
-			Token::ArrayStart => self.json_array(),
-			_ => Ok(JsonExpression::Expression(
-				self.expression()?
-			))
-		}
-	}
-
-	fn json_array(&mut self) -> Result<JsonExpression<'a>, String> {
-		self.consume(
-			Token::ArrayStart,
-			&format!("Expected '{}' before array", Token::ArrayStart)
-		)?;
-		let mut elements = Vec::new();
-		while !self.check_current(&Token::ArrayEnd) && !self.is_at_end() {
-			elements.push(self.json_expression()?);
-			if !self.check_current(&Token::ArrayEnd) && !self.is_at_end() {
-				self.consume(
-					Token::Comma,
-					&format!("Expected '{}' after array element", Token::Comma)
-				)?;
-			}
-		}
-		self.consume(
-			Token::ArrayEnd,
-			&format!("Expected '{}' after array", Token::ArrayEnd)
-		)?;
-		Ok(JsonExpression::Array(elements))
-	}
-
-	fn json_object(&mut self) -> Result<JsonExpression<'a>, String> {
-		self.consume(
-			Token::ObjectStart,
-			&format!("Expected '{}' before object", Token::ObjectStart)
-		)?;
-		let mut object = HashMap::new();
-		while !self.check_current(&Token::ObjectEnd) && !self.is_at_end() {
-			let key = match self.primary() {
-				Ok(Expression::Literal(Literal::Str(s))) => s,
-				_ => return Err(self.error("Expected string literal as key in object"))
-			};
-			self.consume(
-				Token::Colon,
-				&format!("Expected '{}' after key in object", Token::Colon)
-			)?;
-			object.insert(key, self.json_expression()?);
-			if !self.check_current(&Token::ObjectEnd) && !self.is_at_end() {
-				self.consume(
-					Token::Comma,
-					&format!("Expected '{}' after object element", Token::Comma)
-				)?;
-			}
-		}
-		self.consume(
-			Token::ObjectEnd,
-			&format!("Expected '{}' after object", Token::ObjectEnd)
-		)?;
-		Ok(JsonExpression::Object(object))
 	}
 }
 
@@ -269,11 +210,7 @@ impl<'a> Parser<'a> {
 	fn assign(&mut self) -> Result<Stmt<'a>, String> {
 		self.advance();
 		let variable = match self.get_current() {
-			Token::Value(name) => {
-				let variable = self.variable(name)?;
-				self.advance();
-				variable
-			},
+			Token::Value(name) => self.variable(name)?,
 			_ => {
 				return Err(self.error("Expected variable before '=' in assign"));
 			}
@@ -289,11 +226,7 @@ impl<'a> Parser<'a> {
 	fn foreach(&mut self) -> Result<Stmt<'a>, String> {
 		self.advance();
 		let variable = match self.get_current() {
-			Token::Value(name) => {
-				let variable = self.variable(name)?;
-				self.advance();
-				variable
-			},
+			Token::Value(name) => self.variable(name)?,
 			_ => return Err(self.error(
 				&format!("Expected variable after '{}' in {} statement", Token::For, Token::For)
 			))
@@ -302,16 +235,7 @@ impl<'a> Parser<'a> {
 			Token::In,
 			&format!("Expected '{}' after variable in {} statement", Token::In, Token::For),
 		)?;
-		let list = match self.get_current() {
-			Token::Value(name) => {
-				let variable = self.variable(name)?;
-				self.advance();
-				variable
-			},
-			_ => return Err(self.error(
-				&format!("Expected variable after '{}' in {} statement", Token::In, Token::For)
-			))
-		}; // TODO implement with json \\ variable
+		let list = self.list_or_variable()?;
 		self.consume(
 			Token::DelimiterEnd,
 			&format!("Expected '{}' in {} statement", Token::DelimiterEnd, Token::For),
@@ -389,6 +313,82 @@ impl<'a> Parser<'a> {
 	fn break_stmt(&mut self) -> Stmt<'a> {
 		self.advance();
 		Stmt::Break
+	}
+}
+
+// Grammar: Json
+impl<'a> Parser<'a> {
+	fn json_expression(&mut self) -> Result<JsonExpression<'a>, String> {
+		match self.get_current() {
+			Token::ObjectStart => self.json_object(),
+			Token::ArrayStart => self.json_array(),
+			_ => Ok(JsonExpression::Expression(
+				self.expression()?
+			))
+		}
+	}
+
+	fn json_array(&mut self) -> Result<JsonExpression<'a>, String> {
+		self.consume(
+			Token::ArrayStart,
+			&format!("Expected '{}' before array", Token::ArrayStart)
+		)?;
+		let mut elements = Vec::new();
+		while !self.check_current(&Token::ArrayEnd) && !self.is_at_end() {
+			elements.push(self.json_expression()?);
+			if !self.check_current(&Token::ArrayEnd) && !self.is_at_end() {
+				self.consume(
+					Token::Comma,
+					&format!("Expected '{}' after array element", Token::Comma)
+				)?;
+			}
+		}
+		self.consume(
+			Token::ArrayEnd,
+			&format!("Expected '{}' after array", Token::ArrayEnd)
+		)?;
+		Ok(JsonExpression::Array(elements))
+	}
+
+	fn json_object(&mut self) -> Result<JsonExpression<'a>, String> {
+		self.consume(
+			Token::ObjectStart,
+			&format!("Expected '{}' before object", Token::ObjectStart)
+		)?;
+		let mut object = HashMap::new();
+		while !self.check_current(&Token::ObjectEnd) && !self.is_at_end() {
+			let key = match self.primary() {
+				Ok(Expression::Literal(Literal::Str(s))) => s,
+				_ => return Err(self.error("Expected string literal as key in object"))
+			};
+			self.consume(
+				Token::Colon,
+				&format!("Expected '{}' after key in object", Token::Colon)
+			)?;
+			object.insert(key, self.json_expression()?);
+			if !self.check_current(&Token::ObjectEnd) && !self.is_at_end() {
+				self.consume(
+					Token::Comma,
+					&format!("Expected '{}' after object element", Token::Comma)
+				)?;
+			}
+		}
+		self.consume(
+			Token::ObjectEnd,
+			&format!("Expected '{}' after object", Token::ObjectEnd)
+		)?;
+		Ok(JsonExpression::Object(object))
+	}
+
+	fn list_or_variable(&mut self) -> Result<ListOrVariable<'a>, String> {
+		let result = match self.get_current() {
+			Token::Value(name) => ListOrVariable::Variable(self.variable(name)?),
+			Token::ArrayStart => ListOrVariable::List(self.json_array()?),
+			_ => return Err(self.error(
+				&format!("Expected variable or list after '{}' in {} statement", Token::In, Token::For)
+			))
+		};
+		Ok(result)
 	}
 }
 
@@ -482,7 +482,6 @@ impl<'a> Parser<'a> {
 					return Ok(Expression::Literal(literal));
 				}
 				if let Ok(variable) = self.variable(s) {
-					self.advance();
 					return Ok(Expression::Variable(variable));
 				}
 				Err(self.error("Invalid variable name"))
@@ -492,8 +491,9 @@ impl<'a> Parser<'a> {
 		}
 	}
 
-	fn variable(&self, name: &'a str) -> Result<Variable<'a>, String> {
+	fn variable(&mut self, name: &'a str) -> Result<Variable<'a>, String> {
 		if let Some(variable) = Variable::from_str(name) {
+			self.advance();
 			return Ok(variable);
 		}
 		Err(self.error("Expected variable"))

@@ -1,6 +1,7 @@
 use crate::lexer::Token;
 use crate::model::{
-	Expression, Literal, Binary, Grouping, Unary, JsonExpression,
+	Expression, Literal, Binary, Grouping, Unary,
+	JsonExpression, ListOrVariable,
 	Stmt, Variable, ForEach, If, Block, ConditionalBlock, Assign
 };
 use crate::tree_walker::SyntaxTreePrinter;
@@ -90,7 +91,20 @@ macro_tests!(
 		"for ( x in y ) {  }",
 		Stmt::ForEach(ForEach::new(
 			Variable::from_str("x").unwrap(),
-			Variable::from_str("y").unwrap(),
+			ListOrVariable::Variable(Variable::from_str("y").unwrap()),
+			Stmt::Block(Block::new(Vec::new()))
+		))
+	),
+	(
+		test_foreach_list,
+		"for ( x in [1, 2, 3] ) {  }",
+		Stmt::ForEach(ForEach::new(
+			Variable::from_str("x").unwrap(),
+			ListOrVariable::List(JsonExpression::Array(vec![
+				JsonExpression::Expression(Expression::Literal(Literal::Int(1))),
+				JsonExpression::Expression(Expression::Literal(Literal::Int(2))),
+				JsonExpression::Expression(Expression::Literal(Literal::Int(3))),
+			])),
 			Stmt::Block(Block::new(Vec::new()))
 		))
 	),

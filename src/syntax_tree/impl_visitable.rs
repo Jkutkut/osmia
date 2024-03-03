@@ -1,5 +1,6 @@
 use crate::model::{
-	Expression, Literal, Unary, Binary, Grouping, Variable, JsonExpression,
+	Expression, Literal, Unary, Binary, Grouping, Variable,
+	JsonExpression, ListOrVariable,
 	Stmt, Assign, ConditionalBlock, ForEach, If
 };
 use crate::syntax_tree::{
@@ -49,12 +50,26 @@ impl<T> Visitable<T> for ForEach<'_> {
 	}
 }
 
+// Json
+
 impl<T> Visitable<T> for JsonExpression<'_> {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		match self {
 			JsonExpression::Expression(expr) => expr.accept(visitor),
 			JsonExpression::Array(arr) => visitor.visit_array(arr),
 			JsonExpression::Object(obj) => visitor.visit_object(obj)
+		}
+	}
+}
+
+impl<T> Visitable<T> for ListOrVariable<'_> {
+	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
+		match self {
+			ListOrVariable::List(json) => match json {
+				JsonExpression::Array(arr) => visitor.visit_array(arr),
+				_ => unreachable!()
+			},
+			ListOrVariable::Variable(var) => visitor.visit_variable(var)
 		}
 	}
 }

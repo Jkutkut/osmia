@@ -14,6 +14,7 @@ mod variable_key;
 mod json_expression;
 mod ctx;
 mod json_tree;
+mod list_or_variable;
 
 pub use assign::Assign;
 pub use binary::Binary;
@@ -31,3 +32,4 @@ pub use variable_key::VariableKey;
 pub use json_expression::JsonExpression;
 pub use ctx::Ctx;
 pub use json_tree::JsonTree;
+pub use list_or_variable::ListOrVariable;

@@ -1,14 +1,14 @@
-use crate::model::{Variable, Stmt};
+use crate::model::{Variable, Stmt, ListOrVariable};
 
 #[derive(Debug, PartialEq)]
 pub struct ForEach<'a> {
 	var: Variable<'a>,
-	list: Variable<'a>,
+	list: ListOrVariable<'a>,
 	body: Box<Stmt<'a>>,
 }
 
 impl<'a> ForEach<'a> {
-	pub fn new(var: Variable<'a>, list: Variable<'a>, body: Stmt<'a>) -> Self {
+	pub fn new(var: Variable<'a>, list: ListOrVariable<'a>, body: Stmt<'a>) -> Self {
 		Self { var, list, body: Box::new(body) }
 	}
 
@@ -16,7 +16,7 @@ impl<'a> ForEach<'a> {
 		&self.var
 	}
 
-	pub fn list(&self) -> &Variable<'a> {
+	pub fn list(&self) -> &ListOrVariable<'a> {
 		&self.list
 	}
 

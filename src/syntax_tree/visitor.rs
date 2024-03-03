@@ -17,6 +17,8 @@ pub trait Visitor<T> {
 	fn visit_conditional_block(&self, block: &ConditionalBlock) -> T;
 	fn visit_break(&self) -> T;
 	fn visit_continue(&self) -> T;
+
+	// Json
 	fn visit_array(&self, arr: &Vec<JsonExpression<'_>>) -> T;
 	fn visit_object(&self, obj: &HashMap<String, JsonExpression<'_>>) -> T;
 

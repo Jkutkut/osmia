@@ -1,6 +1,7 @@
 use crate::Token;
 use crate::model::{
-	Variable, Expression,
+	Variable, Expression, Literal,
+	ListOrVariable, JsonExpression,
 	Stmt, ForEach
 };
 use super::{test_parser, should_fail};
@@ -24,7 +25,7 @@ macro_tests!(
 		],
 		Stmt::ForEach(ForEach::new(
 			Variable::from_str("a").unwrap(),
-			Variable::from_str("lst").unwrap(),
+			ListOrVariable::Variable(Variable::from_str("lst").unwrap()),
 			Stmt::Raw("This line is constant")
 		))
 	),
@@ -56,16 +57,49 @@ macro_tests!(
 		],
 		Stmt::ForEach(ForEach::new(
 			Variable::from_str("arr").unwrap(),
-			Variable::from_str("matrix").unwrap(),
+			ListOrVariable::Variable(Variable::from_str("matrix").unwrap()),
 			Stmt::ForEach(ForEach::new(
 				Variable::from_str("cell").unwrap(),
-				Variable::from_str("arr").unwrap(),
+				ListOrVariable::Variable(Variable::from_str("arr").unwrap()),
 				Stmt::Print(
 					Expression::Variable(
 						Variable::from_str("cell").unwrap()
 					)
 				)
 			))
+		))
+	),
+	(
+		list, // {{for a in [1, 2, 3]}}{{print a}}{{end}}
+		vec![
+			Token::DelimiterStart,
+			Token::For,
+			Token::Value("a"),
+			Token::In,
+			Token::ArrayStart,
+			Token::Value("1"),
+			Token::Comma,
+			Token::Value("2"),
+			Token::Comma,
+			Token::Value("3"),
+			Token::ArrayEnd,
+			Token::DelimiterEnd,
+			Token::DelimiterStart,
+			Token::Print,
+			Token::Value("a"),
+			Token::DelimiterEnd,
+			Token::DelimiterStart,
+			Token::Done,
+			Token::DelimiterEnd
+		],
+		Stmt::ForEach(ForEach::new(
+			Variable::from_str("a").unwrap(),
+			ListOrVariable::List(JsonExpression::Array(vec![
+				JsonExpression::Expression(Expression::Literal(Literal::Int(1))),
+				JsonExpression::Expression(Expression::Literal(Literal::Int(2))),
+				JsonExpression::Expression(Expression::Literal(Literal::Int(3)))
+			])),
+			Stmt::Print(Expression::Variable(Variable::from_str("a").unwrap()))
 		))
 	)
 );
