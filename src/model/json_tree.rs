@@ -5,7 +5,7 @@ use crate::model::{
 	Literal
 };
 
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum JsonTree {
 	Str(String),

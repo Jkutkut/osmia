@@ -154,16 +154,23 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	fn visit_foreach(&mut self, block: &ForEach) -> InterpreterResult {
 		let mut string = String::new();
 		let mut exit_status = ExitStatus::False;
-		let mut iterable = match block.list() {
+		let iterable_obj = match block.list() { // TODO use refs
 			ListOrVariable::List(json) => match json {
-				JsonExpression::Array(arr) => arr.iter(),
-				_ => todo!()
+				JsonExpression::Array(arr) => arr.clone(),
+				JsonExpression::Object(obj) => todo!(),
+				JsonExpression::Expression(expr) => todo!()
 			},
 			ListOrVariable::Variable(var) => {
-				let value = self.ctx.get(var)?;
-				todo!()
+				let json_tree = self.ctx.get_raw(var)?;
+				let json_expr = JsonExpression::from(json_tree);
+				match json_expr {
+					JsonExpression::Array(arr) => arr.clone(),
+					JsonExpression::Object(obj) => todo!(),
+					JsonExpression::Expression(expr) => todo!()
+				}
 			}
 		};
+		let mut iterable = iterable_obj.iter();
 		while let Some(item) = iterable.next() {
 			let item = match item {
 				JsonExpression::Expression(expr) => expr.accept(self)?,

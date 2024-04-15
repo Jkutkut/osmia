@@ -1,6 +1,6 @@
 use super::{Literal, Grouping, Unary, Binary, Variable};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Expression<'a> {
 	Literal(Literal),
 	Variable(Variable<'a>),

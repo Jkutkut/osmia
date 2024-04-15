@@ -25,12 +25,40 @@ impl Ctx {
 		}
 	}
 
+	pub fn get_raw<'a>(&'a self, key: &'a Variable) -> Result<&'a JsonTree, String> {
+		self.get_value_raw(key)
+	}
+
 	pub fn get(&self, key: &Variable) -> Result<Literal, String> {
 		self.get_value(key)
 	}
 
 	pub fn set(&mut self, key: &Variable, value: Literal) -> Result<(), String> {
 		self.set_value(key, value)
+	}
+}
+
+impl Ctx {
+	pub fn get_value_raw<'a>(&'a self, key: &'a Variable) -> Result<&'a JsonTree, String> {
+		let keys = &mut key.keys().iter();
+		let mut var = &self.tree;
+		let mut current_key = keys.next().unwrap();
+		loop {
+			match var {
+				JsonTree::Object(ref map) =>
+					var = Self::visit_obj(current_key, map)?,
+				JsonTree::Array(ref array) =>
+					var = Self::visit_arr(current_key, array)?,
+				_ => return Err(
+					format!("{} is not an object or array", var)
+				)
+			};
+			current_key = match keys.next() {
+				Some(k) => k,
+				None => break
+			};
+		}
+		Ok(var)
 	}
 }
 

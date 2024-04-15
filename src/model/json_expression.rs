@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
 use crate::model::{
-	Expression
+	Expression,
+	JsonTree, Literal
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum JsonExpression<'a> {
 	Expression(Expression<'a>),
 	Array(Vec<JsonExpression<'a>>),
@@ -29,6 +30,20 @@ impl std::fmt::Display for JsonExpression<'_> {
 					.collect::<Vec<String>>()
 					.join(",")
 			)
+		}
+	}
+}
+
+impl From<&JsonTree> for JsonExpression<'_> {
+	fn from(tree: &JsonTree) -> Self {
+		match tree {
+			JsonTree::Number(n) => Self::Expression(Expression::Literal(Literal::Int(*n))),
+			JsonTree::Float(f) => Self::Expression(Expression::Literal(Literal::Float(*f))),
+			JsonTree::Str(s) => Self::Expression(Expression::Literal(Literal::Str(s.to_string()))),
+			JsonTree::Bool(b) => Self::Expression(Expression::Literal(Literal::Bool(*b))),
+			JsonTree::Null => Self::Expression(Expression::Literal(Literal::Null)),
+			JsonTree::Array(array) => Self::Array(array.iter().map(|e| (&e.clone()).into()).collect()),
+			JsonTree::Object(obj) => Self::Object(obj.iter().map(|(k, v)| (k.to_string(), JsonExpression::from(&**v))).collect()),
 		}
 	}
 }

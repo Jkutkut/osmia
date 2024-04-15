@@ -2,7 +2,7 @@ use std::collections::LinkedList;
 use crate::lexer::VariableLexer;
 use crate::model::VariableKey;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Variable<'a> {
 	raw: &'a str,
 	keys: LinkedList<VariableKey<'a>>,

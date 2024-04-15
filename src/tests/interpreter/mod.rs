@@ -30,7 +30,7 @@ fn run_interpreter(
 }
 
 #[cfg(test)]
-fn test_interpreter(code: &str, ctx: &str, expected: &str) {
+fn test_interpreter(code: &str, ctx: &str, expected: &str) { 
 	let ctx = Ctx::from_str(ctx).unwrap();
 	let result = match run_interpreter(code, ctx) {
 		Ok(r) => r,
@@ -520,9 +520,33 @@ macro_tests!(
 		"{{for v in [1 + v, 2, 3]}}{{ v }}{{done}}",
 		r#"{"v": 3}"#,
 		"423"
+	),
+	(
+		foreachvariable01,
+		"{{for v in arr}}{{ v }}{{done}}",
+		r#"{"arr": [1, 2, 3]}"#,
+		"123"
+	),
+	(
+		foreachvariable02,
+		"{{for v in arr}} {{ v }}{{done}}",
+		r#"{"arr": [true, "2", null]}"#,
+		" true 2 null"
+	),
+	(
+		foreachvariable03,
+		"{{for v in arr}}{{ v }}{{done}}",
+		r#"{"arr": []}"#,
+		""
+	),
+	(
+		foreachvariable04,
+		"{{for v in arr}}{{ v }}{{done}}",
+		r#"{"arr": [12.3]}"#,
+		"12.3"
 	)
 	// TODO loop array of objects
-	// TODO loop variable
+	// TODO loop array of arrays
 );
 
 
