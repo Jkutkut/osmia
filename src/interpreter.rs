@@ -158,16 +158,16 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 		let iterable_obj = match block.list() { // TODO use refs
 			ListOrVariable::List(json) => match json {
 				JsonExpression::Array(arr) => arr.clone(),
-				JsonExpression::Object(obj) => todo!(),
-				JsonExpression::Expression(expr) => todo!()
+				JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
+				JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
 			},
 			ListOrVariable::Variable(var) => {
 				let json_tree = self.ctx.get(var)?;
 				let json_expr = JsonExpression::from(json_tree);
 				match json_expr {
 					JsonExpression::Array(arr) => arr.clone(),
-					JsonExpression::Object(obj) => todo!(),
-					JsonExpression::Expression(expr) => todo!()
+					JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
+					JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
 				}
 			}
 		};
