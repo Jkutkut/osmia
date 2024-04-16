@@ -46,7 +46,7 @@ macro_tests!(
 		"null"
 	),
 	(
-		assign_array,
+		assign_array_item,
 		"{{assign v[2] = 2 }}{{ v[0] }}{{ v[1] }}{{ v[2] }}",
 		r#"{"v": [1, 2, 3]}"#,
 		"122"
@@ -74,6 +74,30 @@ macro_tests!(
 		"{{assign foo = bar * foo }}{{foo}}",
 		r#"{"bar": 2, "foo": 2}"#,
 		"4"
+	),
+	(
+		assign_array01,
+		"{{assign v = [1, 2, 3] }}{{ v[0] }}{{ v[1] }}{{ v[2] }}",
+		"{}",
+		"123"
+	),
+	(
+		assign_array02,
+		r#"{{assign v = [{"name": "foo"}, "this", [3]]}}{{ v[0].name }} -- {{ v[1] }} -- {{ v[2][0] }}"#,
+		"{}",
+		"foo -- this -- 3"
+	),
+	(
+		assign_object01,
+		r#"{{assign v = {"foo": 1, "bar": 2}}}{{ v.foo }} -- {{ v.bar }}"#,
+		"{}",
+		"1 -- 2"
+	),
+	(
+		assign_object02,
+		r#"{{assign v = {"foo": {"bar": 1}, "bar": [2]}}}{{ v.foo.bar }} -- {{ v.bar[0] }}"#,
+		"{}",
+		"1 -- 2"
 	)
 );
 

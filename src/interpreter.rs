@@ -87,14 +87,10 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 
 	fn visit_assign(&mut self, assign: &Assign) -> InterpreterResult {
-		match assign.expression() {
-			JsonExpression::Expression(expr) => {
-				let expr = expr.accept(self)?;
-				self.ctx.set_literal(assign.variable(), expr)?;
-				Ok((ExitStatus::Okay, InterpreterValue::Void))
-			},
-			_ => todo!() // TODO implement
-		}
+		let value = self.eval_json(assign.expression())?;
+		let tree = JsonTree::from(&value)?;
+		self.ctx.set(assign.variable(), tree)?;
+		Ok((ExitStatus::Okay, InterpreterValue::Void))
 	}
 
 	fn visit_if(&mut self, block: &If) -> InterpreterResult {
