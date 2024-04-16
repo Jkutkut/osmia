@@ -1,10 +1,11 @@
+use std::collections::HashMap;
 use crate::Token;
 use crate::syntax_tree::{
 	StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
 };
 use crate::model::{
 	Expression, Literal, Binary, Unary, Grouping, Variable,
-	JsonExpression, ListOrVariable,
+	JsonExpression, ListOrVariable, JsonTree,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach,
 	Ctx
 };
@@ -89,7 +90,7 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 		match assign.expression() {
 			JsonExpression::Expression(expr) => {
 				let expr = expr.accept(self)?;
-				self.ctx.set(assign.variable(), expr)?;
+				self.ctx.set_literal(assign.variable(), expr)?;
 				Ok((ExitStatus::Okay, InterpreterValue::Void))
 			},
 			_ => todo!() // TODO implement
@@ -161,7 +162,7 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 				JsonExpression::Expression(expr) => todo!()
 			},
 			ListOrVariable::Variable(var) => {
-				let json_tree = self.ctx.get_raw(var)?;
+				let json_tree = self.ctx.get(var)?;
 				let json_expr = JsonExpression::from(json_tree);
 				match json_expr {
 					JsonExpression::Array(arr) => arr.clone(),
@@ -172,10 +173,8 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 		};
 		let mut iterable = iterable_obj.iter();
 		while let Some(item) = iterable.next() {
-			let item = match item {
-				JsonExpression::Expression(expr) => expr.accept(self)?,
-				_ => todo!()
-			};
+			let item = self.eval_json(item)?;
+			let item = JsonTree::from(&item)?;
 			self.ctx.set(block.variable(), item)?;
 			let result = block.body().accept(self)?;
 			match result.0 {
@@ -237,7 +236,7 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 	}
 
 	fn visit_variable(&self, variable: &Variable) -> Result<Literal, String> {
-		self.ctx.get(variable)
+		self.ctx.get_literal(variable)
 	}
 
 	fn visit_grouping(&self, grouping: &Grouping) -> Result<Literal, String> {
@@ -343,5 +342,28 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 			}));
 		}
 		Err(err)
+	}
+}
+
+impl<'a> Interpreter<'a> {
+	pub fn eval_json(&self, tree: &JsonExpression) -> Result<JsonExpression, String> {
+		let new_tree: JsonExpression = match tree {
+			JsonExpression::Expression(expr) => JsonExpression::Expression(Expression::Literal(expr.accept(self)?)),
+			JsonExpression::Array(arr) => {
+				let mut new_arr = Vec::new();
+				for item in arr {
+					new_arr.push(self.eval_json(item)?);
+				}
+				JsonExpression::Array(new_arr)
+			},
+			JsonExpression::Object(obj) => {
+				let mut new_obj = HashMap::new();
+				for (key, value) in obj {
+					new_obj.insert(key.to_string(), self.eval_json(value)?);
+				}
+				JsonExpression::Object(new_obj)
+			}
+		};
+		Ok(new_tree)
 	}
 }

@@ -25,21 +25,37 @@ impl Ctx {
 		}
 	}
 
-	pub fn get_raw<'a>(&'a self, key: &'a Variable) -> Result<&'a JsonTree, String> {
-		self.get_value_raw(key)
-	}
-
-	pub fn get(&self, key: &Variable) -> Result<Literal, String> {
+	pub fn get<'a>(&'a self, key: &'a Variable) -> Result<&'a JsonTree, String> {
 		self.get_value(key)
 	}
 
-	pub fn set(&mut self, key: &Variable, value: Literal) -> Result<(), String> {
+	pub fn get_literal(&self, key: &Variable) -> Result<Literal, String> {
+		self.get_value_literal(key)
+	}
+
+	pub fn set(&mut self, key: &Variable, value: JsonTree) -> Result<(), String> {
+		self.set_value(key, value)
+	}
+
+	pub fn set_literal(&mut self, key: &Variable, value: Literal) -> Result<(), String> {
+		let value = JsonTree::from_literal(&value);
 		self.set_value(key, value)
 	}
 }
 
 impl Ctx {
-	pub fn get_value_raw<'a>(&'a self, key: &'a Variable) -> Result<&'a JsonTree, String> {
+	fn get_value_literal(&self, key: &Variable) -> Result<Literal, String> {
+		match self.get_value(key)? {
+			JsonTree::Str(s) => Ok(Literal::Str(s.to_string())),
+			JsonTree::Number(n) => Ok(Literal::Int(*n)),
+			JsonTree::Float(f) => Ok(Literal::Float(*f)),
+			JsonTree::Null => Ok(Literal::Null),
+			JsonTree::Bool(b) => Ok(Literal::Bool(*b)),
+			_ => Err("Cannot get a array or object".to_string())
+		}
+	}
+
+	fn get_value<'a>(&'a self, key: &'a Variable) -> Result<&'a JsonTree, String> {
 		let keys = &mut key.keys().iter();
 		let mut var = &self.tree;
 		let mut current_key = keys.next().unwrap();
@@ -60,40 +76,8 @@ impl Ctx {
 		}
 		Ok(var)
 	}
-}
 
-impl Ctx {
-	pub fn get_value(&self, key: &Variable) -> Result<Literal, String> {
-		let keys = &mut key.keys().iter();
-		let mut var = &self.tree;
-		let mut current_key = keys.next().unwrap();
-		loop {
-			match var {
-				JsonTree::Object(ref map) =>
-					var = Self::visit_obj(current_key, map)?,
-				JsonTree::Array(ref array) =>
-					var = Self::visit_arr(current_key, array)?,
-				_ => return Err(
-					format!("{} is not an object or array", var)
-				)
-			};
-			current_key = match keys.next() {
-				Some(k) => k,
-				None => break
-			};
-		}
-		match var {
-			JsonTree::Str(s) => Ok(Literal::Str(s.to_string())),
-			JsonTree::Number(n) => Ok(Literal::Int(*n)),
-			JsonTree::Float(f) => Ok(Literal::Float(*f)),
-			JsonTree::Null => Ok(Literal::Null),
-			JsonTree::Bool(b) => Ok(Literal::Bool(*b)),
-			_ => Err("Cannot get a array or object".to_string())
-		}
-	}
-
-	fn set_value(&mut self, key: &Variable, value: Literal) -> Result<(), String> {
-		let value = JsonTree::from_literal(&value);
+	fn set_value(&mut self, key: &Variable, value: JsonTree) -> Result<(), String> {
 		let mut keys = key.keys().iter();
 		let mut var = &mut self.tree;
 		let mut current_key = keys.next().unwrap();
@@ -139,7 +123,9 @@ impl Ctx {
 		}
 		Ok(())
 	}
+}
 
+impl Ctx {
 	fn visit_obj<'a>(
 		key: &'a VariableKey,
 		map: &'a HashMap<String, Box<JsonTree>>

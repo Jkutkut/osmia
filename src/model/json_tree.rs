@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::model::{
-	Literal
+	Literal, Expression,
+	JsonExpression
 };
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
@@ -31,6 +32,30 @@ impl JsonTree {
 			Literal::Bool(b) => JsonTree::Bool(*b),
 			Literal::Null => JsonTree::Null
 		}
+	}
+
+	pub fn from(expr: &JsonExpression) -> Result<Self, String> {
+		let tree = match expr {
+			JsonExpression::Expression(expr) => match expr {
+				Expression::Literal(literal) => match literal {
+					Literal::Str(s) => JsonTree::Str(s.to_string()),
+					Literal::Int(i) => JsonTree::Number(*i),
+					Literal::Float(f) => JsonTree::Float(*f),
+					Literal::Bool(b) => JsonTree::Bool(*b),
+					Literal::Null => JsonTree::Null,
+				},
+				_ => return Err("Only literals are supported".to_string())
+			},
+			JsonExpression::Array(arr) => JsonTree::Array(
+				arr.iter()
+					.map(|x| JsonTree::from(x))
+					.collect::<Result<Vec<JsonTree>, String>>()?
+			),
+			JsonExpression::Object(obj) => JsonTree::Object(obj.iter().map(|(k, v)| {
+				(k.to_string(), Box::new(JsonTree::from(v).unwrap()))
+			}).collect())
+		};
+		Ok(tree)
 	}
 }
 

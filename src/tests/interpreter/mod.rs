@@ -544,9 +544,21 @@ macro_tests!(
 		"{{for v in arr}}{{ v }}{{done}}",
 		r#"{"arr": [12.3]}"#,
 		"12.3"
-	)
+	),
 	// TODO loop array of objects
 	// TODO loop array of arrays
+	(
+		foreach06,
+		"{{for v in [[1, 2], [3, 4]]}}{{ v[0] }} -- {{ v[1] }},{{done}}",
+		"{}",
+		"1 -- 2,3 -- 4,"
+	),
+	(
+		foreach07,
+		r#"{{for v in [{"name": "foo"}, {"name": "bar"}]}}{{ v.name }},{{done}}"#,
+		"{}",
+		"foo,bar,"
+	)
 );
 
 

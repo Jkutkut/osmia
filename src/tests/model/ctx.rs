@@ -36,7 +36,7 @@ fn set(
 		let variable = Variable::from_str(key).unwrap();
 		let literal = Literal::from_str(value).unwrap();
 		println!("  - set({}, {:?})", key, value);
-		let result = ctx.set(&variable, literal);
+		let result = ctx.set_literal(&variable, literal);
 		if let Err(e) = result {
 			panic!("{}", e);
 		}
@@ -56,7 +56,7 @@ fn get(
 	let var = Variable::from_str(var).unwrap();
 	println!("Test get");
 	println!("  - get({})", var);
-	let get = ctx.get(&var);
+	let get = ctx.get_literal(&var);
 	match expected {
 		Ok(expected) => {
 			let expected = Literal::from_str(expected).unwrap();
@@ -85,7 +85,7 @@ fn invalid_set(
 	let variable = Variable::from_str(set.0).unwrap();
 	let literal = Literal::from_str(set.1).unwrap();
 	println!("  - set({}, {:?})", set.0, set.1);
-	let result = ctx.set(&variable, literal);
+	let result = ctx.set_literal(&variable, literal);
 	assert!(result.is_err());
 }
 
