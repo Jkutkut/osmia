@@ -23,7 +23,7 @@ mod r#for;
 #[cfg(test)]
 fn run_interpreter(
 	code: &str,
-	mut ctx: Ctx
+	ctx: Ctx
 ) -> Result<String, String> {
 	println!("Running interpreter: {}", code);
 	println!("  - Code: {}", &code);
@@ -34,7 +34,7 @@ fn run_interpreter(
 	let mut parser = Parser::new(tokens);
 	let code = parser.parse().unwrap();
 	println!("  - Code: {:?}", code);
-	let mut interpreter = Interpreter::new(&mut ctx);
+	let mut interpreter = Interpreter::new(ctx);
 	interpreter.run(&code)
 }
 

@@ -26,16 +26,16 @@ pub enum ExitStatus {
 	False
 }
 
-pub struct Interpreter<'a> {
-	ctx: &'a mut Ctx
+pub struct Interpreter {
+	ctx: Ctx
 }
 
-impl<'a> Interpreter<'a> {
-	pub fn new(ctx: &'a mut Ctx) -> Self {
+impl Interpreter {
+	pub fn new(ctx: Ctx) -> Self {
 		Self { ctx }
 	}
 
-	pub fn run(&mut self, code: &Stmt<'a>) -> Result<String, String> {
+	pub fn run(&mut self, code: &Stmt) -> Result<String, String> {
 		println!("Running interpreter...");
 		let (exit_status, value) = self.visit_stmt(code)?;
 		match exit_status {
@@ -51,7 +51,7 @@ impl<'a> Interpreter<'a> {
 	}
 }
 
-impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
+impl StmtVisitor<InterpreterResult> for Interpreter {
 	fn visit_stmt(&mut self, stmt: &Stmt) -> InterpreterResult {
 		stmt.accept(self)
 	}
@@ -222,7 +222,7 @@ impl StmtVisitor<InterpreterResult> for Interpreter<'_> {
 	}
 }
 
-impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
+impl ExprVisitor<Result<Literal, String>> for Interpreter {
 	fn visit_expression(&self, expression: &Expression) -> Result<Literal, String> {
 		expression.accept(self)
 	}
@@ -341,7 +341,7 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter<'_> {
 	}
 }
 
-impl<'a> Interpreter<'a> {
+impl Interpreter {
 	pub fn eval_json(&self, tree: &JsonExpression) -> Result<JsonExpression, String> {
 		let new_tree: JsonExpression = match tree {
 			JsonExpression::Expression(expr) => JsonExpression::Expression(Expression::Literal(expr.accept(self)?)),
