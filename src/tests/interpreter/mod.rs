@@ -1,7 +1,6 @@
 use crate::{
-	Token,
-	Parser,
-	Lexer
+	lexer::{Token, Lexer},
+	parser::Parser,
 };
 use crate::interpreter::{
 	Interpreter,

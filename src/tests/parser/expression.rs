@@ -1,4 +1,4 @@
-use crate::Token;
+use crate::lexer::Token;
 use crate::model::{
 	Expression, Binary, Unary, Grouping, Literal, Variable,
 	Stmt

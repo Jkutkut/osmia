@@ -21,5 +21,3 @@ macro_tests! {
 	(basic14, "{{true}} {{false}} {{3.14}}", "true false 3.14"),
 	(basic15, r#"{{"Hello, world!"}} {{42}}"#, "Hello, world! 42")
 }
-
-// TODO

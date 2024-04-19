@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::Token;
+use crate::lexer::Token;
 use crate::model::{
 	Expression, Variable, Literal, Binary,
 	Stmt, Assign, JsonExpression

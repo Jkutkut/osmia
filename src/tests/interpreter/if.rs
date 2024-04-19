@@ -1,5 +1,5 @@
 use crate::macro_tests;
-use super::{test_interpreter/*, expect_error*/};
+use super::{test_interpreter};
 
 macro_tests!(
 	test_interpreter,
@@ -76,5 +76,3 @@ macro_tests!(
 		"else02"
 	)
 );
-
-// TODO

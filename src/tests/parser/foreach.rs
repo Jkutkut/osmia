@@ -1,4 +1,4 @@
-use crate::Token;
+use crate::lexer::Token;
 use crate::model::{
 	Variable, Expression, Literal,
 	ListOrVariable, JsonExpression,
