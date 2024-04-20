@@ -98,6 +98,24 @@ macro_tests!(
 		r#"{{assign v = {"foo": {"bar": 1}, "bar": [2]}}}{{ v.foo.bar }} -- {{ v.bar[0] }}"#,
 		"{}",
 		"1 -- 2"
+	),
+	(
+		assign_object03,
+		r#"{{ assign obj = {"user": {"name": "Marvin"} } }}{{ assign obj.user.name = "R2D2" }}{{ obj.user.name }}"#,
+		"{}",
+		"R2D2"
+	),
+	(
+		assign_object04,
+		r#"{{ assign obj = {"user": {"name":"Marvin"}} }}{{ assign obj.user.name = "R2D2" }}{{ obj.user.name }}"#,
+		"{}",
+		"R2D2"
+	),
+	(
+		assign_object05,
+		r#"{{ assign obj = {"user": {"name":"Marvin"}}}}{{ assign obj.user.name = "R2D2" }}{{ obj.user.name }}"#,
+		"{}",
+		"R2D2"
 	)
 );
 

@@ -32,18 +32,40 @@ impl<'a> Lexer<'a> {
 			}
 			tokens.push_back(Token::DelimiterStart);
 			i += self.delimiter_start.len();
-			let delimiter_end_idx = match input[i..].find(self.delimiter_end) {
-				Some(idx) => {
-					let mut idx = idx;
-					while i + idx + self.delimiter_end.len() < input.len() && 
-						input[i + idx + 1..].starts_with(self.delimiter_end)
-					{ // TODO refactor to work with multiple delimiters
-						idx += 1;
+			let mut stack = std::collections::VecDeque::new();
+			let mut delimiter_end_idx = 0;
+			while i + delimiter_end_idx < input.len() - self.delimiter_end.len() {
+				if input[i + delimiter_end_idx..].starts_with(self.delimiter_end) &&
+					stack.is_empty() {
+					break;
+				}
+				let current_char = input.chars().nth(i + delimiter_end_idx).unwrap();
+				for (s, e) in [('{', '}'), ('[', ']'), ('(', ')')] {
+					if current_char == s {
+						stack.push_back(e);
+						break;
 					}
-					idx
-				},
-				None => return Err("Unclosed delimiter".to_string())
-			};
+					if current_char == e {
+						if let Some(stack_element) = stack.pop_back() {
+							if stack_element != e {
+								return Err(format!("Invalid close delimiter: {}", current_char));
+							}
+						}
+						else {
+							return Err(format!("Invalid close delimiter: {}", current_char));
+						}
+						break;
+					}
+				}
+				delimiter_end_idx += 1;
+			}
+			if !stack.is_empty() {
+				return Err(format!("{} was not closed", stack.back().unwrap()));
+			}
+			if i + delimiter_end_idx >= input.len() ||
+				!input[i + delimiter_end_idx..].starts_with(self.delimiter_end) {
+				return Err(format!("Osmia delimiter was not closed"));
+			}
 			for token in Tokenizer::new(&input[i..i + delimiter_end_idx]) {
 				let token = token?;
 				match Token::from_str(token) {
