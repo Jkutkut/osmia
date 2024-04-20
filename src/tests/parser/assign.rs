@@ -14,9 +14,9 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
-			Token::Value("\"bar\""),
+			Token::Value("\"bar\"".to_string()),
 			Token::DelimiterEnd
 		],
 		Stmt::Assign(Assign::new(
@@ -29,9 +29,9 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
-			Token::Value("bar"),
+			Token::Value("bar".to_string()),
 			Token::DelimiterEnd
 		],
 		Stmt::Assign(Assign::new(
@@ -44,11 +44,11 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::DelimiterEnd
 		],
 		Stmt::Assign(Assign::new(
@@ -65,9 +65,9 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
-			Token::Value("bar"),
+			Token::Value("bar".to_string()),
 			Token::DelimiterEnd
 		],
 		Stmt::Assign(Assign::new(
@@ -82,11 +82,11 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
-			Token::Value("bar"),
+			Token::Value("bar".to_string()),
 			Token::Multiply,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::DelimiterEnd
 		],
 		Stmt::Assign(Assign::new(
@@ -103,12 +103,12 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::ArrayEnd,
 			Token::DelimiterEnd
 		],
@@ -129,12 +129,12 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Comma,
 			Token::ArrayEnd,
 			Token::DelimiterEnd
@@ -156,7 +156,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
 			Token::ArrayEnd,
@@ -172,15 +172,15 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
 			Token::ArrayStart,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Comma,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::ArrayEnd,
 			Token::ArrayEnd,
 			Token::DelimiterEnd
@@ -208,7 +208,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
 			Token::ObjectEnd,
@@ -224,12 +224,12 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
-			Token::Value(r#""bar""#),
+			Token::Value(r#""bar""#.to_string()),
 			Token::Colon,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::ObjectEnd,
 			Token::DelimiterEnd
 		],
@@ -250,16 +250,16 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
-			Token::Value(r#""bar""#),
+			Token::Value(r#""bar""#.to_string()),
 			Token::Colon,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
-			Token::Value(r#""baz""#),
+			Token::Value(r#""baz""#.to_string()),
 			Token::Colon,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::ObjectEnd,
 			Token::DelimiterEnd
 		],
@@ -286,12 +286,12 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
-			Token::Value(r#""bar""#),
+			Token::Value(r#""bar""#.to_string()),
 			Token::Colon,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
 			Token::ObjectEnd,
 			Token::DelimiterEnd
@@ -313,16 +313,16 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
-			Token::Value(r#""bar""#),
+			Token::Value(r#""bar""#.to_string()),
 			Token::Colon,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
-			Token::Value(r#""baz""#),
+			Token::Value(r#""baz""#.to_string()),
 			Token::Colon,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Comma,
 			Token::ObjectEnd,
 			Token::DelimiterEnd
@@ -350,15 +350,15 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
-			Token::Value(r#""bar""#),
+			Token::Value(r#""bar""#.to_string()),
 			Token::Colon,
 			Token::ArrayStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::ArrayEnd,
 			Token::ObjectEnd,
 			Token::DelimiterEnd
@@ -385,15 +385,15 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
 			Token::ObjectStart,
-			Token::Value(r#""bar""#),
+			Token::Value(r#""bar""#.to_string()),
 			Token::Colon,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::ObjectEnd,
 			Token::ArrayEnd,
 			Token::DelimiterEnd
@@ -425,7 +425,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::DelimiterEnd
 		]
@@ -435,7 +435,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq
 		]
 	),
@@ -444,7 +444,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo")
+			Token::Value("foo".to_string())
 		]
 	),
 	(
@@ -459,7 +459,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::DelimiterEnd
 		]
@@ -477,7 +477,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
 			Token::DelimiterEnd
@@ -488,10 +488,10 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::DelimiterEnd
 		]
 	),
@@ -500,10 +500,10 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::Comma,
 			Token::DelimiterEnd,
 		]
@@ -513,7 +513,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ArrayStart,
 			Token::Comma,
@@ -526,7 +526,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
 			Token::DelimiterEnd
@@ -537,10 +537,10 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::DelimiterEnd
 		]
 	),
@@ -549,10 +549,10 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::Colon,
 			Token::DelimiterEnd
 		]
@@ -562,12 +562,12 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::Assign,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::AssignEq,
 			Token::ObjectStart,
-			Token::Value("foo"),
+			Token::Value("foo".to_string()),
 			Token::Colon,
-			Token::Value("bar"),
+			Token::Value("bar".to_string()),
 			Token::DelimiterEnd
 		]
 	)

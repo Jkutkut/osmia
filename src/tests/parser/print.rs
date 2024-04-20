@@ -26,13 +26,13 @@ fn test_parser_print(tokens: Vec<Token>, expected: Expression) {
 #[test]
 fn basic_parser() {
 	let tokens = vec![ // 1 + 2 * 3 == 7
-		Token::Value("1"),
+		Token::Value("1".to_string()),
 		Token::Plus,
-		Token::Value("2"),
+		Token::Value("2".to_string()),
 		Token::Multiply,
-		Token::Value("3"),
+		Token::Value("3".to_string()),
 		Token::Equal,
-		Token::Value("7")
+		Token::Value("7".to_string())
 	];
 	let expected = Expression::Binary(Binary::new(
 		Expression::Binary(Binary::new(
@@ -55,7 +55,7 @@ fn should_fail01() {
 	should_fail(vec![
 		Token::DelimiterStart,
 		Token::Print,
-		Token::Value("1"),
+		Token::Value("1".to_string()),
 	]);
 }
 

@@ -36,13 +36,13 @@ macro_tests!(
 	(
 		basic_parser, // 1 + 2 * 3 == 7
 		vec![ // 1 + 2 * 3 == 7
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Multiply,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::Equal,
-			Token::Value("7")
+			Token::Value("7".to_string())
 		],
 		Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
@@ -61,29 +61,29 @@ macro_tests!(
 	(
 		precedence, // 1 + 2 * 3 / (4 + 5) == 1 + (2 * 3) % 9 == true
 		vec![
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Multiply,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::Divide,
 			Token::GroupingStart,
-			Token::Value("4"),
+			Token::Value("4".to_string()),
 			Token::Plus,
-			Token::Value("5"),
+			Token::Value("5".to_string()),
 			Token::GroupingEnd,
 			Token::Equal,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
 			Token::GroupingStart,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Multiply,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::GroupingEnd,
 			Token::Modulo,
-			Token::Value("9"),
+			Token::Value("9".to_string()),
 			Token::Equal,
-			Token::Value("true")
+			Token::Value("true".to_string())
 		],
 		Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
@@ -132,22 +132,22 @@ macro_tests!(
 		vec![
 			Token::Not,
 			Token::Not,
-			Token::Value("true"),
+			Token::Value("true".to_string()),
 			Token::Equal,
 			Token::Not,
-			Token::Value("false"),
+			Token::Value("false".to_string()),
 			Token::Equal,
 			Token::GroupingStart,
 			Token::Minus,
 			Token::GroupingStart,
 			Token::Minus,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::GroupingEnd,
 			Token::Equal,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::GroupingEnd,
 			Token::NotEqual,
-			Token::Value("false")
+			Token::Value("false".to_string())
 		],
 		Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
@@ -192,7 +192,7 @@ macro_tests!(
 			Token::Minus,
 			Token::Minus,
 			Token::Minus,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Equal,
 			Token::Minus,
 			Token::GroupingStart,
@@ -200,13 +200,13 @@ macro_tests!(
 			Token::GroupingStart,
 			Token::Minus,
 			Token::GroupingStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::GroupingEnd,
 			Token::GroupingEnd,
 			Token::GroupingEnd,
 			Token::Equal,
 			Token::Minus,
-			Token::Value("1")
+			Token::Value("1".to_string())
 		],
 		Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
@@ -249,14 +249,14 @@ macro_tests!(
 		grouping, // (1 + 2) * 3 == 9
 		vec![
 			Token::GroupingStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::GroupingEnd,
 			Token::Multiply,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::Equal,
-			Token::Value("9")
+			Token::Value("9".to_string())
 		],
 		Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
@@ -276,7 +276,7 @@ macro_tests!(
 	),
 	(
 		json_value01, // user.age == 42
-		vec![Token::Value("user.age"), Token::Equal, Token::Value("42")],
+		vec![Token::Value("user.age".to_string()), Token::Equal, Token::Value("42".to_string())],
 		Expression::Binary(Binary::new(
 			Expression::Variable(Variable::from_str("user.age").unwrap()),
 			Token::Equal,
@@ -293,26 +293,26 @@ macro_tests!(
 		invalid_grouping01, // (1 + 2 * 3 == 7
 		vec![
 			Token::GroupingStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Multiply,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::Equal,
-			Token::Value("7")
+			Token::Value("7".to_string())
 		]
 	),
 	(
 		invalid_grouping02, // 1 + 2 * 3) == 7
 		vec![
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Multiply,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::GroupingEnd,
 			Token::Equal,
-			Token::Value("7")
+			Token::Value("7".to_string())
 		]
 	),
 	(empty, vec![]),
@@ -321,7 +321,7 @@ macro_tests!(
 		vec![
 			Token::Plus,
 			Token::Equal,
-			Token::Value("1")
+			Token::Value("1".to_string())
 		]
 	),
 	(
@@ -344,88 +344,88 @@ macro_tests!(
 		invalid_operator06, // * 3 == 2
 		vec![
 			Token::Multiply,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::Equal,
-			Token::Value("2")
+			Token::Value("2".to_string())
 		]
 	),
 	(
 		invalid_operator07, // 3 * == 2
 		vec![
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::Multiply,
 			Token::Equal,
-			Token::Value("2")
+			Token::Value("2".to_string())
 		]
 	),
 	(
 		invalid_operator08, // 3 + == 2
 		vec![
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::Plus,
 			Token::Equal,
-			Token::Value("2")
+			Token::Value("2".to_string())
 		]
 	),
 	(
 		invalid_operator09, // 3 -
-		vec![Token::Value("3"), Token::Minus]
+		vec![Token::Value("3".to_string()), Token::Minus]
 	),
 	(
 		invalid_operator10, // 3 *
-		vec![Token::Value("3"), Token::Multiply]
+		vec![Token::Value("3".to_string()), Token::Multiply]
 	),
 	(
 		invalid_operator11, // 3 /
-		vec![Token::Value("3"), Token::Divide]
+		vec![Token::Value("3".to_string()), Token::Divide]
 	),
 	(
 		invalid_operator12, // 3 %
-		vec![Token::Value("3"), Token::Modulo]
+		vec![Token::Value("3".to_string()), Token::Modulo]
 	),
 	(
 		invalid_operator13, // 3 == == 2
 		vec![
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::Equal,
 			Token::Equal,
-			Token::Value("2")
+			Token::Value("2".to_string())
 		]
 	),
 	(
 		invalid_number01, // 1.0.0
-		vec![Token::Value("1.0.0")]
+		vec![Token::Value("1.0.0".to_string())]
 	),
 	(
 		invalid_number02, // 1.0.0.0
-		vec![Token::Value("1.0.0.0")]
+		vec![Token::Value("1.0.0.0".to_string())]
 	),
 	(
 		invalid_number03, // 1a
-		vec![Token::Value("1a")]
+		vec![Token::Value("1a".to_string())]
 	),
 	(
 		invalid_number04, // 1.0a
-		vec![Token::Value("1.0a")]
+		vec![Token::Value("1.0a".to_string())]
 	),
 	(
 		invalid_number05, // 1.a0
-		vec![Token::Value("1.a0")]
+		vec![Token::Value("1.a0".to_string())]
 	),
 	(
 		invalid_variable01, // foo.
-		vec![Token::Value("foo.")]
+		vec![Token::Value("foo.".to_string())]
 	),
 	(
 		invalid_variable02, // foo.0
-		vec![Token::Value("foo.0")]
+		vec![Token::Value("foo.0".to_string())]
 	),
 	(
 		invalid_variable03, // foo[
-		vec![Token::Value("foo[")]
+		vec![Token::Value("foo[".to_string())]
 	),
 	(
 		invalid_variable04, // foo[0
-		vec![Token::Value("foo[0")]
+		vec![Token::Value("foo[0".to_string())]
 	)
 );

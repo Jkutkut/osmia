@@ -23,7 +23,7 @@ impl<'a> Lexer<'a> {
 			if delimiter_start_idx > 0 {
 				let chunk = &input[i..i + delimiter_start_idx];
 				if !self.can_be_omitted(chunk) {
-					tokens.push_back(Token::Raw(chunk));
+					tokens.push_back(Token::Raw(chunk.to_string()));
 				}
 				i += delimiter_start_idx;
 				if i >= input.len() {
@@ -48,7 +48,7 @@ impl<'a> Lexer<'a> {
 				let token = token?;
 				match Token::from_str(token) {
 					Some(t) => tokens.push_back(t),
-					None => tokens.push_back(Token::Value(token))
+					None => tokens.push_back(Token::Value(token.to_string()))
 				}
 			}
 			tokens.push_back(Token::DelimiterEnd);

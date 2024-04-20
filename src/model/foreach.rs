@@ -1,31 +1,31 @@
 use crate::model::{Variable, Stmt, ListOrVariable};
 
 #[derive(Debug, PartialEq)]
-pub struct ForEach<'a> {
-	var: Variable<'a>,
-	list: ListOrVariable<'a>,
-	body: Box<Stmt<'a>>,
+pub struct ForEach {
+	var: Variable,
+	list: ListOrVariable,
+	body: Box<Stmt>,
 }
 
-impl<'a> ForEach<'a> {
-	pub fn new(var: Variable<'a>, list: ListOrVariable<'a>, body: Stmt<'a>) -> Self {
+impl ForEach {
+	pub fn new(var: Variable, list: ListOrVariable, body: Stmt) -> Self {
 		Self { var, list, body: Box::new(body) }
 	}
 
-	pub fn variable(&self) -> &Variable<'a> {
+	pub fn variable(&self) -> &Variable {
 		&self.var
 	}
 
-	pub fn list(&self) -> &ListOrVariable<'a> {
+	pub fn list(&self) -> &ListOrVariable {
 		&self.list
 	}
 
-	pub fn body(&self) -> &Stmt<'a> {
+	pub fn body(&self) -> &Stmt {
 		&self.body
 	}
 }
 
-impl std::fmt::Display for ForEach<'_> {
+impl std::fmt::Display for ForEach {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "foreach ( {} in {} ) {{\n{}}}", self.var, self.list, self.body)
 	}

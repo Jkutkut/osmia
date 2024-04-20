@@ -6,14 +6,14 @@ use crate::model::{
 };
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum JsonExpression<'a> {
-	Expression(Expression<'a>),
-	Array(Vec<JsonExpression<'a>>),
-	Object(HashMap<String, JsonExpression<'a>>)
+pub enum JsonExpression {
+	Expression(Expression),
+	Array(Vec<JsonExpression>),
+	Object(HashMap<String, JsonExpression>)
 }
 
-impl std::fmt::Display for JsonExpression<'_> {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for JsonExpression {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		match self {
 			Self::Expression(e) => write!(f, "{}", e),
 			Self::Array(a) => write!(
@@ -34,7 +34,7 @@ impl std::fmt::Display for JsonExpression<'_> {
 	}
 }
 
-impl From<&JsonTree> for JsonExpression<'_> {
+impl From<&JsonTree> for JsonExpression {
 	fn from(tree: &JsonTree) -> Self {
 		match tree {
 			JsonTree::Number(n) => Self::Expression(Expression::Literal(Literal::Int(*n))),

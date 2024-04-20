@@ -11,31 +11,31 @@ impl<T> ExprVisitable<T> for Literal {
 	}
 }
 
-impl<T> ExprVisitable<T> for Variable<'_> {
+impl<T> ExprVisitable<T> for Variable {
 	fn accept(&self, visitor: &dyn ExprVisitor<T>) -> T {
 		visitor.visit_variable(self)
 	}
 }
 
-impl<T> ExprVisitable<T> for Grouping<'_> {
+impl<T> ExprVisitable<T> for Grouping {
 	fn accept(&self, visitor: &dyn ExprVisitor<T>) -> T {
 		visitor.visit_grouping(self)
 	}
 }
 
-impl<T> ExprVisitable<T> for Unary<'_> {
+impl<T> ExprVisitable<T> for Unary {
 	fn accept(&self, visitor: &dyn ExprVisitor<T>) -> T {
 		visitor.visit_unary(self)
 	}
 }
 
-impl<T> ExprVisitable<T> for Binary<'_> {
+impl<T> ExprVisitable<T> for Binary {
 	fn accept(&self, visitor: &dyn ExprVisitor<T>) -> T {
 		visitor.visit_binary(self)
 	}
 }
 
-impl<T> ExprVisitable<T> for Expression<'_> {
+impl<T> ExprVisitable<T> for Expression {
 	fn accept(&self, visitor: &dyn ExprVisitor<T>) -> T {
 		match self {
 			Expression::Literal(literal) => literal.accept(visitor),

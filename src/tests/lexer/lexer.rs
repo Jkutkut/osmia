@@ -11,14 +11,14 @@ fn lexer() -> Lexer<'static> {
 
 #[cfg(test)]
 fn check_result(
-	real: Result<LinkedList<Token<'_>>, String>,
-	expected: Vec<Token<'_>>
+	real: Result<LinkedList<Token>, String>,
+	expected: Vec<Token>
 ) {
 	if let Err(err) = real {
 		panic!("Error: {}", err);
 	}
 	let real = real.unwrap();
-	let real = real.into_iter().collect::<Vec<Token<'_>>>();
+	let real = real.into_iter().collect::<Vec<Token>>();
 	println!("real    : {:?}", real);
 	println!("expected: {:?}", expected);
 	for (real, expected) in real.iter().zip(expected.iter()) {
@@ -32,7 +32,7 @@ fn check_result(
 #[cfg(test)]
 fn lexer_test(
 	input: &str,
-	expected: Vec<Token<'_>>
+	expected: Vec<Token>
 ) {
 	let lexer = lexer();
 	let result = lexer.scan(input);
@@ -63,7 +63,7 @@ macro_tests!(
 		"{{1}}",
 		vec![
 			Token::DelimiterStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -73,7 +73,7 @@ macro_tests!(
 		"{{1.0}}",
 		vec![
 			Token::DelimiterStart,
-			Token::Value("1.0"),
+			Token::Value("1.0".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -83,7 +83,7 @@ macro_tests!(
 		"{{true}}",
 		vec![
 			Token::DelimiterStart,
-			Token::Value("true"),
+			Token::Value("true".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -93,7 +93,7 @@ macro_tests!(
 		"{{false}}",
 		vec![
 			Token::DelimiterStart,
-			Token::Value("false"),
+			Token::Value("false".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -103,7 +103,7 @@ macro_tests!(
 		"{{null}}",
 		vec![
 			Token::DelimiterStart,
-			Token::Value("null"),
+			Token::Value("null".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -113,7 +113,7 @@ macro_tests!(
 		"{{\"hello world\"}}",
 		vec![
 			Token::DelimiterStart,
-			Token::Value(r#""hello world""#),
+			Token::Value(r#""hello world""#.to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -123,9 +123,9 @@ macro_tests!(
 		"{{1}} test",
 		vec![
 			Token::DelimiterStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::DelimiterEnd,
-			Token::Raw(" test"),
+			Token::Raw(" test".to_string()),
 			Token::Eof
 		]
 	),
@@ -133,9 +133,9 @@ macro_tests!(
 		str_expr,
 		"test {{123}}",
 		vec![
-			Token::Raw("test "),
+			Token::Raw("test ".to_string()),
 			Token::DelimiterStart,
-			Token::Value("123"),
+			Token::Value("123".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -144,11 +144,11 @@ macro_tests!(
 		str_expr_str,
 		"test {{true}} test",
 		vec![
-			Token::Raw("test "),
+			Token::Raw("test ".to_string()),
 			Token::DelimiterStart,
-			Token::Value("true"),
+			Token::Value("true".to_string()),
 			Token::DelimiterEnd,
-			Token::Raw(" test"),
+			Token::Raw(" test".to_string()),
 			Token::Eof
 		]
 	),
@@ -157,11 +157,11 @@ macro_tests!(
 		"{{123}} test {{456}}",
 		vec![
 			Token::DelimiterStart,
-			Token::Value("123"),
+			Token::Value("123".to_string()),
 			Token::DelimiterEnd,
-			Token::Raw(" test "),
+			Token::Raw(" test ".to_string()),
 			Token::DelimiterStart,
-			Token::Value("456"),
+			Token::Value("456".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -170,19 +170,19 @@ macro_tests!(
 		multiple_expr,
 		"test {{1}}tcc{{true}}vvvvv{{false}}aaaa",
 		vec![
-			Token::Raw("test "),
+			Token::Raw("test ".to_string()),
 			Token::DelimiterStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::DelimiterEnd,
-			Token::Raw("tcc"),
+			Token::Raw("tcc".to_string()),
 			Token::DelimiterStart,
-			Token::Value("true"),
+			Token::Value("true".to_string()),
 			Token::DelimiterEnd,
-			Token::Raw("vvvvv"),
+			Token::Raw("vvvvv".to_string()),
 			Token::DelimiterStart,
-			Token::Value("false"),
+			Token::Value("false".to_string()),
 			Token::DelimiterEnd,
-			Token::Raw("aaaa"),
+			Token::Raw("aaaa".to_string()),
 			Token::Eof
 		]
 	),
@@ -191,11 +191,11 @@ macro_tests!(
 		"{{\n\r\t 1\n+\n  1\t-1}}",
 		vec![
 			Token::DelimiterStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Minus,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -312,11 +312,11 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::ArrayStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Comma,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::ArrayEnd,
 			Token::DelimiterEnd,
 			Token::Eof
@@ -328,9 +328,9 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::ObjectStart,
-			Token::Value(r#""a""#),
+			Token::Value(r#""a""#.to_string()),
 			Token::Colon,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::ObjectEnd,
 			Token::DelimiterEnd,
 			Token::Eof
@@ -342,16 +342,16 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::ObjectStart,
-			Token::Value(r#""a""#),
+			Token::Value(r#""a""#.to_string()),
 			Token::Colon,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
-			Token::Value(r#""b""#),
+			Token::Value(r#""b""#.to_string()),
 			Token::Colon,
 			Token::ObjectStart,
-			Token::Value(r#""b""#),
+			Token::Value(r#""b""#.to_string()),
 			Token::Colon,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::ObjectEnd,
 			Token::ObjectEnd,
 			Token::DelimiterEnd,
@@ -364,20 +364,20 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::ObjectStart,
-			Token::Value(r#""a""#),
+			Token::Value(r#""a""#.to_string()),
 			Token::Colon,
 			Token::ArrayStart,
 			Token::ArrayEnd,
 			Token::Comma,
-			Token::Value(r#""b""#),
+			Token::Value(r#""b""#.to_string()),
 			Token::Colon,
 			Token::ObjectStart,
-			Token::Value(r#""c""#),
+			Token::Value(r#""c""#.to_string()),
 			Token::Colon,
 			Token::ObjectStart,
-			Token::Value(r#""d""#),
+			Token::Value(r#""d""#.to_string()),
 			Token::Colon,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::ObjectEnd,
 			Token::ObjectEnd,
 			Token::ObjectEnd,
@@ -392,16 +392,16 @@ macro_tests!(
 			Token::DelimiterStart,
 			Token::ArrayStart,
 			Token::ObjectStart,
-			Token::Value(r#""a""#),
+			Token::Value(r#""a""#.to_string()),
 			Token::Colon,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::ObjectEnd,
 			Token::Comma,
 			Token::ArrayStart,
 			Token::ObjectStart,
-			Token::Value(r#""b""#),
+			Token::Value(r#""b""#.to_string()),
 			Token::Colon,
-			Token::Value(r#""2""#),
+			Token::Value(r#""2""#.to_string()),
 			Token::ObjectEnd,
 			Token::ArrayEnd,
 			Token::ArrayEnd,
@@ -415,7 +415,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::ArrayStart,
-			Token::Value("null"),
+			Token::Value("null".to_string()),
 			Token::ArrayEnd,
 			Token::DelimiterEnd,
 			Token::Eof
@@ -428,11 +428,11 @@ macro_tests!(
 			Token::DelimiterStart,
 			Token::ArrayStart,
 			Token::ArrayStart,
-			Token::Value("true"),
+			Token::Value("true".to_string()),
 			Token::ArrayEnd,
 			Token::Comma,
 			Token::ArrayStart,
-			Token::Value("false"),
+			Token::Value("false".to_string()),
 			Token::ArrayEnd,
 			Token::ArrayEnd,
 			Token::DelimiterEnd,
@@ -445,9 +445,9 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::ObjectStart,
-			Token::Value(r#""a""#),
+			Token::Value(r#""a""#.to_string()),
 			Token::Colon,
-			Token::Value("true"),
+			Token::Value("true".to_string()),
 			Token::ObjectEnd,
 			Token::DelimiterEnd,
 			Token::Eof
@@ -459,9 +459,9 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::GroupingStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::GroupingEnd,
 			Token::DelimiterEnd,
 			Token::Eof
@@ -473,17 +473,17 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::GroupingStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::GroupingEnd,
 			Token::DelimiterEnd,
-			Token::Raw(" "),
+			Token::Raw(" ".to_string()),
 			Token::DelimiterStart,
 			Token::GroupingStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Plus,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::GroupingEnd,
 			Token::DelimiterEnd,
 			Token::Eof

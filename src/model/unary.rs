@@ -2,13 +2,13 @@ use super::Expression;
 use crate::lexer::Token;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Unary<'a> {
-	pub operator: Token<'a>,
-	pub right: Box<Expression<'a>>
+pub struct Unary {
+	pub operator: Token,
+	pub right: Box<Expression>
 }
 
-impl<'a> Unary<'a> {
-	pub fn new(operator: Token<'a>, right: Expression<'a>) -> Result<Unary<'a>, String> {
+impl Unary {
+	pub fn new(operator: Token, right: Expression) -> Result<Unary, String> {
 		match operator {
 			Token::Minus | Token::Not | Token::Plus => Ok(Unary {
 				operator: operator,
@@ -19,7 +19,7 @@ impl<'a> Unary<'a> {
 	}
 }
 
-impl std::fmt::Display for Unary<'_> {
+impl std::fmt::Display for Unary {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		write!(f, "{}{}", self.operator, self.right)
 	}

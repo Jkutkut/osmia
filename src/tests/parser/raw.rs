@@ -8,8 +8,8 @@ use super::{test_parser};
 #[test]
 fn basic_test() {
 	test_parser(
-		vec![Token::Raw("Hello World!")],
-		Stmt::Raw("Hello World!"),
+		vec![Token::Raw("Hello World!".to_string())],
+		Stmt::Raw("Hello World!".to_string()),
 	);
 }
 
@@ -17,12 +17,12 @@ fn basic_test() {
 fn basic_test2() {
 	test_parser(
 		vec![
-			Token::Raw("Hello World!"),
-			Token::Raw("Hello World!"),
+			Token::Raw("Hello World!".to_string()),
+			Token::Raw("Hello World!".to_string()),
 		],
 		Stmt::Block(Block::new(vec![
-			Stmt::Raw("Hello World!"),
-			Stmt::Raw("Hello World!"),
+			Stmt::Raw("Hello World!".to_string()),
+			Stmt::Raw("Hello World!".to_string()),
 		])),
 	);
 }

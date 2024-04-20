@@ -9,7 +9,7 @@ use crate::syntax_tree::{
 
 // Stmt
 
-impl<T> Visitable<T> for Stmt<'_> {
+impl<T> Visitable<T> for Stmt {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		match self {
 			Stmt::Block(blocks) => visitor.visit_block(blocks),
@@ -26,25 +26,25 @@ impl<T> Visitable<T> for Stmt<'_> {
 	}
 }
 
-impl<T> Visitable<T> for Assign<'_> {
+impl<T> Visitable<T> for Assign {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_assign(self)
 	}
 }
 
-impl<T> Visitable<T> for If<'_> {
+impl<T> Visitable<T> for If {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_if(self)
 	}
 }
 
-impl<T> Visitable<T> for ConditionalBlock<'_> {
+impl<T> Visitable<T> for ConditionalBlock {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_conditional_block(self)
 	}
 }
 
-impl<T> Visitable<T> for ForEach<'_> {
+impl<T> Visitable<T> for ForEach {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_foreach(self)
 	}
@@ -52,7 +52,7 @@ impl<T> Visitable<T> for ForEach<'_> {
 
 // Json
 
-impl<T> Visitable<T> for JsonExpression<'_> {
+impl<T> Visitable<T> for JsonExpression {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		match self {
 			JsonExpression::Expression(expr) => expr.accept(visitor),
@@ -62,7 +62,7 @@ impl<T> Visitable<T> for JsonExpression<'_> {
 	}
 }
 
-impl<T> Visitable<T> for ListOrVariable<'_> {
+impl<T> Visitable<T> for ListOrVariable {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		match self {
 			ListOrVariable::List(json) => match json {
@@ -82,31 +82,31 @@ impl<T> Visitable<T> for Literal {
 	}
 }
 
-impl<T> Visitable<T> for Variable<'_> {
+impl<T> Visitable<T> for Variable {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_variable(self)
 	}
 }
 
-impl<T> Visitable<T> for Grouping<'_> {
+impl<T> Visitable<T> for Grouping {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_grouping(self)
 	}
 }
 
-impl<T> Visitable<T> for Unary<'_> {
+impl<T> Visitable<T> for Unary {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_unary(self)
 	}
 }
 
-impl<T> Visitable<T> for Binary<'_> {
+impl<T> Visitable<T> for Binary {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		visitor.visit_binary(self)
 	}
 }
 
-impl<T> Visitable<T> for Expression<'_> {
+impl<T> Visitable<T> for Expression {
 	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
 		match self {
 			Expression::Literal(literal) => literal.accept(visitor),

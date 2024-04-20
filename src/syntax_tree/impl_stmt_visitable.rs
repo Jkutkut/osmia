@@ -5,7 +5,7 @@ use crate::syntax_tree::{
 	StmtVisitable, StmtVisitor
 };
 
-impl<T> StmtVisitable<T> for Stmt<'_> {
+impl<T> StmtVisitable<T> for Stmt {
 	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		match self {
 			Stmt::Block(blocks) => visitor.visit_block(blocks),
@@ -22,25 +22,25 @@ impl<T> StmtVisitable<T> for Stmt<'_> {
 	}
 }
 
-impl<T> StmtVisitable<T> for Assign<'_> {
+impl<T> StmtVisitable<T> for Assign {
 	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		visitor.visit_assign(self)
 	}
 }
 
-impl<T> StmtVisitable<T> for If<'_> {
+impl<T> StmtVisitable<T> for If {
 	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		visitor.visit_if(self)
 	}
 }
 
-impl<T> StmtVisitable<T> for ConditionalBlock<'_> {
+impl<T> StmtVisitable<T> for ConditionalBlock {
 	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		visitor.visit_conditional_block(self)
 	}
 }
 
-impl<T> StmtVisitable<T> for ForEach<'_> {
+impl<T> StmtVisitable<T> for ForEach {
 	fn accept(&self, visitor: &mut dyn StmtVisitor<T>) -> T {
 		visitor.visit_foreach(self)
 	}

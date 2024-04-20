@@ -14,11 +14,11 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::For,
-			Token::Value("a"),
+			Token::Value("a".to_string()),
 			Token::In,
-			Token::Value("lst"),
+			Token::Value("lst".to_string()),
 			Token::DelimiterEnd,
-			Token::Raw("This line is constant"),
+			Token::Raw("This line is constant".to_string()),
 			Token::DelimiterStart,
 			Token::Done,
 			Token::DelimiterEnd
@@ -26,7 +26,7 @@ macro_tests!(
 		Stmt::ForEach(ForEach::new(
 			Variable::from_str("a").unwrap(),
 			ListOrVariable::Variable(Variable::from_str("lst").unwrap()),
-			Stmt::Raw("This line is constant")
+			Stmt::Raw("This line is constant".to_string())
 		))
 	),
 	(
@@ -34,19 +34,19 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::For,
-			Token::Value("arr"),
+			Token::Value("arr".to_string()),
 			Token::In,
-			Token::Value("matrix"),
+			Token::Value("matrix".to_string()),
 			Token::DelimiterEnd,
 			Token::DelimiterStart,
 			Token::For,
-			Token::Value("cell"),
+			Token::Value("cell".to_string()),
 			Token::In,
-			Token::Value("arr"),
+			Token::Value("arr".to_string()),
 			Token::DelimiterEnd,
 			Token::DelimiterStart,
 			Token::Print,
-			Token::Value("cell"),
+			Token::Value("cell".to_string()),
 			Token::DelimiterEnd,
 			Token::DelimiterStart,
 			Token::Done,
@@ -74,19 +74,19 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::For,
-			Token::Value("a"),
+			Token::Value("a".to_string()),
 			Token::In,
 			Token::ArrayStart,
-			Token::Value("1"),
+			Token::Value("1".to_string()),
 			Token::Comma,
-			Token::Value("2"),
+			Token::Value("2".to_string()),
 			Token::Comma,
-			Token::Value("3"),
+			Token::Value("3".to_string()),
 			Token::ArrayEnd,
 			Token::DelimiterEnd,
 			Token::DelimiterStart,
 			Token::Print,
-			Token::Value("a"),
+			Token::Value("a".to_string()),
 			Token::DelimiterEnd,
 			Token::DelimiterStart,
 			Token::Done,
@@ -112,9 +112,9 @@ macro_tests!(
 			vec![
 			Token::DelimiterStart,
 			Token::For,
-			Token::Value("a"),
+			Token::Value("a".to_string()),
 			Token::In,
-			Token::Value("lst"),
+			Token::Value("lst".to_string()),
 			Token::DelimiterEnd
 		]
 	),
@@ -123,7 +123,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::For,
-			Token::Value("a"),
+			Token::Value("a".to_string()),
 			Token::In
 		]
 	),
@@ -132,7 +132,7 @@ macro_tests!(
 		vec![
 			Token::DelimiterStart,
 			Token::For,
-			Token::Value("a")
+			Token::Value("a".to_string())
 		]
 	),
 	(

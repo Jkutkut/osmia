@@ -2,18 +2,18 @@ use super::Expression;
 use crate::lexer::Token;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Binary<'a> {
-	pub left: Box<Expression<'a>>,
-	pub operator: Token<'a>,
-	pub right: Box<Expression<'a>>
+pub struct Binary {
+	pub left: Box<Expression>,
+	pub operator: Token,
+	pub right: Box<Expression>
 }
 
-impl<'a> Binary<'a> {
+impl Binary {
 	pub fn new(
-		left: Expression<'a>,
-		operator: Token<'a>,
-		right: Expression<'a>
-	) -> Result<Binary<'a>, String> {
+		left: Expression,
+		operator: Token,
+		right: Expression
+	) -> Result<Binary, String> {
 		if !operator.is_binary_operator() {
 			return Err(format!("Invalid binary operator: {}", operator));
 		}
@@ -25,7 +25,7 @@ impl<'a> Binary<'a> {
 	}
 }
 
-impl std::fmt::Display for Binary<'_> {
+impl std::fmt::Display for Binary {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		write!(f, "{} {} {}", self.operator, self.left, self.right)
 	}

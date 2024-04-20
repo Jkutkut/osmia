@@ -1,12 +1,11 @@
 #[derive(Debug, Clone, PartialEq)]
-pub enum Token<'a> {
+pub enum Token {
 	Eof,
 	DelimiterStart,
 	DelimiterEnd,
 
-	Raw(&'a str),
-
-	Value(&'a str),
+	Raw(String),
+	Value(String),
 
 	// Statements
 	Print,
@@ -63,7 +62,7 @@ pub enum Token<'a> {
 	ArrayEnd,
 }
 
-impl Token<'_> {
+impl Token {
 	pub fn from_str(s: &str) -> Option<Token> {
 		match s {
 			// Delimiters
@@ -134,7 +133,7 @@ impl Token<'_> {
 	}
 }
 
-impl std::fmt::Display for Token<'_> {
+impl std::fmt::Display for Token {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Token::Eof => write!(f, "EOF"),

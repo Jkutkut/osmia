@@ -3,34 +3,34 @@ use crate::lexer::VariableLexer;
 use crate::model::VariableKey;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Variable<'a> {
-	raw: &'a str,
-	keys: LinkedList<VariableKey<'a>>,
+pub struct Variable {
+	raw: String,
+	keys: LinkedList<VariableKey>,
 }
 
-impl<'a> Variable<'a> {
-	pub fn new(raw: &'a str, lst: LinkedList<VariableKey<'a>>) -> Self {
+impl Variable {
+	pub fn new(raw: &str, lst: LinkedList<VariableKey>) -> Self {
 		Self {
-			raw,
+			raw: raw.to_string(),
 			keys: lst
 		}
 	}
 
 	/// Parses a str into a Variable.
 	/// Checks if the variable is valid.
-	pub fn from_str(raw: &'a str) -> Option<Self> {
+	pub fn from_str(raw: &str) -> Option<Self> {
 		Some(Self::new(
 			raw,
 			VariableLexer::lex(raw)?
 		))
 	}
 
-	pub fn keys(&self) -> &LinkedList<VariableKey<'a>> {
+	pub fn keys(&self) -> &LinkedList<VariableKey> {
 		&self.keys
 	}
 }
 
-impl std::fmt::Display for Variable<'_> {
+impl std::fmt::Display for Variable {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		write!(f, "{}", self.raw)
 	}

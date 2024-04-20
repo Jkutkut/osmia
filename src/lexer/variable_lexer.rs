@@ -3,14 +3,14 @@ use crate::model::VariableKey;
 
 pub struct VariableLexer;
 
-impl<'a> VariableLexer {
-	pub fn lex(raw: &'a str) -> Option<LinkedList<VariableKey<'a>>> {
+impl VariableLexer {
+	pub fn lex(raw: &str) -> Option<LinkedList<VariableKey>> {
 		VariableLexer::lex_str(raw)
 	}
 }
 
-impl<'a> VariableLexer {
-	fn get_key_str(value: &'a str, start: usize, end: usize) -> Option<&'a str> {
+impl VariableLexer {
+	fn get_key_str(value: &str, start: usize, end: usize) -> Option<& str> {
 		if start >= end {
 			return None;
 		}
@@ -28,7 +28,7 @@ impl<'a> VariableLexer {
 		c.is_alphabetic() || c == '_'
 	}
 
-	fn is_valid_key(value: &'a str) -> bool {
+	fn is_valid_key(value: & str) -> bool {
 		if value.is_empty() {
 			return false;
 		}
@@ -46,10 +46,10 @@ impl<'a> VariableLexer {
 
 	/// Attempts to get a key as a string.
 	/// The key is validated by the `is_valid_key` function.
-	fn get_as_key(value: &'a str, start: usize, end: usize) -> Option<VariableKey<'a>> {
+	fn get_as_key(value: & str, start: usize, end: usize) -> Option<VariableKey> {
 		let key = Self::get_key_str(value, start, end)?;
 		match Self::is_valid_key(key) {
-			true => Some(VariableKey::Key(key)),
+			true => Some(VariableKey::Key(key.to_string())),
 			false => None
 		}
 	}
@@ -58,7 +58,7 @@ impl<'a> VariableLexer {
 	///
 	/// ## Example:
 	/// If the variable is `foo[2]`, the only index key is `2`.
-	fn get_as_index(value: &'a str, start: usize, end: usize) -> Option<VariableKey<'a>> {
+	fn get_as_index(value: & str, start: usize, end: usize) -> Option<VariableKey> {
 		let key = Self::get_key_str(value, start, end)?;
 		match key.parse::<usize>() {
 			Ok(index) => Some(VariableKey::Index(index)),
@@ -68,7 +68,7 @@ impl<'a> VariableLexer {
 
 	/// Lexes a variable.
 	/// During lexing, the variable is validated.
-	fn lex_str(raw: &'a str) -> Option<LinkedList<VariableKey<'a>>> {
+	fn lex_str(raw: & str) -> Option<LinkedList<VariableKey>> {
 		let mut keys = LinkedList::new();
 		let mut should_be_index = false;
 		let mut i: usize = 0;

@@ -1,5 +1,5 @@
 #[derive(Debug, PartialEq, Clone)]
-pub enum VariableKey<'a> {
-	Key(&'a str),
+pub enum VariableKey {
+	Key(String),
 	Index(usize),
 }

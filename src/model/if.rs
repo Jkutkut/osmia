@@ -1,17 +1,17 @@
 use crate::model::{Stmt, ConditionalBlock};
 
 #[derive(Debug, PartialEq)]
-pub struct If<'a> {
-	_if: ConditionalBlock<'a>,
-	_elseifs: Option<Vec<ConditionalBlock<'a>>>,
-	_else: Option<Box<Stmt<'a>>>,
+pub struct If {
+	_if: ConditionalBlock,
+	_elseifs: Option<Vec<ConditionalBlock>>,
+	_else: Option<Box<Stmt>>,
 }
 
-impl<'a> If<'a> {
+impl If {
 	pub fn new(
-		if_block: ConditionalBlock<'a>,
-		elseifs: Option<Vec<ConditionalBlock<'a>>>,
-		else_block: Option<Stmt<'a>>
+		if_block: ConditionalBlock,
+		elseifs: Option<Vec<ConditionalBlock>>,
+		else_block: Option<Stmt>
 	) -> Self {
 		let else_block = else_block.map(Box::new);
 		Self {
@@ -21,20 +21,20 @@ impl<'a> If<'a> {
 		}
 	}
 
-	pub fn if_block(&self) -> &ConditionalBlock<'a> {
+	pub fn if_block(&self) -> &ConditionalBlock {
 		&self._if
 	}
 
-	pub fn elseifs(&self) -> &Option<Vec<ConditionalBlock<'a>>> {
+	pub fn elseifs(&self) -> &Option<Vec<ConditionalBlock>> {
 		&self._elseifs
 	}
 
-	pub fn else_block(&self) -> &Option<Box<Stmt<'a>>> {
+	pub fn else_block(&self) -> &Option<Box<Stmt>> {
 		&self._else
 	}
 }
 
-impl std::fmt::Display for If<'_> {
+impl std::fmt::Display for If {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "if {}", self._if)?;
 		if let Some(elseifs) = &self._elseifs {

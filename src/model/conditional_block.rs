@@ -1,26 +1,26 @@
 use crate::model::{Expression, Stmt};
 
 #[derive(Debug, PartialEq)]
-pub struct ConditionalBlock<'a> {
-	cond: Expression<'a>,
-	body: Box<Stmt<'a>>,
+pub struct ConditionalBlock {
+	cond: Expression,
+	body: Box<Stmt>,
 }
 
-impl<'a> ConditionalBlock<'a> {
-	pub fn new(cond: Expression<'a>, body: Stmt<'a>) -> Self {
+impl ConditionalBlock {
+	pub fn new(cond: Expression, body: Stmt) -> Self {
 		Self { cond, body: Box::new(body) }
 	}
 
-	pub fn condition(&self) -> &Expression<'a> {
+	pub fn condition(&self) -> &Expression {
 		&self.cond
 	}
 
-	pub fn body(&self) -> &Stmt<'a> {
+	pub fn body(&self) -> &Stmt {
 		&self.body
 	}
 }
 
-impl std::fmt::Display for ConditionalBlock<'_> {
+impl std::fmt::Display for ConditionalBlock {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "( {} ) {{\n{}}}", self.cond, self.body)
 	}

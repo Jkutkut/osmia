@@ -136,7 +136,7 @@ impl Ctx {
 				format!("Attempted to use index {} in object", i)
 			)
 		};
-		match map.get(*key) {
+		match map.get(key) {
 			None => Err(
 				format!("Key {} not found in object", key)
 			),
@@ -154,7 +154,7 @@ impl Ctx {
 				format!("Attempted to use index {} in object", i)
 			)
 		};
-		match map.get_mut(*key) {
+		match map.get_mut(key) {
 			None => Err(
 				format!("Key {} not found in object", key)
 			),

@@ -11,7 +11,7 @@ use crate::macro_tests;
 #[cfg(test)]
 fn test_visit(
 	expected: &str,
-	expression: Expression<'_>
+	expression: Expression
 ) {
 	let actual = expression.accept(&SyntaxTreePrinter);
 	assert_eq!(actual, expected);
@@ -19,7 +19,7 @@ fn test_visit(
 
 fn test_stmt(
 	expected: &str,
-	expression: Stmt<'_>
+	expression: Stmt
 ) {
 	let actual = expression.accept(&SyntaxTreePrinter);
 	assert_eq!(actual, expected);
@@ -152,7 +152,7 @@ macro_tests!(
 	(
 		test_raw,
 		"Hello, world!",
-		Stmt::Raw("Hello, world!")
+		Stmt::Raw("Hello, world!".to_string())
 	),
 	(
 		test_print,

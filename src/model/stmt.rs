@@ -3,20 +3,20 @@ use crate::model::{
 };
 
 #[derive(Debug, PartialEq)]
-pub enum Stmt<'a> {
-	Block(Block<'a>),
-	Raw(&'a str),
-	Print(Expression<'a>),
-	Expression(Expression<'a>),
-	Assign(Assign<'a>),
-	If(If<'a>),
-	While(ConditionalBlock<'a>),
-	ForEach(ForEach<'a>),
+pub enum Stmt {
+	Block(Block),
+	Raw(String),
+	Print(Expression),
+	Expression(Expression),
+	Assign(Assign),
+	If(If),
+	While(ConditionalBlock),
+	ForEach(ForEach),
 	Break,
 	Continue,
 }
 
-impl std::fmt::Display for Stmt<'_> {
+impl std::fmt::Display for Stmt {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Stmt::Break => write!(f, "break"),

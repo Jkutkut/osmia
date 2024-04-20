@@ -40,19 +40,19 @@ use crate::model::{
 /// primary        →  Literal | Variable | grouping;
 /// grouping       →  "(" expression ")" ;
 /// ```
-pub struct Parser<'a> {
-	tokens: Vec<Token<'a>>,
+pub struct Parser {
+	tokens: Vec<Token>,
 	current: usize,
 }
 
 // Public methods
 
-impl<'a> Parser<'a> {
+impl Parser {
 	/// Constructor for the parser.
 	///
 	/// # Arguments
 	/// `tokens` - List of tokens to parse.
-	pub fn new(tokens: Vec<Token<'a>>) -> Self {
+	pub fn new(tokens: Vec<Token>) -> Self {
 		Self {
 			tokens,
 			current: 0,
@@ -63,7 +63,7 @@ impl<'a> Parser<'a> {
 	///
 	/// # Returns
 	/// `Result<Stmt, String>` - The syntax tree or an error message.
-	pub fn parse(&mut self) -> Result<Stmt<'a>, String> {
+	pub fn parse(&mut self) -> Result<Stmt, String> {
 		let code = self.code()?;
 		if !self.is_at_end() {
 			return Err(self.error("Expected end of program"));
@@ -74,18 +74,18 @@ impl<'a> Parser<'a> {
 
 // Tools
 
-impl<'a> Parser<'a> {
+impl Parser {
 	fn new_binary(
-		left: Expression<'a>,
-		operator: Token<'a>,
-		right: Expression<'a>
-	) -> Result<Expression<'a>, String> {
+		left: Expression,
+		operator: Token,
+		right: Expression
+	) -> Result<Expression, String> {
 		Ok(Expression::Binary(Binary::new(
 			left, operator, right
 		)?))
 	}
 
-	fn match_and_advance(&mut self, types: &[Token<'a>]) -> bool {
+	fn match_and_advance(&mut self, types: &[Token]) -> bool {
 		for token_type in types {
 			if self.check_current(token_type) {
 				self.advance();
@@ -95,11 +95,11 @@ impl<'a> Parser<'a> {
 		false
 	}
 
-	fn check_current(&self, token2compare: &Token<'a>) -> bool {
+	fn check_current(&self, token2compare: &Token) -> bool {
 		self.get_current() == token2compare
 	}
 
-	fn advance(&mut self) -> &Token<'a> {
+	fn advance(&mut self) -> &Token {
 		if !self.is_at_end() {
 			self.current += 1;
 		}
@@ -110,19 +110,19 @@ impl<'a> Parser<'a> {
 		self.check_current(&Token::Eof)
 	}
 
-	fn get_current(&self) -> &Token<'a> {
+	fn get_current(&self) -> &Token {
 		&self.tokens[self.current]
 	}
 
-	fn get_previous(&self) -> &Token<'a> {
+	fn get_previous(&self) -> &Token {
 		&self.tokens[self.current - 1]
 	}
 
 	fn consume(
 		&mut self,
-		token: Token<'a>,
+		token: Token,
 		message: &str
-	) -> Result<Token<'a>, String> {
+	) -> Result<Token, String> {
 		if self.check_current(&token) {
 			return Ok(self.advance().clone());
 		}
@@ -145,16 +145,16 @@ impl<'a> Parser<'a> {
 
 // Grammar: Statements
 
-impl<'a> Parser<'a> {
-	fn code(&mut self) -> Result<Stmt<'a>, String> {
+impl Parser {
+	fn code(&mut self) -> Result<Stmt, String> {
 		self.block(None)
 	}
 
-	fn block(&mut self, end_tokens: Option<Vec<Token>>) -> Result<Stmt<'a>, String> {
-		let mut statements: Vec<Stmt<'a>> = Vec::new();
+	fn block(&mut self, end_tokens: Option<Vec<Token>>) -> Result<Stmt, String> {
+		let mut statements: Vec<Stmt> = Vec::new();
 		while !self.is_at_end() {
 			match self.advance() {
-				Token::Raw(r) => statements.push(Stmt::Raw(r)),
+				Token::Raw(r) => statements.push(Stmt::Raw(r.to_string())),
 				Token::DelimiterStart => match self.block_stmt(&end_tokens) {
 					Ok(Some(stmt)) => statements.push(stmt),
 					Ok(None) => break,
@@ -171,7 +171,7 @@ impl<'a> Parser<'a> {
 		Ok(Stmt::Block(Block::new(statements)))
 	}
 
-	fn block_stmt(&mut self, end_tokens: &Option<Vec<Token>>) -> Result<Option<Stmt<'a>>, String> {
+	fn block_stmt(&mut self, end_tokens: &Option<Vec<Token>>) -> Result<Option<Stmt>, String> {
 		let stmt = match self.get_current() {
 			Token::Print => self.print()?,
 			Token::Assign => self.assign()?,
@@ -196,21 +196,21 @@ impl<'a> Parser<'a> {
 		Ok(Some(stmt))
 	}
 
-	fn print(&mut self) -> Result<Stmt<'a>, String> {
+	fn print(&mut self) -> Result<Stmt, String> {
 		self.advance();
 		let expression = self.expression()?;
 		Ok(Stmt::Print(expression))
 	}
 
-	fn statement(&mut self) -> Result<Stmt<'a>, String> {
+	fn statement(&mut self) -> Result<Stmt, String> {
 		let expression = self.expression()?;
 		Ok(Stmt::Expression(expression))
 	}
 
-	fn assign(&mut self) -> Result<Stmt<'a>, String> {
+	fn assign(&mut self) -> Result<Stmt, String> {
 		self.advance();
 		let variable = match self.get_current() {
-			Token::Value(name) => self.variable(name)?,
+			Token::Value(name) => self.variable(&name.to_string())?,
 			_ => {
 				return Err(self.error("Expected variable before '=' in assign"));
 			}
@@ -223,10 +223,10 @@ impl<'a> Parser<'a> {
 		Ok(Stmt::Assign(Assign::new(variable, json)))
 	}
 
-	fn foreach(&mut self) -> Result<Stmt<'a>, String> {
+	fn foreach(&mut self) -> Result<Stmt, String> {
 		self.advance();
 		let variable = match self.get_current() {
-			Token::Value(name) => self.variable(name)?,
+			Token::Value(name) => self.variable(&name.to_string())?,
 			_ => return Err(self.error(
 				&format!("Expected variable after '{}' in {} statement", Token::For, Token::For)
 			))
@@ -246,7 +246,7 @@ impl<'a> Parser<'a> {
 		Ok(Stmt::ForEach(ForEach::new(variable, list, block)))
 	}
 
-	fn if_stmt(&mut self) -> Result<Stmt<'a>, String> {
+	fn if_stmt(&mut self) -> Result<Stmt, String> {
 		self.advance();
 		let if_block = self.conditional(vec![Token::Else, Token::ElseIf, Token::Fi])?;
 		let mut else_if_blocks = Vec::new();
@@ -274,12 +274,12 @@ impl<'a> Parser<'a> {
 		)))
 	}
 
-	fn while_stmt(&mut self) -> Result<Stmt<'a>, String> {
+	fn while_stmt(&mut self) -> Result<Stmt, String> {
 		self.advance();
 		Ok(Stmt::While(self.conditional(vec![Token::Done])?))
 	}
 
-	fn conditional(&mut self, end_tokens: Vec<Token>) -> Result<ConditionalBlock<'a>, String> {
+	fn conditional(&mut self, end_tokens: Vec<Token>) -> Result<ConditionalBlock, String> {
 		let expr = self.expression()?;
 		self.consume(
 			Token::DelimiterEnd,
@@ -305,20 +305,20 @@ impl<'a> Parser<'a> {
 		Ok(is_end_token)
 	}
 
-	fn continue_stmt(&mut self) -> Stmt<'a> {
+	fn continue_stmt(&mut self) -> Stmt {
 		self.advance();
 		Stmt::Continue
 	}
 
-	fn break_stmt(&mut self) -> Stmt<'a> {
+	fn break_stmt(&mut self) -> Stmt {
 		self.advance();
 		Stmt::Break
 	}
 }
 
 // Grammar: Json
-impl<'a> Parser<'a> {
-	fn json_expression(&mut self) -> Result<JsonExpression<'a>, String> {
+impl Parser {
+	fn json_expression(&mut self) -> Result<JsonExpression, String> {
 		match self.get_current() {
 			Token::ObjectStart => self.json_object(),
 			Token::ArrayStart => self.json_array(),
@@ -328,7 +328,7 @@ impl<'a> Parser<'a> {
 		}
 	}
 
-	fn json_array(&mut self) -> Result<JsonExpression<'a>, String> {
+	fn json_array(&mut self) -> Result<JsonExpression, String> {
 		self.consume(
 			Token::ArrayStart,
 			&format!("Expected '{}' before array", Token::ArrayStart)
@@ -350,7 +350,7 @@ impl<'a> Parser<'a> {
 		Ok(JsonExpression::Array(elements))
 	}
 
-	fn json_object(&mut self) -> Result<JsonExpression<'a>, String> {
+	fn json_object(&mut self) -> Result<JsonExpression, String> {
 		self.consume(
 			Token::ObjectStart,
 			&format!("Expected '{}' before object", Token::ObjectStart)
@@ -380,9 +380,9 @@ impl<'a> Parser<'a> {
 		Ok(JsonExpression::Object(object))
 	}
 
-	fn list_or_variable(&mut self) -> Result<ListOrVariable<'a>, String> {
+	fn list_or_variable(&mut self) -> Result<ListOrVariable, String> {
 		let result = match self.get_current() {
-			Token::Value(name) => ListOrVariable::Variable(self.variable(name)?),
+			Token::Value(name) => ListOrVariable::Variable(self.variable(&name.to_string())?),
 			Token::ArrayStart => ListOrVariable::List(self.json_array()?),
 			_ => return Err(self.error(
 				&format!("Expected variable or list after '{}' in {} statement", Token::In, Token::For)
@@ -394,12 +394,12 @@ impl<'a> Parser<'a> {
 
 // Grammar: Expression
 
-impl<'a> Parser<'a> {
-	fn expression(&mut self) -> Result<Expression<'a>, String> {
+impl Parser {
+	fn expression(&mut self) -> Result<Expression, String> {
 		self.equality()
 	}
 
-	fn equality(&mut self) -> Result<Expression<'a>, String> {
+	fn equality(&mut self) -> Result<Expression, String> {
 		let mut expr = self.comparison()?;
 		while self.match_and_advance(&[Token::NotEqual, Token::Equal]) {
 			let operator = self.get_previous().clone();
@@ -411,7 +411,7 @@ impl<'a> Parser<'a> {
 		Ok(expr)
 	}
 
-	fn comparison(&mut self) -> Result<Expression<'a>, String> {
+	fn comparison(&mut self) -> Result<Expression, String> {
 		let mut expr = self.bool_op()?;
 		while self.match_and_advance(&[
 			Token::GreaterThan, Token::GreaterEqual,
@@ -426,7 +426,7 @@ impl<'a> Parser<'a> {
 		Ok(expr)
 	}
 
-	fn bool_op(&mut self) -> Result<Expression<'a>, String> {
+	fn bool_op(&mut self) -> Result<Expression, String> {
 		let mut expr = self.term()?;
 		while self.match_and_advance(&[Token::And, Token::Or]) {
 			let operator = self.get_previous().clone();
@@ -438,7 +438,7 @@ impl<'a> Parser<'a> {
 		Ok(expr)
 	}
 
-	fn term(&mut self) -> Result<Expression<'a>, String> {
+	fn term(&mut self) -> Result<Expression, String> {
 		let mut expr = self.factor()?;
 		while self.match_and_advance(&[Token::Minus, Token::Plus]) {
 			let operator = self.get_previous().clone();
@@ -450,7 +450,7 @@ impl<'a> Parser<'a> {
 		Ok(expr)
 	}
 
-	fn factor(&mut self) -> Result<Expression<'a>, String> {
+	fn factor(&mut self) -> Result<Expression, String> {
 		let mut expr = self.unary()?;
 		while self.match_and_advance(&[
 			Token::Multiply, Token::Divide, Token::Modulo
@@ -464,7 +464,7 @@ impl<'a> Parser<'a> {
 		Ok(expr)
 	}
 
-	fn unary(&mut self) -> Result<Expression<'a>, String> {
+	fn unary(&mut self) -> Result<Expression, String> {
 		if self.match_and_advance(&[Token::Not, Token::Minus, Token::Plus]) {
 			let operator = self.get_previous().clone();
 			let right = self.unary()?;
@@ -474,14 +474,14 @@ impl<'a> Parser<'a> {
 		self.primary()
 	}
 
-	fn primary(&mut self) -> Result<Expression<'a>, String> {
+	fn primary(&mut self) -> Result<Expression, String> {
 		match self.get_current() {
 			Token::Value(s) => {
 				if let Ok(literal) = self.literal(s) {
 					self.advance();
 					return Ok(Expression::Literal(literal));
 				}
-				if let Ok(variable) = self.variable(s) {
+				if let Ok(variable) = self.variable(&s.to_string()) {
 					return Ok(Expression::Variable(variable));
 				}
 				Err(self.error("Invalid variable name"))
@@ -491,7 +491,7 @@ impl<'a> Parser<'a> {
 		}
 	}
 
-	fn variable(&mut self, name: &'a str) -> Result<Variable<'a>, String> {
+	fn variable(&mut self, name: & str) -> Result<Variable, String> {
 		if let Some(variable) = Variable::from_str(name) {
 			self.advance();
 			return Ok(variable);
@@ -499,14 +499,14 @@ impl<'a> Parser<'a> {
 		Err(self.error("Expected variable"))
 	}
 
-	fn literal(&self, text: &'a str) -> Result<Literal, String> {
+	fn literal(&self, text: & str) -> Result<Literal, String> {
 		if let Some(literal) = Literal::from_str(text) {
 			return Ok(literal);
 		}
 		Err(self.error("Expected literal"))
 	}
 
-	fn grouping(&mut self) -> Result<Expression<'a>, String> {
+	fn grouping(&mut self) -> Result<Expression, String> {
 		self.consume(
 			Token::GroupingStart,
 			&format!("Expected '{}' before expression", Token::GroupingStart)

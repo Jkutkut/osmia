@@ -1,21 +1,21 @@
 use crate::model::{Stmt};
 
 #[derive(Debug, PartialEq)]
-pub struct Block<'a> {
-	stmts: Vec<Stmt<'a>>,
+pub struct Block {
+	stmts: Vec<Stmt>,
 }
 
-impl<'a> Block<'a> {
-	pub fn new(stmts: Vec<Stmt<'a>>) -> Self {
+impl Block {
+	pub fn new(stmts: Vec<Stmt>) -> Self {
 		Self { stmts }
 	}
 
-	pub fn stmts(&self) -> &Vec<Stmt<'a>> {
+	pub fn stmts(&self) -> &Vec<Stmt> {
 		&self.stmts
 	}
 }
 
-impl std::fmt::Display for Block<'_> {
+impl std::fmt::Display for Block {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		for stmt in &self.stmts {
 			write!(f, "{}", stmt)?;
