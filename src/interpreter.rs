@@ -36,7 +36,6 @@ impl Interpreter {
 	}
 
 	pub fn run(&mut self, code: &Stmt) -> Result<String, String> {
-		println!("Running interpreter...");
 		let (exit_status, value) = self.visit_stmt(code)?;
 		match exit_status {
 			ExitStatus::Okay | ExitStatus::False => (),
