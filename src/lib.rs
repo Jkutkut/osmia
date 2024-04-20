@@ -6,16 +6,43 @@ mod syntax_tree;
 mod tree_walker;
 mod interpreter;
 
-// use lexer::{Lexer, Token};
-
-pub use parser::Parser;
-pub use interpreter::Interpreter;
-
 #[cfg(test)]
 mod tests;
 
-// type Json = serde_json::Value;
-// type JsonRef<'a> = &'a Json;
+use interpreter::Interpreter;
+use model::Ctx;
+use parser::Parser;
+use lexer::Lexer;
+use lexer::Token;
+use model::Stmt;
 
-// TODO remove
-pub use lexer::{Token, Lexer};
+pub struct Osmia {
+}
+
+
+impl Osmia {
+	pub fn new() -> Interpreter {
+		Self::from_json("{}").unwrap()
+	}
+
+	pub fn from_json(json: &str) -> Result<Interpreter, String> {
+		let ctx = Self::new_ctx(json)?;
+		let interpreter = Interpreter::new(ctx);
+		Ok(interpreter)
+	}
+
+	fn new_ctx(ctx: &str) -> Result<Ctx, String> {
+		Ctx::from_str(ctx)
+	}
+
+	pub fn code(code: &str) -> Result<Stmt, String> {
+		Self::custom_code(code, "{{", "}}")
+	}
+
+	pub fn custom_code(code: &str, start_delimiter: &str, end_delimiter: &str) -> Result<Stmt, String> {
+		let lexer = Lexer::new(start_delimiter, end_delimiter);
+		let tokens = lexer.scan(code)?;
+		let tokens = tokens.iter().map(|t| t.clone()).collect::<Vec<Token>>();
+		Parser::new(tokens).parse()
+	}
+}
