@@ -51,7 +51,7 @@ impl Ctx {
 			JsonTree::Float(f) => Ok(Literal::Float(*f)),
 			JsonTree::Null => Ok(Literal::Null),
 			JsonTree::Bool(b) => Ok(Literal::Bool(*b)),
-			_ => Err("Cannot get a array or object".to_string())
+			_ => Err("Cannot get an array or object as a literal".to_string())
 		}
 	}
 
