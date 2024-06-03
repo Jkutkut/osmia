@@ -13,7 +13,6 @@ use interpreter::Interpreter;
 use model::Ctx;
 use parser::Parser;
 use lexer::Lexer;
-use lexer::Token;
 use model::Stmt;
 
 /// This simple API is designed to use the osmia template engine.
@@ -214,7 +213,6 @@ impl Osmia {
 	pub fn custom_code(code: &str, start_delimiter: &str, end_delimiter: &str) -> Result<Stmt, String> {
 		let lexer = Lexer::new(start_delimiter, end_delimiter);
 		let tokens = lexer.scan(code)?;
-		let tokens = tokens.iter().map(|t| t.clone()).collect::<Vec<Token>>();
 		Parser::new(tokens).parse()
 	}
 }

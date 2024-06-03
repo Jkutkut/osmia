@@ -115,48 +115,48 @@ macro_tests!(
 		"#),
 		"This is a complex value: value"
 	),
-	// (
-	// 	foreach01,
-	// 	r#"Hello, {{name}}!
-	// 	{{for item in items}}
-	// 	<a href="{{item.url}}">{{item.name}}</a>
-	// 	{{done}}"#,
-	// 	Some(r#"
-	// 		{
-	// 			"name": "world",
-	// 			"items": [
-	// 				{
-	// 					"url": "https://example01.com",
-	// 					"name": "Example01"
-	// 				},
-	// 				{
-	// 					"url": "https://example02.org",
-	// 					"name": "Example02"
-	// 				}
-	// 			]
-	// 		}
-	// 	"#),
-	// 	"Hello, world!
-	// 	<a href=\"https://example01.com\">Example01</a>
-	// 	<a href=\"https://example02.org\">Example02</a>"
-	// ),
-	// (
-	// 	foreach02,
-	// 	r#"Hello, {{name}}!
-	// 	{{for item in items}}
-	// 	<li>Element {{item}}</li>
-	// 	{{done}}"#,
-	// 	Some(r#"
-	// 		{
-	// 			"name": "world",
-	// 			"items": [1, 2, 3]
-	// 		}
-	// 	"#),
-	// 	"Hello, world!
-	// 	<li>Element 1</li>
-	// 	<li>Element 2</li>
-	// 	<li>Element 3</li>"
-	// ),
+	(
+		foreach01,
+		r#"Hello, {{name}}!
+		{{for item in items}}
+		<a href="{{item.url}}">{{item.name}}</a>
+		{{done}}"#,
+		Some(r#"
+			{
+				"name": "world",
+				"items": [
+					{
+						"url": "https://example01.com",
+						"name": "Example01"
+					},
+					{
+						"url": "https://example02.org",
+						"name": "Example02"
+					}
+				]
+			}
+		"#),
+		"Hello, world!
+		<a href=\"https://example01.com\">Example01</a>
+		<a href=\"https://example02.org\">Example02</a>"
+	),
+	(
+		foreach02,
+		r#"Hello, {{name}}!
+		{{for item in items}}
+		<li>Element {{item}}</li>
+		{{done}}"#,
+		Some(r#"
+			{
+				"name": "world",
+				"items": [1, 2, 3]
+			}
+		"#),
+		"Hello, world!
+		<li>Element 1</li>
+		<li>Element 2</li>
+		<li>Element 3</li>"
+	),
 	(
 		foreach03,
 		r#"{{for item in items}}<ul>{{for i in item.arr}}<li>{{i}}</li>{{done}}</ul>{{done}}"#,
@@ -209,6 +209,40 @@ macro_tests!(
 			}
 		"#),
 		"John is an adult.Jack is an adult."
+	),
+	(
+		conditional03,
+		r#"Hey!
+		{{if true}}
+			True!
+		{{fi}}
+		{{if false}}
+			False!
+		{{fi}}
+		{{if true}}
+			var: {{var}}
+		{{fi}}"#,
+		Some(r#"
+			{
+				"var": "value"
+			}
+		"#),
+		"Hey!
+			True!
+			var: value"
+	),
+	(
+		spacing01,
+		"Hello, {{name}}!
+		{{if age >= 18}}You are an adult{{fi}}.",
+		Some(r#"
+			{
+				"name": "John",
+				"age": 18
+			}
+		"#),
+		"Hello, John!
+		You are an adult."
 	)
 );
 
@@ -244,5 +278,115 @@ macro_tests!(
 				]
 			}
 		"#)
+	)
+);
+
+// GH issues
+
+macro_tests!(
+	test_io,
+	(
+		gh_03_01,
+		r#"start
+  start offset
+  {{for p in pages}}
+    # {{p.name}}
+  {{done}}
+  end offset
+end"#,
+		Some(r#"
+			{
+				"pages": [
+					{
+						"name": "foo"
+					},
+					{
+						"name": "bar"
+					}
+				]
+			}"#
+		),
+		"start
+  start offset
+    # foo
+    # bar
+  end offset
+end"
+	),
+	(
+		gh_03_02,
+		r#"  {{for p in pages}}{{p.name}}{{done}}"#,
+		Some(r#"
+			{
+				"pages": [
+					{
+						"name": "foo"
+					},
+					{
+						"name": "bar"
+					}
+				]
+			}
+		"#),
+		"  foobar"
+	),
+	(
+		gh_03_03,
+		r#"{{for p in pages}}  {{p.name}},{{done}}"#,
+		Some(r#"
+			{
+				"pages": [
+					{
+						"name": "foo"
+					},
+					{
+						"name": "bar"
+					}
+				]
+			}
+		"#),
+		"  foo,  bar,"
+	),
+	(
+		gh_03_04,
+		r#"{{for p in pages}}  {{done}}"#,
+		Some(r#"
+			{
+				"pages": [1, 2]
+			}
+		"#),
+		"    "
+	),
+	(
+		gh_03_05,
+		r#"-->
+		{{for user in users}}
+			{{if user.age >= 18}}
+{{user.name}} is an adult.
+			{{fi}}
+		{{done}}
+		<--"#,
+		Some(r#"
+			{
+				"users": [
+					{
+						"name": "John",
+						"age": 18
+					},
+					{
+						"name": "Jane",
+						"age": 17
+					},
+					{
+						"name": "Jack",
+						"age": 19
+					}
+				]
+			}
+		"#),
+		r#"-->
+John is an adult.
+Jack is an adult.
+		<--"#
 	)
 );
