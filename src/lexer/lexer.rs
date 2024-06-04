@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::lexer::Token;
 use crate::lexer::Tokenizer;
 
@@ -16,159 +18,160 @@ impl<'a> Lexer<'a> {
 
 	pub fn scan(&self, input: &'a str) -> Result<Vec<Token>, String> {
 		let mut tokens: Vec<Token> = Vec::new();
+		let input_arr: &[u8] = input.as_bytes();
 		let mut i = 0;
+		let mut start = 0;
 		while i < input.len() {
-			let delimiter_start_idx = input[i..].find(self.delimiter_start).unwrap_or(input.len() - i);
-			if delimiter_start_idx > 0 {
-				let chunk = &input[i..i + delimiter_start_idx];
-				i += delimiter_start_idx;
-				if !self.can_be_omitted(chunk) {
-					let (chunk, trimmed) = self.trim_last_empty_line(chunk);
-					tokens.push(Token::Raw(chunk));
-					if let Some(trimmed) = trimmed {
-						tokens.push(Token::Raw(trimmed));
-					}
-				}
-				if i >= input.len() {
-					break;
-				}
-			}
-			tokens.push(Token::DelimiterStart);
-			i += self.delimiter_start.len();
-			let mut stack = std::collections::VecDeque::new();
-			let mut delimiter_end_idx = 0;
-			while i + delimiter_end_idx < input.len() - self.delimiter_end.len() {
-				if input[i + delimiter_end_idx..].starts_with(self.delimiter_end) &&
-					stack.is_empty() {
-					break;
-				}
-				let current_char = input.chars().nth(i + delimiter_end_idx).unwrap();
-				for (s, e) in [('{', '}'), ('[', ']'), ('(', ')')] {
-					if current_char == s {
-						stack.push_back(e);
+			let current_char = input_arr[i] as char;
+			if current_char == '\n' {
+				Self::add_raw_token(&mut tokens, Self::cut_input(&input, start, i));
+				Self::add_raw_token(&mut tokens, Some("\n".to_string()));
+				start = i + 1;
+				while i < input.len() {
+					let c = input_arr[i] as char;
+					if !c.is_whitespace() {
 						break;
 					}
-					if current_char == e {
-						if let Some(stack_element) = stack.pop_back() {
-							if stack_element != e {
+					i += 1;
+				}
+				Self::add_raw_token(&mut tokens, Self::cut_input(&input, start, i));
+				start = i;
+				continue;
+			}
+			else if
+				self.delimiter_start.starts_with(current_char) &&
+				input[i..].starts_with(self.delimiter_start)
+			{
+				Self::add_raw_token(&mut tokens, Self::cut_input(&input, start, i));
+				Self::add_token(&mut tokens, Some(Token::DelimiterStart));
+				i += self.delimiter_start.len();
+				start = i;
+				let mut stack: VecDeque<char> = VecDeque::new();
+				while i < input.len() - self.delimiter_end.len() {
+					let next_char = input_arr[i] as char;
+					if
+						self.delimiter_end.starts_with(next_char) &&
+						input[i..].starts_with(self.delimiter_end) &&
+						stack.is_empty()
+					{
+						break;
+					}
+					let current_char = input_arr[i] as char;
+					for (s, e) in [('{', '}'), ('[', ']'), ('(', ')')] {
+						if current_char == s {
+							stack.push_back(e);
+							break;
+						}
+						if current_char == e {
+							if let Some(stack_element) = stack.pop_back() {
+								if stack_element != e {
+									return Err(format!("Invalid close delimiter: {}", current_char));
+								}
+							}
+							else {
 								return Err(format!("Invalid close delimiter: {}", current_char));
 							}
+							break;
 						}
-						else {
-							return Err(format!("Invalid close delimiter: {}", current_char));
-						}
-						break;
+					}
+					i += 1;
+				}
+				if !stack.is_empty() {
+					return Err(format!("{} was not closed", stack.back().unwrap()));
+				}
+				if i >= input.len() || !input[i..].starts_with(self.delimiter_end) {
+					return Err(format!("'{}' was not closed with '{}'", self.delimiter_start, self.delimiter_end));
+				}
+				for token in Tokenizer::new(&input[start..i]) {
+					let token = token?;
+					match Token::from_str(token) {
+						Some(t) => tokens.push(t),
+						None => tokens.push(Token::Value(token.to_string()))
 					}
 				}
-				delimiter_end_idx += 1;
+				tokens.push(Token::DelimiterEnd);
+				start = i + self.delimiter_end.len();
+				i = start;
+				continue;
 			}
-			if !stack.is_empty() {
-				return Err(format!("{} was not closed", stack.back().unwrap()));
-			}
-			if i + delimiter_end_idx >= input.len() ||
-				!input[i + delimiter_end_idx..].starts_with(self.delimiter_end) {
-				return Err(format!("Osmia delimiter was not closed"));
-			}
-			for token in Tokenizer::new(&input[i..i + delimiter_end_idx]) {
-				let token = token?;
-				match Token::from_str(token) {
-					Some(t) => tokens.push(t),
-					None => tokens.push(Token::Value(token.to_string()))
-				}
-			}
-			tokens.push(Token::DelimiterEnd);
-			i += delimiter_end_idx + self.delimiter_end.len();
+			i += 1;
 		}
-		tokens.push(Token::Eof);
-		self.clean_tokens(&mut tokens);
+		if start < input.len() {
+			Self::add_raw_token(&mut tokens, Self::cut_input(&input, start, input.len()));
+		}
+		Self::add_token(&mut tokens, Some(Token::Eof));
+		Self::clean_tokens(&mut tokens);
 		Ok(tokens)
 	}
 
-	fn can_be_omitted(&self, chunk: &str) -> bool {
-		let mut omit = false;
-		let mut chunk_chars = chunk.chars();
-		loop {
-			match chunk_chars.next() {
-				Some(c) => match c {
-					'\n' => {
-						omit = true;
-						break;
-					},
-					c => if !c.is_whitespace() {
-						break;
-					}
-				},
-				None => break
-			};
+	fn cut_input(input: &str, from: usize, to: usize) -> Option<String> {
+		if from >= to {
+			return None;
 		}
-		if omit {
-			for c in chunk.chars() {
-				if !c.is_whitespace() && c != '\n' {
-					return false;
-				}
-			}
-		}
-		omit
+		Some(input[from..to].to_string())
 	}
 
-	fn trim_last_empty_line(&self, chunk: &str) -> (String, Option<String>) {
-		let last_new_line = match chunk.rfind('\n') {
-			None => return (chunk.to_string(), None),
-			Some(idx) => idx
-		};
-		let trimmed_chunk = chunk[0..last_new_line].to_string();
-		let trimmed_piece = chunk[last_new_line..].to_string();
-		for c in trimmed_piece.chars() {
-			if !c.is_whitespace() && c != '\n' {
-				return (chunk.to_string(), None);
-			}
+	fn add_token(tokens: &mut Vec<Token>, token: Option<Token>) {
+		if let Some(token) = token {
+			tokens.push(token);
 		}
-		(trimmed_chunk, Some(trimmed_piece))
 	}
 
-	fn clean_tokens(&self, tokens: &mut Vec<Token>) {
+	fn add_raw_token(tokens: &mut Vec<Token>, token: Option<String>) {
+		if let Some(token) = token {
+			tokens.push(Token::Raw(token));
+		}
+	}
+
+	fn clean_tokens(tokens: &mut Vec<Token>) {
 		let mut i = 0;
-		println!("clean_tokens: {:?}", tokens);
 		while i < tokens.len() - 1 {
-			let token = &tokens[i];
 			i += 1;
-			if let Token::Raw(chunk) = token {
-				if !chunk.starts_with('\n') || !self.is_all_whitespace(&chunk[1..]) {
-					continue;
+			if !Self::is_new_line_token(&tokens[i - 1]) {
+				continue;
+			}
+			if !Self::is_whitespace_token(&tokens[i]) {
+				continue;
+			}
+			let mut j = 1;
+			let mut is_printable_token_in_row = false;
+			while i + j < tokens.len() - 1 {
+				if Self::is_new_line_token(&tokens[i + j]) {
+					break;
 				}
-				let mut shoud_be_omitted = true;
-				let mut j = 0;
-				while i + j < tokens.len() {
-					let next_token = &tokens[i + j];
-					j += 1;
-					match next_token {
-						Token::Raw(chunk) => {
-							shoud_be_omitted = chunk.starts_with('\n');
+				else if let Token::Raw(_) = &tokens[i + j] {
+					is_printable_token_in_row = true;
+					break;
+				}
+				else if let Token::DelimiterStart = &tokens[i + j] {
+					match &tokens[i + j + 1] {
+						Token::Value(_) => {
+							is_printable_token_in_row = true;
 							break;
-						},
-						Token::DelimiterStart => {
-							if let Token::Value(_) = &tokens[i] {
-								shoud_be_omitted = false;
-								break;
-							}
 						},
 						_ => ()
 					}
 				}
-				if shoud_be_omitted {
-					if i + j == tokens.len() {
-						tokens[i - 1] = Token::Raw(chunk.trim_end().to_string());
-					}
-					else {
-						tokens.remove(i - 1);
-						i -= 1;
-					}
-				}
+				j += 1;
+			}
+			if !is_printable_token_in_row {
+				tokens.drain(i - 1..i + 1);
+				i = i + j - 2;
 			}
 		}
 	}
 
-	fn is_all_whitespace(&self, chunk: &str) -> bool {
-		chunk.len() > 0 && chunk.chars().all(|c| c.is_whitespace())
+	fn is_new_line_token(token: &Token) -> bool {
+		match token {
+			Token::Raw(chunk) => chunk == "\n",
+			_ => false
+		}
+	}
+
+	fn is_whitespace_token(token: &Token) -> bool {
+		match token {
+			Token::Raw(chunk) => chunk.chars().all(|c| c.is_whitespace()),
+			_ => false
+		}
 	}
 }

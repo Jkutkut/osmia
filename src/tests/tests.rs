@@ -388,5 +388,33 @@ end"
 John is an adult.
 Jack is an adult.
 		<--"#
+	),
+	(
+		gh_03_06,
+		r#"
+
+
+{{v}}
+		{{v}}"#,
+		Some(r#"
+			{
+				"v": "foo"
+			}
+		"#),
+		"\n\n\nfoo\n\t\tfoo"
+	),
+	(
+		gh_03_07,
+		r#"
+
+
+{{if v == 7}}		{{v}}		{{fi}}		
+		{{v}}"#,
+		Some(r#"
+			{
+				"v": 7
+			}
+		"#),
+		"\n\n\n\t\t7\t\t\t\t\n\t\t7"
 	)
 );
