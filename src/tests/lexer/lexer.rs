@@ -1,7 +1,6 @@
 use crate::lexer::Token;
 use crate::lexer::Lexer;
 
-use std::collections::LinkedList;
 use crate::macro_tests;
 
 #[cfg(test)]
@@ -11,14 +10,13 @@ fn lexer() -> Lexer<'static> {
 
 #[cfg(test)]
 fn check_result(
-	real: Result<LinkedList<Token>, String>,
+	real: Result<Vec<Token>, String>,
 	expected: Vec<Token>
 ) {
 	if let Err(err) = real {
 		panic!("Error: {}", err);
 	}
 	let real = real.unwrap();
-	let real = real.into_iter().collect::<Vec<Token>>();
 	println!("real    : {:?}", real);
 	println!("expected: {:?}", expected);
 	for (real, expected) in real.iter().zip(expected.iter()) {

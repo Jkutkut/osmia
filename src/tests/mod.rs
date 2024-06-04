@@ -5,3 +5,5 @@ mod model;
 mod lexer;
 
 mod syntax_tree_printer;
+
+mod tests;
