@@ -6,6 +6,7 @@ use crate::model::{
 
 pub trait Visitor<T> {
 	// Stmt
+	#[allow(unused)]
 	fn visit_stmt(&self, stmt: &Stmt) -> T;
 	fn visit_block(&self, block: &Block) -> T;
 	fn visit_raw(&self, raw: &str) -> T;

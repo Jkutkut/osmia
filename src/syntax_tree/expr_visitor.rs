@@ -3,6 +3,7 @@ use crate::model::{
 };
 
 pub trait ExprVisitor<T> {
+	#[allow(unused)]
 	fn visit_expression(&self, expression: &Expression) -> T;
 	fn visit_literal(&self, literal: &Literal) -> T;
 	fn visit_variable(&self, literal: &Variable) -> T;
