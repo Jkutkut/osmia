@@ -117,25 +117,8 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 	fn visit_foreach(&mut self, for_block: &ForEach) -> InterpreterResult {
 		let mut s = String::new();
 		let mut exit_status = ExitStatus::False;
-		let iterable_obj = match for_block.list() { // TODO use refs
-			ListOrVariable::List(json) => match json {
-				JsonExpression::Array(arr) => arr.clone(),
-				JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
-				JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
-			},
-			ListOrVariable::Variable(var) => {
-				let json_tree = self.ctx.get(var)?;
-				let json_expr = JsonExpression::from(json_tree);
-				match json_expr {
-					JsonExpression::Array(arr) => arr.clone(),
-					JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
-					JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
-				}
-			}
-		};
-		let mut iterable = iterable_obj.iter();
-		while let Some(item) = iterable.next() {
-			let item = self.eval_json(item)?;
+		for item in self.get_iterable(for_block.list())? {
+			let item = self.eval_json(&item)?;
 			let item = JsonTree::from(&item)?;
 			self.ctx.set(for_block.variable(), item)?;
 			exit_status = ExitStatus::Okay;
@@ -319,5 +302,25 @@ impl Interpreter {
 		if let InterpreterValue::String(s) = value {
 			result.push_str(&s);
 		}
+	}
+
+	fn get_iterable(&self, lst_or_var: &ListOrVariable) -> Result<Vec<JsonExpression>, String> {
+		let ite = match lst_or_var {
+			ListOrVariable::List(json) => match json {
+				JsonExpression::Array(arr) => arr.clone(),
+				JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
+				JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
+			},
+			ListOrVariable::Variable(var) => {
+				let json_tree = self.ctx.get(var)?;
+				let json_expr = JsonExpression::from(json_tree);
+				match json_expr {
+					JsonExpression::Array(arr) => arr.clone(),
+					JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
+					JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
+				}
+			}
+		};
+		Ok(ite)
 	}
 }
