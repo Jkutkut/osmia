@@ -7,24 +7,9 @@ use crate::model::{
 	Expression, Literal, Binary, Unary, Grouping, Variable,
 	JsonExpression, ListOrVariable, JsonTree,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach,
-	Ctx
+	Ctx,
+	ExitStatus, InterpreterValue, InterpreterResult
 };
-
-#[derive(Debug)]
-pub enum InterpreterValue {
-	String(String),
-	Void
-}
-
-type InterpreterResult = Result<(ExitStatus, InterpreterValue), String>;
-
-#[derive(Debug, PartialEq)]
-pub enum ExitStatus {
-	Okay,
-	Break,
-	Continue,
-	False
-}
 
 pub struct Interpreter {
 	ctx: Ctx
@@ -56,26 +41,26 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 	}
 
 	fn visit_block(&mut self, block: &Block) -> InterpreterResult {
+		let mut exit_status = ExitStatus::Okay;
 		let mut s = String::new();
 		for stmt in block.stmts() {
-			let (exit_status, value) = self.visit_stmt(stmt)?;
-			if exit_status == ExitStatus::Okay {
-				if let InterpreterValue::String(v) = value {
-					s.push_str(&v);
+			let (block_exit_status, r) = self.visit_stmt(stmt)?;
+			Self::add2result(&mut s, r);
+			match block_exit_status {
+				ExitStatus::Continue | ExitStatus::Break => {
+					exit_status = block_exit_status;
+					break;
 				}
+				_ => ()
 			}
-			else if exit_status == ExitStatus::Break {
-				break;
-			}
-			// Continue, False -> do nothing
 		}
-		Ok((ExitStatus::Okay, InterpreterValue::String(s)))
+		Ok((exit_status, InterpreterValue::from(s)))
 	}
 
 	fn visit_raw(&self, raw: &str) -> InterpreterResult {
 		Ok((
 			ExitStatus::Okay,
-			InterpreterValue::String(raw.to_string())
+			InterpreterValue::from(raw.to_string())
 		))
 	}
 
@@ -93,116 +78,63 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 	}
 
 	fn visit_if(&mut self, block: &If) -> InterpreterResult {
-		let (if_status, if_result) = block.if_block().accept(self)?;
-		match if_status {
-			ExitStatus::False => (),
-			_ => return Ok((if_status, if_result))
+		match block.if_block().accept(self)? {
+			(ExitStatus::False, _) => (),
+			r => return Ok(r)
 		}
 		if let Some(elseifs) = block.elseifs() {
 			for elseif in elseifs {
-				let (elseif_status, elseif_result) = elseif.accept(self)?;
-				match elseif_status {
-					ExitStatus::False => (),
-					_ => return Ok((elseif_status, elseif_result))
+				match elseif.accept(self)? {
+					(ExitStatus::False, _) => (),
+					r => return Ok(r)
 				}
 			}
 		}
 		if let Some(else_block) = block.else_block() {
-			let (else_status, else_result) = else_block.accept(self)?;
-			match else_status {
-				ExitStatus::False => (),
-				_ => return Ok((else_status, else_result))
+			match else_block.accept(self)? {
+				(ExitStatus::False, _) => (),
+				r => return Ok(r)
 			}
 		}
 		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
 
 	fn visit_while(&mut self, block: &ConditionalBlock) -> InterpreterResult {
-		let mut string = String::new();
+		let mut s = String::new();
 		let mut exit_status = ExitStatus::False;
-		loop {
-			let condition = block.condition().accept(self)?;
-			if !condition.as_bool() {
-				break;
-			}
-			let result = block.body().accept(self)?;
-			match result.0 {
-				ExitStatus::Continue => continue,
-				ExitStatus::Break => {
-					exit_status = ExitStatus::Break;
-					break;
-				},
-				_ => {
-					exit_status = ExitStatus::Okay;
-					if let InterpreterValue::String(v) = result.1 {
-						string.push_str(&v);
-					}
-				}
+		while block.condition().accept(self)?.as_bool() {
+			exit_status = ExitStatus::Okay;
+			let (block_exit_status, r) = block.body().accept(self)?;
+			Self::add2result(&mut s, r);
+			match block_exit_status {
+				ExitStatus::Break => break,
+				_ => ()
 			}
 		}
-		let result = match string.is_empty() {
-			true => InterpreterValue::Void,
-			false => InterpreterValue::String(string)
-		};
-		Ok((exit_status, result))
+		Ok((exit_status, InterpreterValue::from(s)))
 	}
 
-	fn visit_foreach(&mut self, block: &ForEach) -> InterpreterResult {
-		let mut string = String::new();
+	fn visit_foreach(&mut self, for_block: &ForEach) -> InterpreterResult {
+		let mut s = String::new();
 		let mut exit_status = ExitStatus::False;
-		let iterable_obj = match block.list() { // TODO use refs
-			ListOrVariable::List(json) => match json {
-				JsonExpression::Array(arr) => arr.clone(),
-				JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
-				JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
-			},
-			ListOrVariable::Variable(var) => {
-				let json_tree = self.ctx.get(var)?;
-				let json_expr = JsonExpression::from(json_tree);
-				match json_expr {
-					JsonExpression::Array(arr) => arr.clone(),
-					JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
-					JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
-				}
-			}
-		};
-		let mut iterable = iterable_obj.iter();
-		while let Some(item) = iterable.next() {
-			let item = self.eval_json(item)?;
+		for item in self.get_iterable(for_block.list())? {
+			let item = self.eval_json(&item)?;
 			let item = JsonTree::from(&item)?;
-			self.ctx.set(block.variable(), item)?;
-			let result = block.body().accept(self)?;
-			match result.0 {
-				ExitStatus::Continue => continue, // TODO do nothing
-				ExitStatus::Break => {
-					exit_status = ExitStatus::Break;
-					break;
-				},
-				_ => {
-					exit_status = ExitStatus::Okay;
-					if let InterpreterValue::String(v) = result.1 {
-						string.push_str(&v);
-					}
-				}
+			self.ctx.set(for_block.variable(), item)?;
+			exit_status = ExitStatus::Okay;
+			let (block_exit_status, r) = for_block.body().accept(self)?;
+			Self::add2result(&mut s, r);
+			match block_exit_status {
+				ExitStatus::Break => break,
+				_ => ()
 			}
 		}
-		let result = match string.is_empty() {
-			true => InterpreterValue::Void,
-			false => InterpreterValue::String(string)
-		};
-		Ok((exit_status, result))
+		Ok((exit_status, InterpreterValue::from(s)))
 	}
 
 	fn visit_conditional_block(&mut self, block: &ConditionalBlock) -> InterpreterResult {
-		let condition = block.condition().accept(self)?;
-		if condition.as_bool() {
-			let result = block.body().accept(self)?;
-			return match result.0 {
-				ExitStatus::Continue | ExitStatus::Break => Err(
-					"Cannot continue or break in conditional block".to_string()
-				),
-				_ => Ok(result)
-			}
+		if block.condition().accept(self)?.as_bool() {
+			return block.body().accept(self);
 		}
 		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
@@ -216,8 +148,12 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 	}
 
 	fn visit_expression(&self, expression: &Expression) -> InterpreterResult {
-		let expr = expression.accept(self)?;
-		Ok((ExitStatus::Okay, InterpreterValue::String(expr.to_string())))
+		Ok((
+			ExitStatus::Okay,
+			InterpreterValue::from(
+				expression.accept(self)?.to_string()
+			)
+		))
 	}
 }
 
@@ -360,5 +296,31 @@ impl Interpreter {
 			}
 		};
 		Ok(new_tree)
+	}
+
+	fn add2result(result: &mut String, value: InterpreterValue) {
+		if let InterpreterValue::String(s) = value {
+			result.push_str(&s);
+		}
+	}
+
+	fn get_iterable(&self, lst_or_var: &ListOrVariable) -> Result<Vec<JsonExpression>, String> {
+		let ite = match lst_or_var {
+			ListOrVariable::List(json) => match json {
+				JsonExpression::Array(arr) => arr.clone(),
+				JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
+				JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
+			},
+			ListOrVariable::Variable(var) => {
+				let json_tree = self.ctx.get(var)?;
+				let json_expr = JsonExpression::from(json_tree);
+				match json_expr {
+					JsonExpression::Array(arr) => arr.clone(),
+					JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
+					JsonExpression::Expression(_) => return Err("Cannot iterate over expression".to_string())
+				}
+			}
+		};
+		Ok(ite)
 	}
 }
