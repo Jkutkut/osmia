@@ -266,6 +266,7 @@ macro_tests!(
 		{{continue}}{{break}}
 		"#,
 		vec![
+			Token::Raw("\n".to_string()),
 			Token::DelimiterStart,
 			Token::Print,
 			Token::DelimiterEnd,
