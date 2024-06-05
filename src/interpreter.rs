@@ -7,33 +7,9 @@ use crate::model::{
 	Expression, Literal, Binary, Unary, Grouping, Variable,
 	JsonExpression, ListOrVariable, JsonTree,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach,
-	Ctx
+	Ctx,
+	ExitStatus, InterpreterValue, InterpreterResult
 };
-
-#[derive(Debug)]
-pub enum InterpreterValue {
-	String(String),
-	Void
-}
-
-impl From<String> for InterpreterValue {
-	fn from(s: String) -> Self {
-		match s.is_empty() {
-			true => Self::Void,
-			false => Self::String(s)
-		}
-	}
-}
-
-type InterpreterResult = Result<(ExitStatus, InterpreterValue), String>;
-
-#[derive(Debug, PartialEq)]
-pub enum ExitStatus {
-	Okay,
-	Break,
-	Continue,
-	False
-}
 
 pub struct Interpreter {
 	ctx: Ctx

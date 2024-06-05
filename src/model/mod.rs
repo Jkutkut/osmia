@@ -1,3 +1,7 @@
+mod interpreter;
+
+pub use interpreter::*;
+
 mod assign;
 mod binary;
 mod block;
