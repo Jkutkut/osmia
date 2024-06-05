@@ -124,39 +124,49 @@ impl<'a> Lexer<'a> {
 	}
 
 	fn clean_tokens(tokens: &mut Vec<Token>) {
-		let mut i = 0;
-		while i < tokens.len() - 1 {
-			i += 1;
-			if !Self::is_new_line_token(&tokens[i - 1]) {
-				continue;
-			}
-			if !Self::is_whitespace_token(&tokens[i]) {
-				continue;
-			}
-			let mut j = 1;
-			let mut is_printable_token_in_row = false;
-			while i + j < tokens.len() - 1 {
-				if Self::is_new_line_token(&tokens[i + j]) {
+		let mut i: usize = tokens.len() - 1;
+		let mut end: usize;
+		while i > 0 {
+			end = i;
+			while i > 0 {
+				i -= 1;
+				if Self::is_new_line_token(&tokens[i]) {
 					break;
 				}
-				else if let Token::Raw(_) = &tokens[i + j] {
-					is_printable_token_in_row = true;
-					break;
-				}
-				else if let Token::DelimiterStart = &tokens[i + j] {
-					match &tokens[i + j + 1] {
-						Token::Value(_) => {
-							is_printable_token_in_row = true;
-							break;
-						},
-						_ => ()
-					}
-				}
-				j += 1;
 			}
-			if !is_printable_token_in_row {
-				tokens.drain(i - 1..i + 1);
-				i = i + j - 2;
+			if Self::is_new_line_token(&tokens[i]) {
+				i += 1;
+			}
+			let line = &tokens[i..end + 1];
+			let mut row_has_printable_token = false;
+			let mut k = 0;
+			while k < line.len() - 1 && !row_has_printable_token {
+				match &line[k] {
+					Token::Raw(_) => row_has_printable_token = !Self::is_whitespace_token(&line[k]),
+					Token::DelimiterStart => {
+						match &line[k + 1] {
+							Token::Value(_) => row_has_printable_token = true,
+							_ => ()
+						}
+					},
+					_ => ()
+				}
+				k += 1;
+			}
+			if !row_has_printable_token {
+				let mut ts: Vec<Token> = Vec::new();
+				let mut line = line.to_vec();
+				if Self::is_new_line_token(&tokens[end]) {
+					ts.push(tokens.remove(end));
+					line.remove(line.len() - 1);
+				}
+				if Self::is_whitespace_token(&tokens[i]) {
+					ts.push(tokens.remove(i));
+					line.remove(0);
+				}
+			}
+			if i > 0 {
+				i -= 1;
 			}
 		}
 	}

@@ -138,7 +138,7 @@ macro_tests!(
 		"#),
 		"Hello, world!
 		<a href=\"https://example01.com\">Example01</a>
-		<a href=\"https://example02.org\">Example02</a>"
+		<a href=\"https://example02.org\">Example02</a>\n"
 	),
 	(
 		foreach02,
@@ -155,7 +155,7 @@ macro_tests!(
 		"Hello, world!
 		<li>Element 1</li>
 		<li>Element 2</li>
-		<li>Element 3</li>"
+		<li>Element 3</li>\n"
 	),
 	(
 		foreach03,
@@ -229,7 +229,7 @@ macro_tests!(
 		"#),
 		"Hey!
 			True!
-			var: value"
+			var: value\n"
 	),
 	(
 		spacing01,
@@ -416,5 +416,64 @@ Jack is an adult.
 			}
 		"#),
 		"\n\n\n\t\t7\t\t\t\t\n\t\t7"
+	),
+	(
+		gh_03_08,
+		r#"
+{{for page in pages}}
+  {{if page.disabled}}
+  {{fi}}
+  # {{page.endpoint}}
+{{done}}"#,
+		Some(r#"
+			{
+				"pages": [
+					{
+						"disabled": true,
+						"endpoint": "foo"
+					},
+					{
+						"disabled": false,
+						"endpoint": "bar"
+					},
+					{
+						"disabled": false,
+						"endpoint": "baz"
+					}
+				]
+			}
+		"#),
+		"\n  # foo\n  # bar\n  # baz\n"
+	),
+	(
+		gh_03_09,
+		r#"  {{for page in pages}}{{if page.disabled}}{{fi}}
+  # {{page.endpoint}}
+{{done}}"#,
+		Some(r#"
+			{
+				"pages": [
+					{
+						"disabled": true,
+						"endpoint": "foo"
+					},
+					{
+						"disabled": false,
+						"endpoint": "bar"
+					},
+					{
+						"disabled": false,
+						"endpoint": "baz"
+					}
+				]
+			}
+		"#),
+		"  # foo\n  # bar\n  # baz\n"
+	),
+	(
+		gh_03_10,
+		"\n\n\n\n\n    {{v}}",
+		Some(r#"{"v": "foo"}"#),
+		"\n\n\n\n\n    foo"
 	)
 );
