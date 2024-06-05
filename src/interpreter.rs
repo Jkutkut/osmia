@@ -45,22 +45,16 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 		let mut s = String::new();
 		for stmt in block.stmts() {
 			let (block_exit_status, r) = self.visit_stmt(stmt)?;
-			if let InterpreterValue::String(v) = r {
-				s.push_str(&v);
-			}
+			Self::add2result(&mut s, r);
 			match block_exit_status {
-				ExitStatus::Break => {
-					exit_status = ExitStatus::Break;
+				ExitStatus::Continue | ExitStatus::Break => {
+					exit_status = block_exit_status;
 					break;
-				},
-				ExitStatus::Continue => {
-					exit_status = ExitStatus::Continue;
-					break;
-				},
+				}
 				_ => ()
 			}
 		}
-		Ok((exit_status, InterpreterValue::String(s)))
+		Ok((exit_status, InterpreterValue::from(s)))
 	}
 
 	fn visit_raw(&self, raw: &str) -> InterpreterResult {
@@ -106,30 +100,24 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 	}
 
 	fn visit_while(&mut self, block: &ConditionalBlock) -> InterpreterResult {
-		let mut string = String::new();
+		let mut s = String::new();
 		let mut exit_status = ExitStatus::False;
-		loop {
-			let condition = block.condition().accept(self)?;
-			if !condition.as_bool() {
-				break;
-			}
+		while block.condition().accept(self)?.as_bool() {
 			exit_status = ExitStatus::Okay;
 			let (block_exit_status, r) = block.body().accept(self)?;
-			if let InterpreterValue::String(v) = r {
-				string.push_str(&v);
-			}
+			Self::add2result(&mut s, r);
 			match block_exit_status {
 				ExitStatus::Break => break,
 				_ => ()
 			}
 		}
-		Ok((exit_status, InterpreterValue::from(string)))
+		Ok((exit_status, InterpreterValue::from(s)))
 	}
 
-	fn visit_foreach(&mut self, block: &ForEach) -> InterpreterResult {
-		let mut string = String::new();
+	fn visit_foreach(&mut self, for_block: &ForEach) -> InterpreterResult {
+		let mut s = String::new();
 		let mut exit_status = ExitStatus::False;
-		let iterable_obj = match block.list() { // TODO use refs
+		let iterable_obj = match for_block.list() { // TODO use refs
 			ListOrVariable::List(json) => match json {
 				JsonExpression::Array(arr) => arr.clone(),
 				JsonExpression::Object(_) => return Err("Cannot iterate over object".to_string()),
@@ -149,23 +137,20 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 		while let Some(item) = iterable.next() {
 			let item = self.eval_json(item)?;
 			let item = JsonTree::from(&item)?;
-			self.ctx.set(block.variable(), item)?;
+			self.ctx.set(for_block.variable(), item)?;
 			exit_status = ExitStatus::Okay;
-			let (block_exit_status, r) = block.body().accept(self)?;
-			if let InterpreterValue::String(v) = r {
-				string.push_str(&v);
-			}
+			let (block_exit_status, r) = for_block.body().accept(self)?;
+			Self::add2result(&mut s, r);
 			match block_exit_status {
 				ExitStatus::Break => break,
 				_ => ()
 			}
 		}
-		Ok((exit_status, InterpreterValue::from(string)))
+		Ok((exit_status, InterpreterValue::from(s)))
 	}
 
 	fn visit_conditional_block(&mut self, block: &ConditionalBlock) -> InterpreterResult {
-		let condition = block.condition().accept(self)?;
-		if condition.as_bool() {
+		if block.condition().accept(self)?.as_bool() {
 			return block.body().accept(self);
 		}
 		Ok((ExitStatus::False, InterpreterValue::Void))
@@ -328,5 +313,11 @@ impl Interpreter {
 			}
 		};
 		Ok(new_tree)
+	}
+
+	fn add2result(result: &mut String, value: InterpreterValue) {
+		if let InterpreterValue::String(s) = value {
+			result.push_str(&s);
+		}
 	}
 }
