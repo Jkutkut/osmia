@@ -7,6 +7,7 @@ fn test_io(
 	ctx: Option<&str>,
 	expected: &str
 ) {
+	println!("Code:\n{:?}", input);
 	let mut interpreter = match ctx {
 		None => Osmia::new(),
 		Some(ctx) => Osmia::from_json(ctx).unwrap()
@@ -475,5 +476,111 @@ Jack is an adult.
 		"\n\n\n\n\n    {{v}}",
 		Some(r#"{"v": "foo"}"#),
 		"\n\n\n\n\n    foo"
+	)
+);
+
+macro_tests!(
+	test_io,
+	(
+		gh_01_01,
+		r#"
+{{for page in pages}}
+  {{if page.disabled}}
+    {{continue}}
+  {{fi}}
+  # {{page.endpoint}}
+{{done}}"#,
+		Some(r#"
+			{
+				"pages": [
+					{
+						"disabled": true,
+						"endpoint": "foo"
+					},
+					{
+						"disabled": false,
+						"endpoint": "bar"
+					},
+					{
+						"disabled": false,
+						"endpoint": "baz"
+					}
+				]
+			}
+		"#),
+		"\n  # bar\n  # baz\n"
+	),
+	(
+		gh_01_02,
+		r#"
+{{for page in pages}}
+  {{if true}}
+  {{if page.disabled}}
+    {{continue}}
+  {{fi}}
+  {{fi}}
+  # {{page.endpoint}}
+{{done}}"#,
+		Some(r#"
+			{
+				"pages": [
+					{
+						"disabled": true,
+						"endpoint": "foo"
+					},
+					{
+						"disabled": false,
+						"endpoint": "bar"
+					},
+					{
+						"disabled": false,
+						"endpoint": "baz"
+					}
+				]
+			}
+		"#),
+		"\n  # bar\n  # baz\n"
+	),
+	(
+		gh_01_03,
+		r#"{{for p in pages}}{{p}}{{break}}{{done}}"#,
+		Some(r#"{"pages": [1,2,3]}"#),
+		"1"
+	),
+	(
+		gh_01_04,
+		r#"{{if true}}{{for p in pages}}{{p}}{{break}}{{done}}{{fi}}"#,
+		Some(r#"{"pages": [1,2,3]}"#),
+		"1"
+	),
+	(
+		gh_01_05,
+		r#"{{while true}}{{if true}}{{for p in pages}}{{p}}{{break}}{{done}}{{fi}}{{break}}{{done}}"#,
+		Some(r#"{"pages": [1,2,3]}"#),
+		"1"
+	),
+	(
+		gh_01_06,
+		r#"{{assign v = 0}}{{while v < 10}}{{v}}{{assign v = v + 1}}{{continue}}NO{{done}}"#,
+		None,
+		"0123456789"
+	),
+	(
+		gh_01_07,
+		r#"{{assign v = 0}}{{while v < 10}}{{v}}{{assign v = v + 1}}{{if true}}--{{continue}}{{fi}}NO{{done}}"#,
+		None,
+		"0--1--2--3--4--5--6--7--8--9--"
+	),
+	(
+		gh_01_08,
+		r#"{{for n in nbrs}}{{n}}{{continue}}{{done}}"#,
+		Some(r#"{"nbrs": [1,2,3]}"#),
+		"123"
+	),
+	(
+		gh_01_09,
+		r#"{{for n in nbrs}}{{n}}{{if true}}--{{continue}}{{fi}}{{done}}"#,
+		Some(r#"{"nbrs": [1,2,3]}"#),
+		"1--2--3--"
 	)
 );

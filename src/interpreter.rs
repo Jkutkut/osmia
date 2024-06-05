@@ -16,6 +16,15 @@ pub enum InterpreterValue {
 	Void
 }
 
+impl From<String> for InterpreterValue {
+	fn from(s: String) -> Self {
+		match s.is_empty() {
+			true => Self::Void,
+			false => Self::String(s)
+		}
+	}
+}
+
 type InterpreterResult = Result<(ExitStatus, InterpreterValue), String>;
 
 #[derive(Debug, PartialEq)]
@@ -56,26 +65,32 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 	}
 
 	fn visit_block(&mut self, block: &Block) -> InterpreterResult {
+		let mut exit_status = ExitStatus::Okay;
 		let mut s = String::new();
 		for stmt in block.stmts() {
-			let (exit_status, value) = self.visit_stmt(stmt)?;
-			if exit_status == ExitStatus::Okay {
-				if let InterpreterValue::String(v) = value {
-					s.push_str(&v);
-				}
+			let (block_exit_status, r) = self.visit_stmt(stmt)?;
+			if let InterpreterValue::String(v) = r {
+				s.push_str(&v);
 			}
-			else if exit_status == ExitStatus::Break {
-				break;
+			match block_exit_status {
+				ExitStatus::Break => {
+					exit_status = ExitStatus::Break;
+					break;
+				},
+				ExitStatus::Continue => {
+					exit_status = ExitStatus::Continue;
+					break;
+				},
+				_ => ()
 			}
-			// Continue, False -> do nothing
 		}
-		Ok((ExitStatus::Okay, InterpreterValue::String(s)))
+		Ok((exit_status, InterpreterValue::String(s)))
 	}
 
 	fn visit_raw(&self, raw: &str) -> InterpreterResult {
 		Ok((
 			ExitStatus::Okay,
-			InterpreterValue::String(raw.to_string())
+			InterpreterValue::from(raw.to_string())
 		))
 	}
 
@@ -93,25 +108,22 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 	}
 
 	fn visit_if(&mut self, block: &If) -> InterpreterResult {
-		let (if_status, if_result) = block.if_block().accept(self)?;
-		match if_status {
-			ExitStatus::False => (),
-			_ => return Ok((if_status, if_result))
+		match block.if_block().accept(self)? {
+			(ExitStatus::False, _) => (),
+			r => return Ok(r)
 		}
 		if let Some(elseifs) = block.elseifs() {
 			for elseif in elseifs {
-				let (elseif_status, elseif_result) = elseif.accept(self)?;
-				match elseif_status {
-					ExitStatus::False => (),
-					_ => return Ok((elseif_status, elseif_result))
+				match elseif.accept(self)? {
+					(ExitStatus::False, _) => (),
+					r => return Ok(r)
 				}
 			}
 		}
 		if let Some(else_block) = block.else_block() {
-			let (else_status, else_result) = else_block.accept(self)?;
-			match else_status {
-				ExitStatus::False => (),
-				_ => return Ok((else_status, else_result))
+			match else_block.accept(self)? {
+				(ExitStatus::False, _) => (),
+				r => return Ok(r)
 			}
 		}
 		Ok((ExitStatus::False, InterpreterValue::Void))
@@ -125,26 +137,17 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 			if !condition.as_bool() {
 				break;
 			}
-			let result = block.body().accept(self)?;
-			match result.0 {
-				ExitStatus::Continue => continue,
-				ExitStatus::Break => {
-					exit_status = ExitStatus::Break;
-					break;
-				},
-				_ => {
-					exit_status = ExitStatus::Okay;
-					if let InterpreterValue::String(v) = result.1 {
-						string.push_str(&v);
-					}
-				}
+			exit_status = ExitStatus::Okay;
+			let (block_exit_status, r) = block.body().accept(self)?;
+			if let InterpreterValue::String(v) = r {
+				string.push_str(&v);
+			}
+			match block_exit_status {
+				ExitStatus::Break => break,
+				_ => ()
 			}
 		}
-		let result = match string.is_empty() {
-			true => InterpreterValue::Void,
-			false => InterpreterValue::String(string)
-		};
-		Ok((exit_status, result))
+		Ok((exit_status, InterpreterValue::from(string)))
 	}
 
 	fn visit_foreach(&mut self, block: &ForEach) -> InterpreterResult {
@@ -171,38 +174,23 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 			let item = self.eval_json(item)?;
 			let item = JsonTree::from(&item)?;
 			self.ctx.set(block.variable(), item)?;
-			let result = block.body().accept(self)?;
-			match result.0 {
-				ExitStatus::Continue => continue, // TODO do nothing
-				ExitStatus::Break => {
-					exit_status = ExitStatus::Break;
-					break;
-				},
-				_ => {
-					exit_status = ExitStatus::Okay;
-					if let InterpreterValue::String(v) = result.1 {
-						string.push_str(&v);
-					}
-				}
+			exit_status = ExitStatus::Okay;
+			let (block_exit_status, r) = block.body().accept(self)?;
+			if let InterpreterValue::String(v) = r {
+				string.push_str(&v);
+			}
+			match block_exit_status {
+				ExitStatus::Break => break,
+				_ => ()
 			}
 		}
-		let result = match string.is_empty() {
-			true => InterpreterValue::Void,
-			false => InterpreterValue::String(string)
-		};
-		Ok((exit_status, result))
+		Ok((exit_status, InterpreterValue::from(string)))
 	}
 
 	fn visit_conditional_block(&mut self, block: &ConditionalBlock) -> InterpreterResult {
 		let condition = block.condition().accept(self)?;
 		if condition.as_bool() {
-			let result = block.body().accept(self)?;
-			return match result.0 {
-				ExitStatus::Continue | ExitStatus::Break => Err(
-					"Cannot continue or break in conditional block".to_string()
-				),
-				_ => Ok(result)
-			}
+			return block.body().accept(self);
 		}
 		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
@@ -216,8 +204,12 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 	}
 
 	fn visit_expression(&self, expression: &Expression) -> InterpreterResult {
-		let expr = expression.accept(self)?;
-		Ok((ExitStatus::Okay, InterpreterValue::String(expr.to_string())))
+		Ok((
+			ExitStatus::Okay,
+			InterpreterValue::from(
+				expression.accept(self)?.to_string()
+			)
+		))
 	}
 }
 
