@@ -135,7 +135,21 @@ macro_tests!(
 	(basic_operation09_1, "7 / 2 = {{7 / 2}}", "7 / 2 = 3"),
 	(basic_operation09_2, "7 / 2 = {{7.0 / 2}}", "7 / 2 = 3.5"),
 	(basic_operation10, "7 + 3.2 - 1.2 = {{7 + 3.2 - 1.2}}", "7 + 3.2 - 1.2 = 9"),
-	(basic_operation11, "7.0 / 2.0 = {{7.0 / 2.0}}", "7.0 / 2.0 = 3.5")
+	(basic_operation11, "7.0 / 2.0 = {{7.0 / 2.0}}", "7.0 / 2.0 = 3.5"),
+	// String
+	(basic_str_op01, r#"{{ "abc" + "def" }}"#, "abcdef"),
+	(basic_str_op02, r#"{{ "abc" == "def" }}"#, r#"false"#),
+	(basic_str_op03, r#"{{ "abc" != "def" }}"#, r#"true"#),
+	(basic_str_op04, r#"{{ "abc" < "def" }}"#, r#"true"#),
+	(basic_str_op05, r#"{{ "abc" > "def" }}"#, r#"false"#),
+	(basic_str_op06, r#"{{ "abc" <= "def" }}"#, r#"true"#),
+	(basic_str_op07, r#"{{ "abc" >= "def" }}"#, r#"false"#),
+	(basic_str_op08, r#"{{ "abc" == "abc" }}"#, r#"true"#),
+	(basic_str_op09, r#"{{ "abc" != "abc" }}"#, r#"false"#),
+	(basic_str_op10, r#"{{ "abc" < "abc" }}"#, r#"false"#),
+	(basic_str_op11, r#"{{ "abc" > "abc" }}"#, r#"false"#),
+	(basic_str_op12, r#"{{ "abc" <= "abc" }}"#, r#"true"#),
+	(basic_str_op13, r#"{{ "abc" >= "abc" }}"#, r#"true"#)
 );
 
 macro_tests!(
