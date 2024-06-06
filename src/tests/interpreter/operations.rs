@@ -11,12 +11,22 @@ macro_tests!(
 	(
 		int01,
 		"{{ 1 + 2 }} {{ 1 - 2 }} {{ 3 * 5 }} {{ 3 / 5 }} {{ 3 % 5 }} {{ 7 && 5 }} {{ 7 || 5 }}",
-		"3 -1 15 0 3 5 7"
+		"3 -1 15 0 3 true true"
+	),
+	(
+		int_bool_02,
+		"{{ 5 && 0 }} {{ 0 && 5 }} {{ 5 || 0 }} {{ 0 || 5 }}",
+		"false false true true"
 	),
 	(
 		float01,
 		"{{ 1.2 + 2.0 }} {{ 1.2 - 2.0 }} {{ 3.2 * 5.2 }} {{ 3.2 / 4.2 }} {{ 3.2 % 5.0 }} {{ 7.2 && 5.0 }} {{ 7.0 || 5.2 }}",
-		"3.2 -0.8 16.64 0.7619047619047619 3.2 5 7"
+		"3.2 -0.8 16.64 0.7619047619047619 3.2 true true"
+	),
+	(
+		float_bool_02,
+		"{{ 5.0 && 0.0 }} {{ 0.0 && 5.0 }} {{ 5.0 || 0.0 }} {{ 0.0 || 5.0 }}",
+		"false false true true"
 	),
 	(
 		int02,
@@ -76,7 +86,7 @@ macro_tests!(
 	(
 		bool04,
 		"{{ 1 - true }} {{ 1 - false }} {{ 0 - true }} {{ 0 - false }} {{ 3 - true }} {{ 3 - false }}",
-		"true false false false true false"
+		"true false false true true false"
 	),
 	(
 		unary03,
@@ -97,6 +107,16 @@ macro_tests!(
 		grouping03,
 		"{{ (1 + 2) * (3 + 4) }}",
 		"21"
+	),
+	(
+		float_infinity,
+		"{{ 1.0 / 0.0 }}",
+		"inf"
+	),
+	(
+		float_neg_infinity,
+		"{{ -1.0 / 0.0 }}",
+		"-inf"
 	)
 );
 
@@ -121,23 +141,18 @@ macro_tests!(
 macro_tests!(
 	expect_error,
 	(
-		invalid_div01,
+		int_infinity,
 		"{{ 1 / 0 }}",
 		r#"{}"#
 	),
 	(
-		invalid_div02,
-		"{{ 1.0 / 0 }}",
+		int_neg_infinity,
+		"{{ -1 / 0 }}",
 		r#"{}"#
 	),
 	(
-		invalid_div03,
-		"{{ 1 / 0.0 }}",
-		r#"{}"#
-	),
-	(
-		invalid_div04,
-		"{{ 1.0 / 0.0 }}",
+		invalid_div01,
+		"{{ 1 / 0 }}",
 		r#"{}"#
 	),
 	(

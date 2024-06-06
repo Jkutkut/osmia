@@ -62,7 +62,7 @@ fn test_interpreter_basic(code: &str, expected: &str) {
 fn expect_error(code: &str, ctx: &str) {
 	let ctx = Ctx::from_str(ctx).unwrap();
 	match run_interpreter(code, ctx) {
-		Ok(_) => panic!("Expected error in interpreter"),
+		Ok(c) => panic!("Expected error in interpreter, got: {}", c),
 		Err(_) => ()
 	}
 }
