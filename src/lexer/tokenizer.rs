@@ -65,14 +65,14 @@ impl<'a> Tokenizer<'a> {
 		let c = chars.nth(self.current)?;
 		if let Some(_) = chars.next() {
 			match &self.text[self.current..self.current + 2] {
-				"==" | "!=" | "<=" | ">=" | "&&" | "||" => {
+				"==" | "!=" | "<=" | ">=" | "&&" | "||" | "<<" | ">>" => {
 					self.current += 2;
 					return Some(&self.text[self.current - 2..self.current]);
 				}
 				_ => ()
 			}
 		}
-		let single_char_tokens = "+-*/=()<>!%{}[],:";
+		let single_char_tokens = "+-*/=()<>!%{}[],:&|^";
 		if single_char_tokens.contains(c) {
 			let token = &self.text[self.current..self.current + 1];
 			self.current += 1;

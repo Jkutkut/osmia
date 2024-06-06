@@ -4,6 +4,7 @@ use std::cmp::{
 use std::ops::{
 	Add, Sub, Mul, Div,
 	Rem, Neg, Not,
+	BitAnd, BitOr, BitXor, Shl, Shr
 };
 
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
@@ -209,6 +210,80 @@ impl Rem for Literal {
 			(Literal::Str(_), _) => Err(format!("Cannot modulo string by {}", rhs)),
 			(Literal::Bool(_), _) => Err(format!("Cannot modulo bool by {}", rhs)),
 			(s, rhs) => Err(format!("Cannot modulo {} by {}", s, rhs))
+		}
+	}
+}
+
+impl BitAnd for Literal {
+	type Output = Result<Literal, String>;
+
+	fn bitand(self, rhs: Literal) -> Self::Output {
+		match (self, rhs) {
+			(Literal::Int(n1), n2) => Ok(Literal::Int(n1 & n2.as_int()?)),
+			(Literal::Bool(b1), b2) => Ok(Literal::Bool(b1 & b2.as_bool())),
+			(Literal::Null, Literal::Null) => Ok(Literal::Null),
+			(s, rhs) => Err(format!("Cannot bitwise and {} and {}", s, rhs))
+		}
+	}
+}
+
+impl BitOr for Literal {
+	type Output = Result<Literal, String>;
+
+	fn bitor(self, rhs: Literal) -> Self::Output {
+		match (self, rhs) {
+			(Literal::Int(n1), n2) => Ok(Literal::Int(n1 | n2.as_int()?)),
+			(Literal::Bool(b1), b2) => Ok(Literal::Bool(b1 | b2.as_bool())),
+			(Literal::Null, Literal::Null) => Ok(Literal::Null),
+			(s, rhs) => Err(format!("Cannot bitwise or {} and {}", s, rhs))
+		}
+	}
+}
+
+impl BitXor for Literal {
+	type Output = Result<Literal, String>;
+
+	fn bitxor(self, rhs: Literal) -> Self::Output {
+		match (self, rhs) {
+			(Literal::Int(n1), n2) => Ok(Literal::Int(n1 ^ n2.as_int()?)),
+			(Literal::Bool(b1), b2) => Ok(Literal::Bool(b1 ^ b2.as_bool())),
+			(s, rhs) => Err(format!("Cannot bitwise xor {} and {}", s, rhs))
+		}
+	}
+}
+
+impl Shl for Literal {
+	type Output = Result<Literal, String>;
+
+	fn shl(self, rhs: Literal) -> Self::Output {
+		match (&self, rhs) {
+			(Literal::Int(n1), n2) => Ok(Literal::Int(n1 << n2.as_int()?)),
+			(Literal::Float(_), Literal::Int(n)) => Ok(Literal::Int(self.as_int()? << n)),
+			(Literal::Str(r), Literal::Int(n)) => {
+				if n < 0 || (n as usize) > r.len() {
+					return Err(format!("Cannot shift left {} << {}", r, n));
+				}
+				Ok(Literal::Str(r.chars().skip(n as usize).collect()))
+			},
+			(s, rhs) => Err(format!("Cannot shift left {} << {}", s, rhs))
+		}
+	}
+}
+
+impl Shr for Literal {
+	type Output = Result<Literal, String>;
+
+	fn shr(self, rhs: Literal) -> Self::Output {
+		match (&self, rhs) {
+			(Literal::Int(n1), n2) => Ok(Literal::Int(n1 >> n2.as_int()?)),
+			(Literal::Float(_), Literal::Int(n)) => Ok(Literal::Int(self.as_int()? >> n)),
+			(Literal::Str(r), Literal::Int(n)) => {
+				if n < 0 || (n as usize) > r.len() {
+					return Err(format!("Cannot shift right {} >> {}", r, n));
+				}
+				Ok(Literal::Str(r.chars().take(r.len() - n as usize).collect()))
+			},
+			(s, rhs) => Err(format!("Cannot shift right {} >> {}", s, rhs))
 		}
 	}
 }
