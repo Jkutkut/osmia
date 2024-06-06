@@ -129,5 +129,10 @@ macro_tests!(
 	(operator10, "a / b", vec!["a", "/", "b"]),
 	(operator11, "a % b", vec!["a", "%", "b"]),
 	(operator12, "a && b", vec!["a", "&&", "b"]),
-	(operator13, "a || b", vec!["a", "||", "b"])
+	(operator13, "a || b", vec!["a", "||", "b"]),
+	(operator14, "a & b", vec!["a", "&", "b"]),
+	(operator15, "a | b", vec!["a", "|", "b"]),
+	(operator16, "a ^ b", vec!["a", "^", "b"]),
+	(operator17, "a << b", vec!["a", "<<", "b"]),
+	(operator18, "a >> b", vec!["a", ">>", "b"])
 );

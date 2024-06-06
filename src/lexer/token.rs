@@ -30,11 +30,20 @@ pub enum Token {
 	Equal,
 	NotEqual,
 
+	// Bitwise
+	BitAnd,
+	BitOr,
+	BitXor,
+
 	// Comparison
 	LessThan,
 	LessEqual,
 	GreaterThan,
 	GreaterEqual,
+
+	// Bitshift
+	BitShiftLeft,
+	BitShiftRight,
 
 	// Terms
 	Plus,
@@ -81,10 +90,15 @@ impl Token {
 			"break" => Some(Token::Break),
 			"==" => Some(Token::Equal),
 			"!=" => Some(Token::NotEqual),
+			"&" => Some(Token::BitAnd),
+			"|" => Some(Token::BitOr),
+			"^" => Some(Token::BitXor),
 			"<" => Some(Token::LessThan),
 			"<=" => Some(Token::LessEqual),
 			">" => Some(Token::GreaterThan),
 			">=" => Some(Token::GreaterEqual),
+			"<<" => Some(Token::BitShiftLeft),
+			">>" => Some(Token::BitShiftRight),
 			"+" => Some(Token::Plus),
 			"-" => Some(Token::Minus),
 			"*" => Some(Token::Multiply),
@@ -109,10 +123,15 @@ impl Token {
 		match self {
 			Token::Equal => true,
 			Token::NotEqual => true,
+			Token::BitAnd => true,
+			Token::BitOr => true,
+			Token::BitXor => true,
 			Token::LessThan => true,
 			Token::LessEqual => true,
 			Token::GreaterThan => true,
 			Token::GreaterEqual => true,
+			Token::BitShiftLeft => true,
+			Token::BitShiftRight => true,
 			Token::Plus => true,
 			Token::Minus => true,
 			Token::Multiply => true,
@@ -156,10 +175,15 @@ impl std::fmt::Display for Token {
 			Token::Break => write!(f, "break"),
 			Token::Equal => write!(f, "=="),
 			Token::NotEqual => write!(f, "!="),
+			Token::BitAnd => write!(f, "&"),
+			Token::BitOr => write!(f, "|"),
+			Token::BitXor => write!(f, "^"),
 			Token::LessThan => write!(f, "<"),
 			Token::LessEqual => write!(f, "<="),
 			Token::GreaterThan => write!(f, ">"),
 			Token::GreaterEqual => write!(f, ">="),
+			Token::BitShiftLeft => write!(f, "<<"),
+			Token::BitShiftRight => write!(f, ">>"),
 			Token::Plus => write!(f, "+"),
 			Token::Minus => write!(f, "-"),
 			Token::Multiply => write!(f, "*"),

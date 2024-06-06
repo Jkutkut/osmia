@@ -582,5 +582,35 @@ macro_tests!(
 		r#"{{for n in nbrs}}{{n}}{{if true}}--{{continue}}{{fi}}{{done}}"#,
 		Some(r#"{"nbrs": [1,2,3]}"#),
 		"1--2--3--"
+	),
+	(
+		gh_13_01,
+		r#"{{ 6 & 3 }} {{ true & true }} {{ true & false }} {{ false & true }} {{ false & false }} {{ null & null }}"#,
+		None,
+		"2 true false false false null"
+	),
+	(
+		gh_13_02,
+		r#"{{ 6 | 3 }} {{ true | true }} {{ true | false }} {{ false | true }} {{ false | false }} {{ null | null }}"#,
+		None,
+		"7 true true true false null"
+	),
+	(
+		gh_13_03,
+		r#"{{ 6 ^ 3 }} {{ true ^ true }} {{ true ^ false }} {{ false ^ true }} {{ false ^ false }}"#,
+		None,
+		"5 false true true false"
+	),
+	(
+		gh_13_04,
+		r#"{{ 6 << 2 }} {{ 6 >> 2 }} {{ 6.0 << 2 }} {{ 6.0 >> 2 }} {{ 6.3 << 2 }} {{ 6.9 >> 2 }}"#,
+		None,
+		"24 1 24 1 24 1"
+	),
+	(
+		gh_13_05,
+		r#"{{ "Foo" << 2 }} {{ "Foo" >> 2 }}"#,
+		None,
+		"o F"
 	)
 );

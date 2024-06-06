@@ -258,6 +258,22 @@ macro_tests!(
 		]
 	),
 	(
+		operators5,
+		"{{ | || & && << >> ^ }}",
+		vec![
+			Token::DelimiterStart,
+			Token::BitOr,
+			Token::Or,
+			Token::BitAnd,
+			Token::And,
+			Token::BitShiftLeft,
+			Token::BitShiftRight,
+			Token::BitXor,
+			Token::DelimiterEnd,
+			Token::Eof
+		]
+	),
+	(
 		keywords,
 		r#"
 		{{print}}{{assign =}}
@@ -484,6 +500,63 @@ macro_tests!(
 			Token::Plus,
 			Token::Value("2".to_string()),
 			Token::GroupingEnd,
+			Token::DelimiterEnd,
+			Token::Eof
+		]
+	),
+	(
+		same_expression02,
+		"{{ 1|1 }} {{ 1 | 1 }}
+{{ 1&1 }} {{ 1 & 1 }}
+{{ 1<<1 }} {{ 1 << 1 }}
+{{ 1>>1 }} {{ 1 >> 1 }}",
+		vec![
+			Token::DelimiterStart,
+			Token::Value("1".to_string()),
+			Token::BitOr,
+			Token::Value("1".to_string()),
+			Token::DelimiterEnd,
+			Token::Raw(" ".to_string()),
+			Token::DelimiterStart,
+			Token::Value("1".to_string()),
+			Token::BitOr,
+			Token::Value("1".to_string()),
+			Token::DelimiterEnd,
+			Token::Raw("\n".to_string()),
+			Token::DelimiterStart,
+			Token::Value("1".to_string()),
+			Token::BitAnd,
+			Token::Value("1".to_string()),
+			Token::DelimiterEnd,
+			Token::Raw(" ".to_string()),
+			Token::DelimiterStart,
+			Token::Value("1".to_string()),
+			Token::BitAnd,
+			Token::Value("1".to_string()),
+			Token::DelimiterEnd,
+			Token::Raw("\n".to_string()),
+			Token::DelimiterStart,
+			Token::Value("1".to_string()),
+			Token::BitShiftLeft,
+			Token::Value("1".to_string()),
+			Token::DelimiterEnd,
+			Token::Raw(" ".to_string()),
+			Token::DelimiterStart,
+			Token::Value("1".to_string()),
+			Token::BitShiftLeft,
+			Token::Value("1".to_string()),
+			Token::DelimiterEnd,
+			Token::Raw("\n".to_string()),
+			Token::DelimiterStart,
+			Token::Value("1".to_string()),
+			Token::BitShiftRight,
+			Token::Value("1".to_string()),
+			Token::DelimiterEnd,
+			Token::Raw(" ".to_string()),
+			Token::DelimiterStart,
+			Token::Value("1".to_string()),
+			Token::BitShiftRight,
+			Token::Value("1".to_string()),
 			Token::DelimiterEnd,
 			Token::Eof
 		]

@@ -31,8 +31,10 @@ use crate::model::{
 /// ListOrVariable → Variable | array ;
 ///
 /// expression     → equality ;
-/// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-/// comparison     → bool_op ( ( ">" | ">=" | "<" | "<=" ) bool_op )* ;
+/// equality       → bitwise ( ( "!=" | "==" ) bitwise )* ;
+/// bitwise        → comparison ( ( "&" | "|" | "^" ) comparison )* ;
+/// comparison     → bitshift ( ( ">" | ">=" | "<" | "<=" ) bitshift )* ;
+/// bitshift       → bool_op ( ( ">>" | "<<" ) bool_op )* ;
 /// bool_op        → term ( ( "&&" | "||" ) term )* ;
 /// term           → factor ( ( "-" | "+" ) factor )* ;
 /// factor         → unary ( ( "/" | "*" ) unary )* ;
@@ -400,8 +402,22 @@ impl Parser {
 	}
 
 	fn equality(&mut self) -> Result<Expression, String> {
-		let mut expr = self.comparison()?;
+		let mut expr = self.bitwise()?;
 		while self.match_and_advance(&[Token::NotEqual, Token::Equal]) {
+			let operator = self.get_previous().clone();
+			let right = self.bitwise()?;
+			expr = Self::new_binary(
+				expr, operator, right
+			)?;
+		}
+		Ok(expr)
+	}
+
+	fn bitwise(&mut self) -> Result<Expression, String> {
+		let mut expr = self.comparison()?;
+		while self.match_and_advance(&[
+			Token::BitAnd, Token::BitOr, Token::BitXor
+		]) {
 			let operator = self.get_previous().clone();
 			let right = self.comparison()?;
 			expr = Self::new_binary(
@@ -412,10 +428,24 @@ impl Parser {
 	}
 
 	fn comparison(&mut self) -> Result<Expression, String> {
-		let mut expr = self.bool_op()?;
+		let mut expr = self.bitshift()?;
 		while self.match_and_advance(&[
 			Token::GreaterThan, Token::GreaterEqual,
 			Token::LessThan, Token::LessEqual
+		]) {
+			let operator = self.get_previous().clone();
+			let right = self.bitshift()?;
+			expr = Self::new_binary(
+				expr, operator, right
+			)?;
+		}
+		Ok(expr)
+	}
+
+	fn bitshift(&mut self) -> Result<Expression, String> {
+		let mut expr = self.bool_op()?;
+		while self.match_and_advance(&[
+			Token::BitShiftLeft, Token::BitShiftRight
 		]) {
 			let operator = self.get_previous().clone();
 			let right = self.bool_op()?;
