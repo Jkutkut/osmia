@@ -187,11 +187,12 @@ use model::Stmt;
 /// let result = interpreter.run(&code).unwrap();
 /// assert_eq!(result, "User: Marvin");
 /// ```
-pub struct Osmia {
-}
+pub struct Osmia;
 
 
 impl Osmia {
+	pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 	pub fn new() -> Interpreter {
 		Self::from_json("{}").unwrap()
 	}
