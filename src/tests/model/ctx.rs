@@ -253,13 +253,13 @@ macro_tests!(
 	(
 		get_invalid_key01,
 		r#"{"foo": "bar"}"#,
-		"other",
+		"foo.bar",
 		Err(())
 	),
 	(
 		get_invalid_key02,
 		r#"{"foo": {"bar": "baz"}}"#,
-		"foo.other",
+		"foo.bar.baz",
 		Err(())
 	),
 	(

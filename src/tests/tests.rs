@@ -251,13 +251,23 @@ macro_tests!(
 	test_execution_error,
 	(
 		not_found_key01,
-		"Hello, {{name}}!",
-		Some(r#"{ "name2": "world" }"#)
+		"Hello, {{usr.name}}!",
+		Some(r#"{ "user": { "name": "John" } }"#)
 	),
 	(
 		not_found_key02,
 		"Hello, {{lst[4]}}!",
 		Some(r#"{ "lst": [1, 2, 3] }"#)
+	),
+	(
+		not_found_key03,
+		"Hello, {{lst[4]}}!",
+		Some(r#"{ "lst": { "a": 1, "b": 2 } }"#)
+	),
+	(
+		not_found_key04,
+		"Hello, {{obj[0]}}!",
+		Some(r#"{ "obj": {}}"#)
 	),
 	(
 		foreach_fail01,
@@ -273,9 +283,7 @@ macro_tests!(
 						"url": "https://example01.com",
 						"name": "Example01"
 					},
-					{
-						"url": "https://example02.org"
-					}
+					123
 				]
 			}
 		"#)
