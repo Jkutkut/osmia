@@ -32,6 +32,18 @@ macro_tests!(
 		"{{ arr[0].name }} {{ arr[1].surname }}",
 		r#"{"arr": [{"name": "foo"}, {"name": "bar", "surname": "baz"}]}"#,
 		"foo baz"
+	),
+	(
+		null_variable01,
+		"{{ foo }}",
+		"{}",
+		"null"
+	),
+	(
+		null_variable02,
+		"{{ foo.bar }}",
+		r#"{"foo": {}}"#,
+		"null"
 	)
 );
 
@@ -39,8 +51,8 @@ macro_tests!(
 	expect_error,
 	(
 		invalid_variable01,
-		"{{ foo }}",
-		r#"{}"#
+		"{{ foo.bar }}",
+		r#"{"foo": "bar"}"#
 	),
 	(
 		invalid_variable02,
@@ -50,7 +62,7 @@ macro_tests!(
 	(
 		invalid_variable03,
 		"{{ foo.bar }}",
-		r#"{"foo": {"other": 42}}"#
+		r#"{"foo": ["other"]}"#
 	),
 	(
 		invalid_variable_index01,
@@ -61,6 +73,16 @@ macro_tests!(
 		invalid_variable_index02,
 		"{{ arr[12] }}",
 		r#"{"arr": [1, 2, 3]}"#
+	),
+	(
+		invalid_variable_index03,
+		"{{ arr[0] }}",
+		r#"{"arr": {"foo": "bar"}}"#
+	),
+	(
+		invalid_variable_index04,
+		"{{ arr[0] }}",
+		r#"{"arr": "bar"}"#
 	)
 );
 
