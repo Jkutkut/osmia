@@ -59,8 +59,8 @@ pub enum Token {
 	And,
 	Or,
 
-	GroupingStart,
-	GroupingEnd,
+	ParentStart,
+	ParentEnd,
 
 	// JSON
 	ObjectStart,
@@ -107,8 +107,8 @@ impl Token {
 			"!" => Some(Token::Not),
 			"&&" => Some(Token::And),
 			"||" => Some(Token::Or),
-			"(" => Some(Token::GroupingStart),
-			")" => Some(Token::GroupingEnd),
+			"(" => Some(Token::ParentStart),
+			")" => Some(Token::ParentEnd),
 			"{" => Some(Token::ObjectStart),
 			"}" => Some(Token::ObjectEnd),
 			":" => Some(Token::Colon),
@@ -192,8 +192,8 @@ impl std::fmt::Display for Token {
 			Token::Not => write!(f, "!"),
 			Token::And => write!(f, "&&"),
 			Token::Or => write!(f, "||"),
-			Token::GroupingStart => write!(f, "("),
-			Token::GroupingEnd => write!(f, ")"),
+			Token::ParentStart => write!(f, "("),
+			Token::ParentEnd => write!(f, ")"),
 			Token::ObjectStart => write!(f, "{{"),
 			Token::ObjectEnd => write!(f, "}}"),
 			Token::Colon => write!(f, ":"),

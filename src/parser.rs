@@ -529,7 +529,7 @@ impl Parser {
 				}
 				Err(self.error("Invalid variable name"))
 			},
-			Token::GroupingStart => Ok(self.grouping()?),
+			Token::ParentStart => Ok(self.grouping()?),
 			_ => Err(self.error("Expected expression"))
 		}
 	}
@@ -551,13 +551,13 @@ impl Parser {
 
 	fn grouping(&mut self) -> Result<Expression, String> {
 		self.consume(
-			Token::GroupingStart,
-			&format!("Expected '{}' before expression", Token::GroupingStart)
+			Token::ParentStart,
+			&format!("Expected '{}' before expression", Token::ParentStart)
 		)?;
 		let expr = self.expression()?;
 		self.consume(
-			Token::GroupingEnd,
-			&format!("Expected '{}' after expression", Token::GroupingEnd)
+			Token::ParentEnd,
+			&format!("Expected '{}' after expression", Token::ParentEnd)
 		)?;
 		Ok(Expression::Grouping(Grouping::new(expr)))
 	}

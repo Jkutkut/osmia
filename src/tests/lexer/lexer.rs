@@ -220,8 +220,8 @@ macro_tests!(
 		"{{()[]{}}}",
 		vec![
 			Token::DelimiterStart,
-			Token::GroupingStart,
-			Token::GroupingEnd,
+			Token::ParentStart,
+			Token::ParentEnd,
 			Token::ArrayStart,
 			Token::ArrayEnd,
 			Token::ObjectStart,
@@ -473,11 +473,11 @@ macro_tests!(
 		"{{ (1 + 2) }}",
 		vec![
 			Token::DelimiterStart,
-			Token::GroupingStart,
+			Token::ParentStart,
 			Token::Value("1".to_string()),
 			Token::Plus,
 			Token::Value("2".to_string()),
-			Token::GroupingEnd,
+			Token::ParentEnd,
 			Token::DelimiterEnd,
 			Token::Eof
 		]
@@ -487,19 +487,19 @@ macro_tests!(
 		"{{ (1 + 2) }} {{ ( 1+2 ) }}",
 		vec![
 			Token::DelimiterStart,
-			Token::GroupingStart,
+			Token::ParentStart,
 			Token::Value("1".to_string()),
 			Token::Plus,
 			Token::Value("2".to_string()),
-			Token::GroupingEnd,
+			Token::ParentEnd,
 			Token::DelimiterEnd,
 			Token::Raw(" ".to_string()),
 			Token::DelimiterStart,
-			Token::GroupingStart,
+			Token::ParentStart,
 			Token::Value("1".to_string()),
 			Token::Plus,
 			Token::Value("2".to_string()),
-			Token::GroupingEnd,
+			Token::ParentEnd,
 			Token::DelimiterEnd,
 			Token::Eof
 		]
