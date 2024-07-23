@@ -34,5 +34,30 @@ test_backtrace:
 doc:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust doc --lib --examples
 
+doc_release:
+	@echo "Ensuring repo has no uncommited changes..."
+	@git diff --quiet && git diff --cached --quiet || (echo "Error: Repository not clean" && false)
+	@echo "${REPO} is clean."
+	@echo "Generating docs..."
+	make doc
+	sudo chown -R ${USER}:${USER} target
+	@echo "Preparing for commit..."
+	rm -rf /tmp/osmia-doc
+	cp -r target/doc /tmp/osmia-doc
+	echo "v$(shell grep -m 1 version Cargo.toml | cut -d '"' -f 2)" > /tmp/osmia-version.txt
+	@echo "Committing docs..."
+	git checkout documentation
+	rm -rf ./*
+	cp -r /tmp/osmia-doc/* .
+	git add .
+	cat /tmp/osmia-version.txt | git commit -F -
+	@echo "Cleaning up..."
+	rm -rf /tmp/osmia-doc
+	rm -rf /tmp/osmia-version.txt
+	@echo "Done! Publishing docs..."
+	@git push
+	@git checkout main
+
+
 clean:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust clean
