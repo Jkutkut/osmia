@@ -622,3 +622,13 @@ macro_tests!(
 		"o F"
 	)
 );
+
+macro_tests!(
+	test_io,
+	(
+		gh_16_01,
+		r#"{{if !nothing}}Nothing is null{{fi}}"#,
+		Some(r#"{"nothing": null}"#),
+		"Nothing is null"
+	)
+);

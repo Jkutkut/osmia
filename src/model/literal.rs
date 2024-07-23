@@ -309,6 +309,7 @@ impl Not for Literal {
 			Literal::Int(_) => Ok(Literal::Bool(!self.as_bool())),
 			Literal::Float(_) => Ok(Literal::Bool(!self.as_bool())),
 			Literal::Bool(b) => Ok(Literal::Bool(!b)),
+			Literal::Null => Ok(Literal::Bool(true)),
 			_ => Err(format!("Cannot logic negate {}", self))
 		}
 	}
