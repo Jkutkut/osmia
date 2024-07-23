@@ -26,21 +26,22 @@ use crate::model::{
 /// Continue       → "{{" "continue" "}}" ;
 ///
 /// json           → object | array | expression ;
-/// jsonObject         → "{" ( Literal ":" json "," )* ( Literal ":" json )? "}" ;
-/// jsonArray          → "[" ( json "," )* ( json )? "]" ;
+/// jsonObject     → "{" ( Literal ":" json "," )* ( Literal ":" json )? "}" ;
+/// jsonArray      → "[" ( json "," )* ( json )? "]" ;
 /// ListOrVariable → Variable | array ;
 ///
-/// expression     → equality ;
+/// expression     → logic_or ;
+/// logic_or       → logic_and ( "||" logic_and )* ;
+/// logic_and      → equality ( "&&" equality )* ;
 /// equality       → bitwise ( ( "!=" | "==" ) bitwise )* ;
 /// bitwise        → comparison ( ( "&" | "|" | "^" ) comparison )* ;
 /// comparison     → bitshift ( ( ">" | ">=" | "<" | "<=" ) bitshift )* ;
-/// bitshift       → bool_op ( ( ">>" | "<<" ) bool_op )* ;
-/// bool_op        → term ( ( "&&" | "||" ) term )* ;
+/// bitshift       → term ( ( ">>" | "<<" ) term )* ;
 /// term           → factor ( ( "-" | "+" ) factor )* ;
 /// factor         → unary ( ( "/" | "*" ) unary )* ;
 /// unary          → ( "!" | "-" | "+" ) unary | primary ;
-/// primary        →  Literal | Variable | grouping;
-/// grouping       →  "(" expression ")" ;
+/// primary        → Literal | Variable | grouping;
+/// grouping       → "(" expression ")" ;
 /// ```
 pub struct Parser {
 	tokens: Vec<Token>,
@@ -398,7 +399,31 @@ impl Parser {
 
 impl Parser {
 	fn expression(&mut self) -> Result<Expression, String> {
-		self.equality()
+		self.logic_or()
+	}
+
+	fn logic_or(&mut self) -> Result<Expression, String> {
+		let mut expr = self.logic_and()?;
+		while self.match_and_advance(&[Token::Or]) {
+			let operator = self.get_previous().clone();
+			let right = self.logic_and()?;
+			expr = Self::new_binary(
+				expr, operator, right
+			)?;
+		}
+		Ok(expr)
+	}
+
+	fn logic_and(&mut self) -> Result<Expression, String> {
+		let mut expr = self.equality()?;
+		while self.match_and_advance(&[Token::And]) {
+			let operator = self.get_previous().clone();
+			let right = self.equality()?;
+			expr = Self::new_binary(
+				expr, operator, right
+			)?;
+		}
+		Ok(expr)
 	}
 
 	fn equality(&mut self) -> Result<Expression, String> {
@@ -443,22 +468,10 @@ impl Parser {
 	}
 
 	fn bitshift(&mut self) -> Result<Expression, String> {
-		let mut expr = self.bool_op()?;
+		let mut expr = self.term()?;
 		while self.match_and_advance(&[
 			Token::BitShiftLeft, Token::BitShiftRight
 		]) {
-			let operator = self.get_previous().clone();
-			let right = self.bool_op()?;
-			expr = Self::new_binary(
-				expr, operator, right
-			)?;
-		}
-		Ok(expr)
-	}
-
-	fn bool_op(&mut self) -> Result<Expression, String> {
-		let mut expr = self.term()?;
-		while self.match_and_advance(&[Token::And, Token::Or]) {
 			let operator = self.get_previous().clone();
 			let right = self.term()?;
 			expr = Self::new_binary(
