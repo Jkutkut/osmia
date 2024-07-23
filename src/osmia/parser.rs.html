@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/parser.rs`."><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../osmia/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/parser.rs`."><title>parser.rs - source</title><script> if (window.location.protocol !== "file:") document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2">`)</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0 (9b00956e5 2024-04-29)" data-channel="1.78.0" data-search-js="search-42d8da7a6b9792c2.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../osmia/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -519,6 +521,49 @@
 <a href="#519" id="519">519</a>
 <a href="#520" id="520">520</a>
 <a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span><span class="kw">crate</span>::lexer::Token;
 <span class="kw">use </span><span class="kw">crate</span>::model::{
@@ -535,31 +580,34 @@
 /// Stmt           → Block | Raw | Print | Expression | Assign | If | While | ForEach | Break | Continue
 ///
 /// Block          → Stmt[] ;
-/// Raw            → &quot;...&quot; ;
-/// Print          → &quot;{{&quot; &quot;print&quot; expression &quot;;&quot; &quot;}}&quot; ;
-/// Expression     → &quot;{{&quot; expression &quot;}}&quot; ;
-/// Assign         → &quot;{{&quot; &quot;assign&quot; Variable &quot;=&quot; json &quot;}}&quot; ;
-/// If             → &quot;{{&quot; &quot;if&quot; Conditional ( &quot;{{&quot; &quot;elseif&quot; Conditional )* ( &quot;{{&quot; &quot;else&quot; Block )? &quot;{{&quot; &quot;fi&quot; &quot;}}&quot; ;
-/// Conditional    → expression &quot;}}&quot; Stmt 
-/// While          → &quot;{{&quot; &quot;while&quot; Conditional &quot;{{&quot; &quot;done&quot; &quot;}}&quot; ;
-/// ForEach        → &quot;{{&quot; &quot;foreach&quot; Variable &quot;in&quot; ListOrVariable &quot;}}&quot; Stmt &quot;{{&quot; &quot;done&quot; &quot;}}&quot; ;
-/// Break          → &quot;{{&quot; &quot;break&quot; &quot;}}&quot; ;
-/// Continue       → &quot;{{&quot; &quot;continue&quot; &quot;}}&quot; ;
+/// Raw            → "..." ;
+/// Print          → "{{" "print" expression ";" "}}" ;
+/// Expression     → "{{" expression "}}" ;
+/// Assign         → "{{" "assign" Variable "=" json "}}" ;
+/// If             → "{{" "if" Conditional ( "{{" "elseif" Conditional )* ( "{{" "else" Block )? "{{" "fi" "}}" ;
+/// Conditional    → expression "}}" Stmt 
+/// While          → "{{" "while" Conditional "{{" "done" "}}" ;
+/// ForEach        → "{{" "foreach" Variable "in" ListOrVariable "}}" Stmt "{{" "done" "}}" ;
+/// Break          → "{{" "break" "}}" ;
+/// Continue       → "{{" "continue" "}}" ;
 ///
 /// json           → object | array | expression ;
-/// jsonObject         → &quot;{&quot; ( Literal &quot;:&quot; json &quot;,&quot; )* ( Literal &quot;:&quot; json )? &quot;}&quot; ;
-/// jsonArray          → &quot;[&quot; ( json &quot;,&quot; )* ( json )? &quot;]&quot; ;
+/// jsonObject     → "{" ( Literal ":" json "," )* ( Literal ":" json )? "}" ;
+/// jsonArray      → "[" ( json "," )* ( json )? "]" ;
 /// ListOrVariable → Variable | array ;
 ///
-/// expression     → equality ;
-/// equality       → comparison ( ( &quot;!=&quot; | &quot;==&quot; ) comparison )* ;
-/// comparison     → bool_op ( ( &quot;&gt;&quot; | &quot;&gt;=&quot; | &quot;&lt;&quot; | &quot;&lt;=&quot; ) bool_op )* ;
-/// bool_op        → term ( ( &quot;&amp;&amp;&quot; | &quot;||&quot; ) term )* ;
-/// term           → factor ( ( &quot;-&quot; | &quot;+&quot; ) factor )* ;
-/// factor         → unary ( ( &quot;/&quot; | &quot;*&quot; ) unary )* ;
-/// unary          → ( &quot;!&quot; | &quot;-&quot; | &quot;+&quot; ) unary | primary ;
-/// primary        →  Literal | Variable | grouping;
-/// grouping       →  &quot;(&quot; expression &quot;)&quot; ;
+/// expression     → logic_or ;
+/// logic_or       → logic_and ( "||" logic_and )* ;
+/// logic_and      → equality ( "&amp;&amp;" equality )* ;
+/// equality       → bitwise ( ( "!=" | "==" ) bitwise )* ;
+/// bitwise        → comparison ( ( "&amp;" | "|" | "^" ) comparison )* ;
+/// comparison     → bitshift ( ( "&gt;" | "&gt;=" | "&lt;" | "&lt;=" ) bitshift )* ;
+/// bitshift       → term ( ( "&gt;&gt;" | "&lt;&lt;" ) term )* ;
+/// term           → factor ( ( "-" | "+" ) factor )* ;
+/// factor         → unary ( ( "/" | "*" ) unary )* ;
+/// unary          → ( "!" | "-" | "+" ) unary | primary ;
+/// primary        → Literal | Variable | grouping;
+/// grouping       → "(" expression ")" ;
 /// ```
 </span><span class="kw">pub struct </span>Parser {
 	tokens: Vec&lt;Token&gt;,
@@ -587,7 +635,7 @@
 	</span><span class="kw">pub fn </span>parse(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Stmt, String&gt; {
 		<span class="kw">let </span>code = <span class="self">self</span>.code()<span class="question-mark">?</span>;
 		<span class="kw">if </span>!<span class="self">self</span>.is_at_end() {
-			<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Expected end of program&quot;</span>));
+			<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Expected end of program"</span>));
 		}
 		<span class="prelude-val">Ok</span>(code)
 	}
@@ -653,14 +701,14 @@
 	<span class="attr">#[cfg(debug_assertions)]
 	</span><span class="kw">fn </span>error(<span class="kw-2">&amp;</span><span class="self">self</span>, message: <span class="kw-2">&amp;</span>str) -&gt; String {
 		<span class="macro">format!</span>(
-			<span class="string">&quot;parser error: {} at &#39;{}&#39; (Token at index: {}).&quot;</span>,
+			<span class="string">"parser error: {} at '{}' (Token at index: {})."</span>,
 			message, <span class="self">self</span>.get_current(), <span class="self">self</span>.current
 		)
 	}
 
 	<span class="attr">#[cfg(not(debug_assertions))]
 	</span><span class="kw">fn </span>error(<span class="kw-2">&amp;</span><span class="self">self</span>, message: <span class="kw-2">&amp;</span>str) -&gt; String {
-		<span class="macro">format!</span>(<span class="string">&quot;parser error: {} at &#39;{}&#39;.&quot;</span>, message, <span class="self">self</span>.get_current())
+		<span class="macro">format!</span>(<span class="string">"parser error: {} at '{}'."</span>, message, <span class="self">self</span>.get_current())
 	}
 }
 
@@ -682,7 +730,7 @@
 					<span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e)
 				},
 				<span class="kw">_ </span>=&gt; {
-					<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Unexpected token&quot;</span>));
+					<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Unexpected token"</span>));
 				}
 			}
 		}
@@ -706,13 +754,13 @@
 				<span class="kw">if </span><span class="self">self</span>.close_block(end_tokens, is_close_block)<span class="question-mark">? </span>{
 					<span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
 				}
-				<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Unexpected token in block&quot;</span>));
+				<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Unexpected token in block"</span>));
 			}
 			<span class="kw">_ </span>=&gt; <span class="self">self</span>.statement()<span class="question-mark">?</span>,
 		};
 		<span class="self">self</span>.consume(
 			Token::DelimiterEnd,
-			<span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39;&quot;</span>, Token::DelimiterEnd).as_str(),
+			<span class="macro">format!</span>(<span class="string">"Expected '{}'"</span>, Token::DelimiterEnd).as_str(),
 		)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(stmt))
 	}
@@ -733,12 +781,12 @@
 		<span class="kw">let </span>variable = <span class="kw">match </span><span class="self">self</span>.get_current() {
 			Token::Value(name) =&gt; <span class="self">self</span>.variable(<span class="kw-2">&amp;</span>name.to_string())<span class="question-mark">?</span>,
 			<span class="kw">_ </span>=&gt; {
-				<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Expected variable before &#39;=&#39; in assign&quot;</span>));
+				<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Expected variable before '=' in assign"</span>));
 			}
 		};
 		<span class="self">self</span>.consume(
 			Token::AssignEq,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after variable&quot;</span>, Token::AssignEq),
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after variable"</span>, Token::AssignEq),
 		)<span class="question-mark">?</span>;
 		<span class="kw">let </span>json = <span class="self">self</span>.json_expression()<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(Stmt::Assign(Assign::new(variable, json)))
@@ -749,17 +797,17 @@
 		<span class="kw">let </span>variable = <span class="kw">match </span><span class="self">self</span>.get_current() {
 			Token::Value(name) =&gt; <span class="self">self</span>.variable(<span class="kw-2">&amp;</span>name.to_string())<span class="question-mark">?</span>,
 			<span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(
-				<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected variable after &#39;{}&#39; in {} statement&quot;</span>, Token::For, Token::For)
+				<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected variable after '{}' in {} statement"</span>, Token::For, Token::For)
 			))
 		};
 		<span class="self">self</span>.consume(
 			Token::In,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after variable in {} statement&quot;</span>, Token::In, Token::For),
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after variable in {} statement"</span>, Token::In, Token::For),
 		)<span class="question-mark">?</span>;
 		<span class="kw">let </span>list = <span class="self">self</span>.list_or_variable()<span class="question-mark">?</span>;
 		<span class="self">self</span>.consume(
 			Token::DelimiterEnd,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; in {} statement&quot;</span>, Token::DelimiterEnd, Token::For),
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' in {} statement"</span>, Token::DelimiterEnd, Token::For),
 		)<span class="question-mark">?</span>;
 		<span class="kw">let </span>block = <span class="self">self</span>.block(<span class="prelude-val">Some</span>(<span class="macro">vec!</span>[
 			Token::Done
@@ -786,7 +834,7 @@
 			<span class="self">self</span>.advance();
 			<span class="self">self</span>.consume(
 				Token::DelimiterEnd,
-				<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after else statement&quot;</span>, Token::DelimiterEnd)
+				<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after else statement"</span>, Token::DelimiterEnd)
 			)<span class="question-mark">?</span>;
 			else_block = <span class="prelude-val">Some</span>(<span class="self">self</span>.block(<span class="prelude-val">Some</span>(<span class="macro">vec!</span>[Token::Fi]))<span class="question-mark">?</span>);
 		}
@@ -804,7 +852,7 @@
 		<span class="kw">let </span>expr = <span class="self">self</span>.expression()<span class="question-mark">?</span>;
 		<span class="self">self</span>.consume(
 			Token::DelimiterEnd,
-			<span class="macro">format!</span>(<span class="string">&quot;Unclosed &#39;{}&#39; in conditional statement&quot;</span>, Token::DelimiterEnd).as_str(),
+			<span class="macro">format!</span>(<span class="string">"Unclosed '{}' in conditional statement"</span>, Token::DelimiterEnd).as_str(),
 		)<span class="question-mark">?</span>;
 		<span class="kw">let </span>block = <span class="self">self</span>.block(<span class="prelude-val">Some</span>(end_tokens))<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(ConditionalBlock::new(expr, block))
@@ -852,7 +900,7 @@
 	<span class="kw">fn </span>json_array(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;JsonExpression, String&gt; {
 		<span class="self">self</span>.consume(
 			Token::ArrayStart,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; before array&quot;</span>, Token::ArrayStart)
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' before array"</span>, Token::ArrayStart)
 		)<span class="question-mark">?</span>;
 		<span class="kw">let </span><span class="kw-2">mut </span>elements = Vec::new();
 		<span class="kw">while </span>!<span class="self">self</span>.check_current(<span class="kw-2">&amp;</span>Token::ArrayEnd) &amp;&amp; !<span class="self">self</span>.is_at_end() {
@@ -860,13 +908,13 @@
 			<span class="kw">if </span>!<span class="self">self</span>.check_current(<span class="kw-2">&amp;</span>Token::ArrayEnd) &amp;&amp; !<span class="self">self</span>.is_at_end() {
 				<span class="self">self</span>.consume(
 					Token::Comma,
-					<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after array element&quot;</span>, Token::Comma)
+					<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after array element"</span>, Token::Comma)
 				)<span class="question-mark">?</span>;
 			}
 		}
 		<span class="self">self</span>.consume(
 			Token::ArrayEnd,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after array&quot;</span>, Token::ArrayEnd)
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after array"</span>, Token::ArrayEnd)
 		)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(JsonExpression::Array(elements))
 	}
@@ -874,29 +922,29 @@
 	<span class="kw">fn </span>json_object(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;JsonExpression, String&gt; {
 		<span class="self">self</span>.consume(
 			Token::ObjectStart,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; before object&quot;</span>, Token::ObjectStart)
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' before object"</span>, Token::ObjectStart)
 		)<span class="question-mark">?</span>;
 		<span class="kw">let </span><span class="kw-2">mut </span>object = HashMap::new();
 		<span class="kw">while </span>!<span class="self">self</span>.check_current(<span class="kw-2">&amp;</span>Token::ObjectEnd) &amp;&amp; !<span class="self">self</span>.is_at_end() {
 			<span class="kw">let </span>key = <span class="kw">match </span><span class="self">self</span>.primary() {
 				<span class="prelude-val">Ok</span>(Expression::Literal(Literal::Str(s))) =&gt; s,
-				<span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Expected string literal as key in object&quot;</span>))
+				<span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Expected string literal as key in object"</span>))
 			};
 			<span class="self">self</span>.consume(
 				Token::Colon,
-				<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after key in object&quot;</span>, Token::Colon)
+				<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after key in object"</span>, Token::Colon)
 			)<span class="question-mark">?</span>;
 			object.insert(key, <span class="self">self</span>.json_expression()<span class="question-mark">?</span>);
 			<span class="kw">if </span>!<span class="self">self</span>.check_current(<span class="kw-2">&amp;</span>Token::ObjectEnd) &amp;&amp; !<span class="self">self</span>.is_at_end() {
 				<span class="self">self</span>.consume(
 					Token::Comma,
-					<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after object element&quot;</span>, Token::Comma)
+					<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after object element"</span>, Token::Comma)
 				)<span class="question-mark">?</span>;
 			}
 		}
 		<span class="self">self</span>.consume(
 			Token::ObjectEnd,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after object&quot;</span>, Token::ObjectEnd)
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after object"</span>, Token::ObjectEnd)
 		)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(JsonExpression::Object(object))
 	}
@@ -906,7 +954,7 @@
 			Token::Value(name) =&gt; ListOrVariable::Variable(<span class="self">self</span>.variable(<span class="kw-2">&amp;</span>name.to_string())<span class="question-mark">?</span>),
 			Token::ArrayStart =&gt; ListOrVariable::List(<span class="self">self</span>.json_array()<span class="question-mark">?</span>),
 			<span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(
-				<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected variable or list after &#39;{}&#39; in {} statement&quot;</span>, Token::In, Token::For)
+				<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected variable or list after '{}' in {} statement"</span>, Token::In, Token::For)
 			))
 		};
 		<span class="prelude-val">Ok</span>(result)
@@ -917,12 +965,50 @@
 
 </span><span class="kw">impl </span>Parser {
 	<span class="kw">fn </span>expression(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
-		<span class="self">self</span>.equality()
+		<span class="self">self</span>.logic_or()
+	}
+
+	<span class="kw">fn </span>logic_or(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
+		<span class="kw">let </span><span class="kw-2">mut </span>expr = <span class="self">self</span>.logic_and()<span class="question-mark">?</span>;
+		<span class="kw">while </span><span class="self">self</span>.match_and_advance(<span class="kw-2">&amp;</span>[Token::Or]) {
+			<span class="kw">let </span>operator = <span class="self">self</span>.get_previous().clone();
+			<span class="kw">let </span>right = <span class="self">self</span>.logic_and()<span class="question-mark">?</span>;
+			expr = <span class="self">Self</span>::new_binary(
+				expr, operator, right
+			)<span class="question-mark">?</span>;
+		}
+		<span class="prelude-val">Ok</span>(expr)
+	}
+
+	<span class="kw">fn </span>logic_and(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
+		<span class="kw">let </span><span class="kw-2">mut </span>expr = <span class="self">self</span>.equality()<span class="question-mark">?</span>;
+		<span class="kw">while </span><span class="self">self</span>.match_and_advance(<span class="kw-2">&amp;</span>[Token::And]) {
+			<span class="kw">let </span>operator = <span class="self">self</span>.get_previous().clone();
+			<span class="kw">let </span>right = <span class="self">self</span>.equality()<span class="question-mark">?</span>;
+			expr = <span class="self">Self</span>::new_binary(
+				expr, operator, right
+			)<span class="question-mark">?</span>;
+		}
+		<span class="prelude-val">Ok</span>(expr)
 	}
 
 	<span class="kw">fn </span>equality(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
-		<span class="kw">let </span><span class="kw-2">mut </span>expr = <span class="self">self</span>.comparison()<span class="question-mark">?</span>;
+		<span class="kw">let </span><span class="kw-2">mut </span>expr = <span class="self">self</span>.bitwise()<span class="question-mark">?</span>;
 		<span class="kw">while </span><span class="self">self</span>.match_and_advance(<span class="kw-2">&amp;</span>[Token::NotEqual, Token::Equal]) {
+			<span class="kw">let </span>operator = <span class="self">self</span>.get_previous().clone();
+			<span class="kw">let </span>right = <span class="self">self</span>.bitwise()<span class="question-mark">?</span>;
+			expr = <span class="self">Self</span>::new_binary(
+				expr, operator, right
+			)<span class="question-mark">?</span>;
+		}
+		<span class="prelude-val">Ok</span>(expr)
+	}
+
+	<span class="kw">fn </span>bitwise(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
+		<span class="kw">let </span><span class="kw-2">mut </span>expr = <span class="self">self</span>.comparison()<span class="question-mark">?</span>;
+		<span class="kw">while </span><span class="self">self</span>.match_and_advance(<span class="kw-2">&amp;</span>[
+			Token::BitAnd, Token::BitOr, Token::BitXor
+		]) {
 			<span class="kw">let </span>operator = <span class="self">self</span>.get_previous().clone();
 			<span class="kw">let </span>right = <span class="self">self</span>.comparison()<span class="question-mark">?</span>;
 			expr = <span class="self">Self</span>::new_binary(
@@ -933,13 +1019,13 @@
 	}
 
 	<span class="kw">fn </span>comparison(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
-		<span class="kw">let </span><span class="kw-2">mut </span>expr = <span class="self">self</span>.bool_op()<span class="question-mark">?</span>;
+		<span class="kw">let </span><span class="kw-2">mut </span>expr = <span class="self">self</span>.bitshift()<span class="question-mark">?</span>;
 		<span class="kw">while </span><span class="self">self</span>.match_and_advance(<span class="kw-2">&amp;</span>[
 			Token::GreaterThan, Token::GreaterEqual,
 			Token::LessThan, Token::LessEqual
 		]) {
 			<span class="kw">let </span>operator = <span class="self">self</span>.get_previous().clone();
-			<span class="kw">let </span>right = <span class="self">self</span>.bool_op()<span class="question-mark">?</span>;
+			<span class="kw">let </span>right = <span class="self">self</span>.bitshift()<span class="question-mark">?</span>;
 			expr = <span class="self">Self</span>::new_binary(
 				expr, operator, right
 			)<span class="question-mark">?</span>;
@@ -947,9 +1033,11 @@
 		<span class="prelude-val">Ok</span>(expr)
 	}
 
-	<span class="kw">fn </span>bool_op(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
+	<span class="kw">fn </span>bitshift(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
 		<span class="kw">let </span><span class="kw-2">mut </span>expr = <span class="self">self</span>.term()<span class="question-mark">?</span>;
-		<span class="kw">while </span><span class="self">self</span>.match_and_advance(<span class="kw-2">&amp;</span>[Token::And, Token::Or]) {
+		<span class="kw">while </span><span class="self">self</span>.match_and_advance(<span class="kw-2">&amp;</span>[
+			Token::BitShiftLeft, Token::BitShiftRight
+		]) {
 			<span class="kw">let </span>operator = <span class="self">self</span>.get_previous().clone();
 			<span class="kw">let </span>right = <span class="self">self</span>.term()<span class="question-mark">?</span>;
 			expr = <span class="self">Self</span>::new_binary(
@@ -1005,10 +1093,10 @@
 				<span class="kw">if let </span><span class="prelude-val">Ok</span>(variable) = <span class="self">self</span>.variable(<span class="kw-2">&amp;</span>s.to_string()) {
 					<span class="kw">return </span><span class="prelude-val">Ok</span>(Expression::Variable(variable));
 				}
-				<span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Invalid variable name&quot;</span>))
+				<span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Invalid variable name"</span>))
 			},
 			Token::GroupingStart =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.grouping()<span class="question-mark">?</span>),
-			<span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Expected expression&quot;</span>))
+			<span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Expected expression"</span>))
 		}
 	}
 
@@ -1017,25 +1105,25 @@
 			<span class="self">self</span>.advance();
 			<span class="kw">return </span><span class="prelude-val">Ok</span>(variable);
 		}
-		<span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Expected variable&quot;</span>))
+		<span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Expected variable"</span>))
 	}
 
 	<span class="kw">fn </span>literal(<span class="kw-2">&amp;</span><span class="self">self</span>, text: &amp; str) -&gt; <span class="prelude-ty">Result</span>&lt;Literal, String&gt; {
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(literal) = Literal::from_str(text) {
 			<span class="kw">return </span><span class="prelude-val">Ok</span>(literal);
 		}
-		<span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">&quot;Expected literal&quot;</span>))
+		<span class="prelude-val">Err</span>(<span class="self">self</span>.error(<span class="string">"Expected literal"</span>))
 	}
 
 	<span class="kw">fn </span>grouping(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Expression, String&gt; {
 		<span class="self">self</span>.consume(
 			Token::GroupingStart,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; before expression&quot;</span>, Token::GroupingStart)
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' before expression"</span>, Token::GroupingStart)
 		)<span class="question-mark">?</span>;
 		<span class="kw">let </span>expr = <span class="self">self</span>.expression()<span class="question-mark">?</span>;
 		<span class="self">self</span>.consume(
 			Token::GroupingEnd,
-			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Expected &#39;{}&#39; after expression&quot;</span>, Token::GroupingEnd)
+			<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Expected '{}' after expression"</span>, Token::GroupingEnd)
 		)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(Expression::Grouping(Grouping::new(expr)))
 	}

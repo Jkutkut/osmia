@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lexer/lexer.rs`."><title>lexer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../osmia/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lexer/lexer.rs`."><title>lexer.rs - source</title><script> if (window.location.protocol !== "file:") document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2">`)</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0 (9b00956e5 2024-04-29)" data-channel="1.78.0" data-search-js="search-42d8da7a6b9792c2.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../osmia/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -107,113 +109,269 @@
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::lexer::Token;
-<span class="kw">use </span><span class="kw">crate</span>::lexer::Tokenizer;
-<span class="kw">use </span>std::collections::LinkedList;
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::VecDeque;
 
-<span class="kw">pub struct </span>Lexer&lt;<span class="lifetime">&#39;a</span>&gt; {
-	delimiter_start: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
-	delimiter_end: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str
+<span class="kw">use </span><span class="kw">crate</span>::lexer::Token;
+<span class="kw">use </span><span class="kw">crate</span>::lexer::Tokenizer;
+
+<span class="kw">pub struct </span>Lexer&lt;<span class="lifetime">'a</span>&gt; {
+	delimiter_start: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
+	delimiter_end: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Lexer&lt;<span class="lifetime">&#39;a</span>&gt; {
-	<span class="kw">pub fn </span>new(delimiter_start: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, delimiter_end: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Lexer&lt;<span class="lifetime">'a</span>&gt; {
+	<span class="kw">pub fn </span>new(delimiter_start: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str, delimiter_end: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="self">Self </span>{
 		Lexer {
 			delimiter_start: delimiter_start,
 			delimiter_end: delimiter_end
 		}
 	}
 
-	<span class="kw">pub fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, input: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;LinkedList&lt;Token&gt;, String&gt; {
-		<span class="kw">let </span><span class="kw-2">mut </span>tokens = LinkedList::new();
+	<span class="kw">pub fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, input: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Token&gt;, String&gt; {
+		<span class="kw">let </span><span class="kw-2">mut </span>tokens: Vec&lt;Token&gt; = Vec::new();
+		<span class="kw">let </span>input_arr: <span class="kw-2">&amp;</span>[u8] = input.as_bytes();
 		<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
+		<span class="kw">let </span><span class="kw-2">mut </span>start = <span class="number">0</span>;
 		<span class="kw">while </span>i &lt; input.len() {
-			<span class="kw">let </span>delimiter_start_idx = input[i..].find(<span class="self">self</span>.delimiter_start).unwrap_or(input.len() - i);
-			<span class="kw">if </span>delimiter_start_idx &gt; <span class="number">0 </span>{
-				<span class="kw">let </span>chunk = <span class="kw-2">&amp;</span>input[i..i + delimiter_start_idx];
-				<span class="kw">if </span>!<span class="self">self</span>.can_be_omitted(chunk) {
-					tokens.push_back(Token::Raw(chunk.to_string()));
-				}
-				i += delimiter_start_idx;
-				<span class="kw">if </span>i &gt;= input.len() {
-					<span class="kw">break</span>;
-				}
-			}
-			tokens.push_back(Token::DelimiterStart);
-			i += <span class="self">self</span>.delimiter_start.len();
-			<span class="kw">let </span><span class="kw-2">mut </span>stack = std::collections::VecDeque::new();
-			<span class="kw">let </span><span class="kw-2">mut </span>delimiter_end_idx = <span class="number">0</span>;
-			<span class="kw">while </span>i + delimiter_end_idx &lt; input.len() - <span class="self">self</span>.delimiter_end.len() {
-				<span class="kw">if </span>input[i + delimiter_end_idx..].starts_with(<span class="self">self</span>.delimiter_end) &amp;&amp;
-					stack.is_empty() {
-					<span class="kw">break</span>;
-				}
-				<span class="kw">let </span>current_char = input.chars().nth(i + delimiter_end_idx).unwrap();
-				<span class="kw">for </span>(s, e) <span class="kw">in </span>[(<span class="string">&#39;{&#39;</span>, <span class="string">&#39;}&#39;</span>), (<span class="string">&#39;[&#39;</span>, <span class="string">&#39;]&#39;</span>), (<span class="string">&#39;(&#39;</span>, <span class="string">&#39;)&#39;</span>)] {
-					<span class="kw">if </span>current_char == s {
-						stack.push_back(e);
+			<span class="kw">let </span>current_char = input_arr[i] <span class="kw">as </span>char;
+			<span class="kw">if </span>current_char == <span class="string">'\n' </span>{
+				<span class="self">Self</span>::add_raw_token(<span class="kw-2">&amp;mut </span>tokens, <span class="self">Self</span>::cut_input(<span class="kw-2">&amp;</span>input, start, i));
+				<span class="self">Self</span>::add_raw_token(<span class="kw-2">&amp;mut </span>tokens, <span class="prelude-val">Some</span>(<span class="string">"\n"</span>.to_string()));
+				start = i + <span class="number">1</span>;
+				<span class="kw">while </span>i &lt; input.len() {
+					<span class="kw">let </span>c = input_arr[i] <span class="kw">as </span>char;
+					<span class="kw">if </span>!c.is_whitespace() {
 						<span class="kw">break</span>;
 					}
-					<span class="kw">if </span>current_char == e {
-						<span class="kw">if let </span><span class="prelude-val">Some</span>(stack_element) = stack.pop_back() {
-							<span class="kw">if </span>stack_element != e {
-								<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid close delimiter: {}&quot;</span>, current_char));
+					i += <span class="number">1</span>;
+				}
+				<span class="self">Self</span>::add_raw_token(<span class="kw-2">&amp;mut </span>tokens, <span class="self">Self</span>::cut_input(<span class="kw-2">&amp;</span>input, start, i));
+				start = i;
+				<span class="kw">continue</span>;
+			}
+			<span class="kw">else if
+				</span><span class="self">self</span>.delimiter_start.starts_with(current_char) &amp;&amp;
+				input[i..].starts_with(<span class="self">self</span>.delimiter_start)
+			{
+				<span class="self">Self</span>::add_raw_token(<span class="kw-2">&amp;mut </span>tokens, <span class="self">Self</span>::cut_input(<span class="kw-2">&amp;</span>input, start, i));
+				<span class="self">Self</span>::add_token(<span class="kw-2">&amp;mut </span>tokens, <span class="prelude-val">Some</span>(Token::DelimiterStart));
+				i += <span class="self">self</span>.delimiter_start.len();
+				start = i;
+				<span class="kw">let </span><span class="kw-2">mut </span>stack: VecDeque&lt;char&gt; = VecDeque::new();
+				<span class="kw">while </span>i &lt; input.len() - <span class="self">self</span>.delimiter_end.len() {
+					<span class="kw">let </span>next_char = input_arr[i] <span class="kw">as </span>char;
+					<span class="kw">if
+						</span><span class="self">self</span>.delimiter_end.starts_with(next_char) &amp;&amp;
+						input[i..].starts_with(<span class="self">self</span>.delimiter_end) &amp;&amp;
+						stack.is_empty()
+					{
+						<span class="kw">break</span>;
+					}
+					<span class="kw">let </span>current_char = input_arr[i] <span class="kw">as </span>char;
+					<span class="kw">for </span>(s, e) <span class="kw">in </span>[(<span class="string">'{'</span>, <span class="string">'}'</span>), (<span class="string">'['</span>, <span class="string">']'</span>), (<span class="string">'('</span>, <span class="string">')'</span>)] {
+						<span class="kw">if </span>current_char == s {
+							stack.push_back(e);
+							<span class="kw">break</span>;
+						}
+						<span class="kw">if </span>current_char == e {
+							<span class="kw">if let </span><span class="prelude-val">Some</span>(stack_element) = stack.pop_back() {
+								<span class="kw">if </span>stack_element != e {
+									<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">"Invalid close delimiter: {}"</span>, current_char));
+								}
 							}
+							<span class="kw">else </span>{
+								<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">"Invalid close delimiter: {}"</span>, current_char));
+							}
+							<span class="kw">break</span>;
 						}
-						<span class="kw">else </span>{
-							<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid close delimiter: {}&quot;</span>, current_char));
-						}
-						<span class="kw">break</span>;
+					}
+					i += <span class="number">1</span>;
+				}
+				<span class="kw">if </span>!stack.is_empty() {
+					<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">"{} was not closed"</span>, stack.back().unwrap()));
+				}
+				<span class="kw">if </span>i &gt;= input.len() || !input[i..].starts_with(<span class="self">self</span>.delimiter_end) {
+					<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">"'{}' was not closed with '{}'"</span>, <span class="self">self</span>.delimiter_start, <span class="self">self</span>.delimiter_end));
+				}
+				<span class="kw">for </span>token <span class="kw">in </span>Tokenizer::new(<span class="kw-2">&amp;</span>input[start..i]) {
+					<span class="kw">let </span>token = token<span class="question-mark">?</span>;
+					<span class="kw">match </span>Token::from_str(token) {
+						<span class="prelude-val">Some</span>(t) =&gt; tokens.push(t),
+						<span class="prelude-val">None </span>=&gt; tokens.push(Token::Value(token.to_string()))
 					}
 				}
-				delimiter_end_idx += <span class="number">1</span>;
+				tokens.push(Token::DelimiterEnd);
+				start = i + <span class="self">self</span>.delimiter_end.len();
+				i = start;
+				<span class="kw">continue</span>;
 			}
-			<span class="kw">if </span>!stack.is_empty() {
-				<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;{} was not closed&quot;</span>, stack.back().unwrap()));
-			}
-			<span class="kw">if </span>i + delimiter_end_idx &gt;= input.len() ||
-				!input[i + delimiter_end_idx..].starts_with(<span class="self">self</span>.delimiter_end) {
-				<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Osmia delimiter was not closed&quot;</span>));
-			}
-			<span class="kw">for </span>token <span class="kw">in </span>Tokenizer::new(<span class="kw-2">&amp;</span>input[i..i + delimiter_end_idx]) {
-				<span class="kw">let </span>token = token<span class="question-mark">?</span>;
-				<span class="kw">match </span>Token::from_str(token) {
-					<span class="prelude-val">Some</span>(t) =&gt; tokens.push_back(t),
-					<span class="prelude-val">None </span>=&gt; tokens.push_back(Token::Value(token.to_string()))
-				}
-			}
-			tokens.push_back(Token::DelimiterEnd);
-			i += delimiter_end_idx + <span class="self">self</span>.delimiter_end.len();
+			i += <span class="number">1</span>;
 		}
-		tokens.push_back(Token::Eof);
+		<span class="kw">if </span>start &lt; input.len() {
+			<span class="self">Self</span>::add_raw_token(<span class="kw-2">&amp;mut </span>tokens, <span class="self">Self</span>::cut_input(<span class="kw-2">&amp;</span>input, start, input.len()));
+		}
+		<span class="self">Self</span>::add_token(<span class="kw-2">&amp;mut </span>tokens, <span class="prelude-val">Some</span>(Token::Eof));
+		<span class="self">Self</span>::clean_tokens(<span class="kw-2">&amp;mut </span>tokens);
 		<span class="prelude-val">Ok</span>(tokens)
 	}
 
-	<span class="kw">fn </span>can_be_omitted(<span class="kw-2">&amp;</span><span class="self">self</span>, chunk: <span class="kw-2">&amp;</span>str) -&gt; bool {
-		<span class="kw">let </span><span class="kw-2">mut </span>omit = <span class="bool-val">false</span>;
-		<span class="kw">let </span><span class="kw-2">mut </span>chunk_chars = chunk.chars();
-		<span class="kw">loop </span>{
-			<span class="kw">match </span>chunk_chars.next() {
-				<span class="prelude-val">Some</span>(c) =&gt; <span class="kw">match </span>c {
-					<span class="string">&#39;\n&#39; </span>=&gt; {
-						omit = <span class="bool-val">true</span>;
-						<span class="kw">break</span>;
-					},
-					c =&gt; <span class="kw">if </span>!c.is_whitespace() {
-						<span class="kw">break</span>;
-					}
-				},
-				<span class="prelude-val">None </span>=&gt; <span class="kw">break
-			</span>};
+	<span class="kw">fn </span>cut_input(input: <span class="kw-2">&amp;</span>str, from: usize, to: usize) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
+		<span class="kw">if </span>from &gt;= to {
+			<span class="kw">return </span><span class="prelude-val">None</span>;
 		}
-		<span class="kw">if </span>omit {
-			<span class="kw">for </span>c <span class="kw">in </span>chunk.chars() {
-				<span class="kw">if </span>!c.is_whitespace() &amp;&amp; c != <span class="string">&#39;\n&#39; </span>{
-					<span class="kw">return </span><span class="bool-val">false</span>;
+		<span class="prelude-val">Some</span>(input[from..to].to_string())
+	}
+
+	<span class="kw">fn </span>add_token(tokens: <span class="kw-2">&amp;mut </span>Vec&lt;Token&gt;, token: <span class="prelude-ty">Option</span>&lt;Token&gt;) {
+		<span class="kw">if let </span><span class="prelude-val">Some</span>(token) = token {
+			tokens.push(token);
+		}
+	}
+
+	<span class="kw">fn </span>add_raw_token(tokens: <span class="kw-2">&amp;mut </span>Vec&lt;Token&gt;, token: <span class="prelude-ty">Option</span>&lt;String&gt;) {
+		<span class="kw">if let </span><span class="prelude-val">Some</span>(token) = token {
+			tokens.push(Token::Raw(token));
+		}
+	}
+
+	<span class="kw">fn </span>clean_tokens(tokens: <span class="kw-2">&amp;mut </span>Vec&lt;Token&gt;) {
+		<span class="kw">let </span><span class="kw-2">mut </span>i: usize = tokens.len() - <span class="number">1</span>;
+		<span class="kw">let </span><span class="kw-2">mut </span>end: usize;
+		<span class="kw">while </span>i &gt; <span class="number">0 </span>{
+			end = i;
+			<span class="kw">while </span>i &gt; <span class="number">0 </span>{
+				i -= <span class="number">1</span>;
+				<span class="kw">if </span><span class="self">Self</span>::is_new_line_token(<span class="kw-2">&amp;</span>tokens[i]) {
+					<span class="kw">break</span>;
 				}
 			}
+			<span class="kw">if </span><span class="self">Self</span>::is_new_line_token(<span class="kw-2">&amp;</span>tokens[i]) {
+				i += <span class="number">1</span>;
+			}
+			<span class="kw">let </span>line = <span class="kw-2">&amp;</span>tokens[i..end + <span class="number">1</span>];
+			<span class="kw">let </span><span class="kw-2">mut </span>row_has_printable_token = <span class="bool-val">false</span>;
+			<span class="kw">let </span><span class="kw-2">mut </span>k = <span class="number">0</span>;
+			<span class="kw">while </span>k &lt; line.len() - <span class="number">1 </span>&amp;&amp; !row_has_printable_token {
+				<span class="kw">match </span><span class="kw-2">&amp;</span>line[k] {
+					Token::Raw(<span class="kw">_</span>) =&gt; row_has_printable_token = !<span class="self">Self</span>::is_whitespace_token(<span class="kw-2">&amp;</span>line[k]),
+					Token::DelimiterStart =&gt; {
+						<span class="kw">match </span><span class="kw-2">&amp;</span>line[k + <span class="number">1</span>] {
+							Token::Value(<span class="kw">_</span>) =&gt; row_has_printable_token = <span class="bool-val">true</span>,
+							<span class="kw">_ </span>=&gt; ()
+						}
+					},
+					<span class="kw">_ </span>=&gt; ()
+				}
+				k += <span class="number">1</span>;
+			}
+			<span class="kw">if </span>!row_has_printable_token {
+				<span class="kw">let </span><span class="kw-2">mut </span>ts: Vec&lt;Token&gt; = Vec::new();
+				<span class="kw">let </span><span class="kw-2">mut </span>line = line.to_vec();
+				<span class="kw">if </span><span class="self">Self</span>::is_new_line_token(<span class="kw-2">&amp;</span>tokens[end]) {
+					ts.push(tokens.remove(end));
+					line.remove(line.len() - <span class="number">1</span>);
+				}
+				<span class="kw">if </span><span class="self">Self</span>::is_whitespace_token(<span class="kw-2">&amp;</span>tokens[i]) {
+					ts.push(tokens.remove(i));
+					line.remove(<span class="number">0</span>);
+				}
+			}
+			<span class="kw">if </span>i &gt; <span class="number">0 </span>{
+				i -= <span class="number">1</span>;
+			}
 		}
-		omit
+	}
+
+	<span class="kw">fn </span>is_new_line_token(token: <span class="kw-2">&amp;</span>Token) -&gt; bool {
+		<span class="kw">match </span>token {
+			Token::Raw(chunk) =&gt; chunk == <span class="string">"\n"</span>,
+			<span class="kw">_ </span>=&gt; <span class="bool-val">false
+		</span>}
+	}
+
+	<span class="kw">fn </span>is_whitespace_token(token: <span class="kw-2">&amp;</span>Token) -&gt; bool {
+		<span class="kw">match </span>token {
+			Token::Raw(chunk) =&gt; chunk.chars().all(|c| c.is_whitespace()),
+			<span class="kw">_ </span>=&gt; <span class="bool-val">false
+		</span>}
 	}
 }
 </code></pre></div></section></main></body></html>

@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/interpreter.rs`."><title>interpreter.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../osmia/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/interpreter.rs`."><title>interpreter.rs - source</title><script> if (window.location.protocol !== "file:") document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2">`)</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0 (9b00956e5 2024-04-29)" data-channel="1.78.0" data-search-js="search-42d8da7a6b9792c2.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../osmia/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -259,109 +261,6 @@
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
 <a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
-<a href="#333" id="333">333</a>
-<a href="#334" id="334">334</a>
-<a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
-<a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
-<a href="#361" id="361">361</a>
-<a href="#362" id="362">362</a>
-<a href="#363" id="363">363</a>
-<a href="#364" id="364">364</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span><span class="kw">crate</span>::lexer::Token;
 <span class="kw">use </span><span class="kw">crate</span>::syntax_tree::{
@@ -371,24 +270,9 @@
 	Expression, Literal, Binary, Unary, Grouping, Variable,
 	JsonExpression, ListOrVariable, JsonTree,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach,
-	Ctx
+	Ctx,
+	ExitStatus, InterpreterValue, InterpreterResult
 };
-
-<span class="attr">#[derive(Debug)]
-</span><span class="kw">pub enum </span>InterpreterValue {
-	String(String),
-	Void
-}
-
-<span class="kw">type </span>InterpreterResult = <span class="prelude-ty">Result</span>&lt;(ExitStatus, InterpreterValue), String&gt;;
-
-<span class="attr">#[derive(Debug, PartialEq)]
-</span><span class="kw">pub enum </span>ExitStatus {
-	Okay,
-	Break,
-	Continue,
-	False
-}
 
 <span class="kw">pub struct </span>Interpreter {
 	ctx: Ctx
@@ -404,12 +288,12 @@
 		<span class="kw">match </span>exit_status {
 			ExitStatus::Okay | ExitStatus::False =&gt; (),
 			ExitStatus::Break | ExitStatus::Continue =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(
-				<span class="string">&quot;Cannot continue or break from the program&quot;</span>.to_string()
+				<span class="string">"Cannot continue or break from the program"</span>.to_string()
 			)
 		}
 		<span class="kw">match </span>value {
 			InterpreterValue::String(s) =&gt; <span class="prelude-val">Ok</span>(s),
-			InterpreterValue::Void =&gt; <span class="prelude-val">Ok</span>(<span class="string">&quot;&quot;</span>.to_string())
+			InterpreterValue::Void =&gt; <span class="prelude-val">Ok</span>(<span class="string">""</span>.to_string())
 		}
 	}
 }
@@ -420,32 +304,32 @@
 	}
 
 	<span class="kw">fn </span>visit_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>Block) -&gt; InterpreterResult {
+		<span class="kw">let </span><span class="kw-2">mut </span>exit_status = ExitStatus::Okay;
 		<span class="kw">let </span><span class="kw-2">mut </span>s = String::new();
 		<span class="kw">for </span>stmt <span class="kw">in </span>block.stmts() {
-			<span class="kw">let </span>(exit_status, value) = <span class="self">self</span>.visit_stmt(stmt)<span class="question-mark">?</span>;
-			<span class="kw">if </span>exit_status == ExitStatus::Okay {
-				<span class="kw">if let </span>InterpreterValue::String(v) = value {
-					s.push_str(<span class="kw-2">&amp;</span>v);
+			<span class="kw">let </span>(block_exit_status, r) = <span class="self">self</span>.visit_stmt(stmt)<span class="question-mark">?</span>;
+			<span class="self">Self</span>::add2result(<span class="kw-2">&amp;mut </span>s, r);
+			<span class="kw">match </span>block_exit_status {
+				ExitStatus::Continue | ExitStatus::Break =&gt; {
+					exit_status = block_exit_status;
+					<span class="kw">break</span>;
 				}
+				<span class="kw">_ </span>=&gt; ()
 			}
-			<span class="kw">else if </span>exit_status == ExitStatus::Break {
-				<span class="kw">break</span>;
-			}
-			<span class="comment">// Continue, False -&gt; do nothing
-		</span>}
-		<span class="prelude-val">Ok</span>((ExitStatus::Okay, InterpreterValue::String(s)))
+		}
+		<span class="prelude-val">Ok</span>((exit_status, InterpreterValue::from(s)))
 	}
 
 	<span class="kw">fn </span>visit_raw(<span class="kw-2">&amp;</span><span class="self">self</span>, raw: <span class="kw-2">&amp;</span>str) -&gt; InterpreterResult {
 		<span class="prelude-val">Ok</span>((
 			ExitStatus::Okay,
-			InterpreterValue::String(raw.to_string())
+			InterpreterValue::from(raw.to_string())
 		))
 	}
 
 	<span class="kw">fn </span>visit_print(<span class="kw-2">&amp;</span><span class="self">self</span>, print: <span class="kw-2">&amp;</span>Expression) -&gt; InterpreterResult {
 		<span class="kw">let </span>expr = print.accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-		<span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, expr);
+		<span class="macro">println!</span>(<span class="string">"{}"</span>, expr);
 		<span class="prelude-val">Ok</span>((ExitStatus::False, InterpreterValue::Void))
 	}
 
@@ -457,116 +341,63 @@
 	}
 
 	<span class="kw">fn </span>visit_if(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>If) -&gt; InterpreterResult {
-		<span class="kw">let </span>(if_status, if_result) = block.if_block().accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-		<span class="kw">match </span>if_status {
-			ExitStatus::False =&gt; (),
-			<span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>((if_status, if_result))
+		<span class="kw">match </span>block.if_block().accept(<span class="self">self</span>)<span class="question-mark">? </span>{
+			(ExitStatus::False, <span class="kw">_</span>) =&gt; (),
+			r =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(r)
 		}
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(elseifs) = block.elseifs() {
 			<span class="kw">for </span>elseif <span class="kw">in </span>elseifs {
-				<span class="kw">let </span>(elseif_status, elseif_result) = elseif.accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-				<span class="kw">match </span>elseif_status {
-					ExitStatus::False =&gt; (),
-					<span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>((elseif_status, elseif_result))
+				<span class="kw">match </span>elseif.accept(<span class="self">self</span>)<span class="question-mark">? </span>{
+					(ExitStatus::False, <span class="kw">_</span>) =&gt; (),
+					r =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(r)
 				}
 			}
 		}
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(else_block) = block.else_block() {
-			<span class="kw">let </span>(else_status, else_result) = else_block.accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-			<span class="kw">match </span>else_status {
-				ExitStatus::False =&gt; (),
-				<span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>((else_status, else_result))
+			<span class="kw">match </span>else_block.accept(<span class="self">self</span>)<span class="question-mark">? </span>{
+				(ExitStatus::False, <span class="kw">_</span>) =&gt; (),
+				r =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(r)
 			}
 		}
 		<span class="prelude-val">Ok</span>((ExitStatus::False, InterpreterValue::Void))
 	}
 
 	<span class="kw">fn </span>visit_while(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>ConditionalBlock) -&gt; InterpreterResult {
-		<span class="kw">let </span><span class="kw-2">mut </span>string = String::new();
+		<span class="kw">let </span><span class="kw-2">mut </span>s = String::new();
 		<span class="kw">let </span><span class="kw-2">mut </span>exit_status = ExitStatus::False;
-		<span class="kw">loop </span>{
-			<span class="kw">let </span>condition = block.condition().accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-			<span class="kw">if </span>!condition.as_bool() {
-				<span class="kw">break</span>;
-			}
-			<span class="kw">let </span>result = block.body().accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-			<span class="kw">match </span>result.<span class="number">0 </span>{
-				ExitStatus::Continue =&gt; <span class="kw">continue</span>,
-				ExitStatus::Break =&gt; {
-					exit_status = ExitStatus::Break;
-					<span class="kw">break</span>;
-				},
-				<span class="kw">_ </span>=&gt; {
-					exit_status = ExitStatus::Okay;
-					<span class="kw">if let </span>InterpreterValue::String(v) = result.<span class="number">1 </span>{
-						string.push_str(<span class="kw-2">&amp;</span>v);
-					}
-				}
+		<span class="kw">while </span>block.condition().accept(<span class="self">self</span>)<span class="question-mark">?</span>.as_bool() {
+			exit_status = ExitStatus::Okay;
+			<span class="kw">let </span>(block_exit_status, r) = block.body().accept(<span class="self">self</span>)<span class="question-mark">?</span>;
+			<span class="self">Self</span>::add2result(<span class="kw-2">&amp;mut </span>s, r);
+			<span class="kw">match </span>block_exit_status {
+				ExitStatus::Break =&gt; <span class="kw">break</span>,
+				<span class="kw">_ </span>=&gt; ()
 			}
 		}
-		<span class="kw">let </span>result = <span class="kw">match </span>string.is_empty() {
-			<span class="bool-val">true </span>=&gt; InterpreterValue::Void,
-			<span class="bool-val">false </span>=&gt; InterpreterValue::String(string)
-		};
-		<span class="prelude-val">Ok</span>((exit_status, result))
+		<span class="prelude-val">Ok</span>((exit_status, InterpreterValue::from(s)))
 	}
 
-	<span class="kw">fn </span>visit_foreach(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>ForEach) -&gt; InterpreterResult {
-		<span class="kw">let </span><span class="kw-2">mut </span>string = String::new();
+	<span class="kw">fn </span>visit_foreach(<span class="kw-2">&amp;mut </span><span class="self">self</span>, for_block: <span class="kw-2">&amp;</span>ForEach) -&gt; InterpreterResult {
+		<span class="kw">let </span><span class="kw-2">mut </span>s = String::new();
 		<span class="kw">let </span><span class="kw-2">mut </span>exit_status = ExitStatus::False;
-		<span class="kw">let </span>iterable_obj = <span class="kw">match </span>block.list() { <span class="comment">// TODO use refs
-			</span>ListOrVariable::List(json) =&gt; <span class="kw">match </span>json {
-				JsonExpression::Array(arr) =&gt; arr.clone(),
-				JsonExpression::Object(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;Cannot iterate over object&quot;</span>.to_string()),
-				JsonExpression::Expression(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;Cannot iterate over expression&quot;</span>.to_string())
-			},
-			ListOrVariable::Variable(var) =&gt; {
-				<span class="kw">let </span>json_tree = <span class="self">self</span>.ctx.get(var)<span class="question-mark">?</span>;
-				<span class="kw">let </span>json_expr = JsonExpression::from(json_tree);
-				<span class="kw">match </span>json_expr {
-					JsonExpression::Array(arr) =&gt; arr.clone(),
-					JsonExpression::Object(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;Cannot iterate over object&quot;</span>.to_string()),
-					JsonExpression::Expression(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;Cannot iterate over expression&quot;</span>.to_string())
-				}
-			}
-		};
-		<span class="kw">let </span><span class="kw-2">mut </span>iterable = iterable_obj.iter();
-		<span class="kw">while let </span><span class="prelude-val">Some</span>(item) = iterable.next() {
-			<span class="kw">let </span>item = <span class="self">self</span>.eval_json(item)<span class="question-mark">?</span>;
+		<span class="kw">for </span>item <span class="kw">in </span><span class="self">self</span>.get_iterable(for_block.list())<span class="question-mark">? </span>{
+			<span class="kw">let </span>item = <span class="self">self</span>.eval_json(<span class="kw-2">&amp;</span>item)<span class="question-mark">?</span>;
 			<span class="kw">let </span>item = JsonTree::from(<span class="kw-2">&amp;</span>item)<span class="question-mark">?</span>;
-			<span class="self">self</span>.ctx.set(block.variable(), item)<span class="question-mark">?</span>;
-			<span class="kw">let </span>result = block.body().accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-			<span class="kw">match </span>result.<span class="number">0 </span>{
-				ExitStatus::Continue =&gt; <span class="kw">continue</span>, <span class="comment">// TODO do nothing
-				</span>ExitStatus::Break =&gt; {
-					exit_status = ExitStatus::Break;
-					<span class="kw">break</span>;
-				},
-				<span class="kw">_ </span>=&gt; {
-					exit_status = ExitStatus::Okay;
-					<span class="kw">if let </span>InterpreterValue::String(v) = result.<span class="number">1 </span>{
-						string.push_str(<span class="kw-2">&amp;</span>v);
-					}
-				}
+			<span class="self">self</span>.ctx.set(for_block.variable(), item)<span class="question-mark">?</span>;
+			exit_status = ExitStatus::Okay;
+			<span class="kw">let </span>(block_exit_status, r) = for_block.body().accept(<span class="self">self</span>)<span class="question-mark">?</span>;
+			<span class="self">Self</span>::add2result(<span class="kw-2">&amp;mut </span>s, r);
+			<span class="kw">match </span>block_exit_status {
+				ExitStatus::Break =&gt; <span class="kw">break</span>,
+				<span class="kw">_ </span>=&gt; ()
 			}
 		}
-		<span class="kw">let </span>result = <span class="kw">match </span>string.is_empty() {
-			<span class="bool-val">true </span>=&gt; InterpreterValue::Void,
-			<span class="bool-val">false </span>=&gt; InterpreterValue::String(string)
-		};
-		<span class="prelude-val">Ok</span>((exit_status, result))
+		<span class="prelude-val">Ok</span>((exit_status, InterpreterValue::from(s)))
 	}
 
 	<span class="kw">fn </span>visit_conditional_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>ConditionalBlock) -&gt; InterpreterResult {
-		<span class="kw">let </span>condition = block.condition().accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-		<span class="kw">if </span>condition.as_bool() {
-			<span class="kw">let </span>result = block.body().accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-			<span class="kw">return match </span>result.<span class="number">0 </span>{
-				ExitStatus::Continue | ExitStatus::Break =&gt; <span class="prelude-val">Err</span>(
-					<span class="string">&quot;Cannot continue or break in conditional block&quot;</span>.to_string()
-				),
-				<span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(result)
-			}
+		<span class="kw">if </span>block.condition().accept(<span class="self">self</span>)<span class="question-mark">?</span>.as_bool() {
+			<span class="kw">return </span>block.body().accept(<span class="self">self</span>);
 		}
 		<span class="prelude-val">Ok</span>((ExitStatus::False, InterpreterValue::Void))
 	}
@@ -580,8 +411,12 @@
 	}
 
 	<span class="kw">fn </span>visit_expression(<span class="kw-2">&amp;</span><span class="self">self</span>, expression: <span class="kw-2">&amp;</span>Expression) -&gt; InterpreterResult {
-		<span class="kw">let </span>expr = expression.accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-		<span class="prelude-val">Ok</span>((ExitStatus::Okay, InterpreterValue::String(expr.to_string())))
+		<span class="prelude-val">Ok</span>((
+			ExitStatus::Okay,
+			InterpreterValue::from(
+				expression.accept(<span class="self">self</span>)<span class="question-mark">?</span>.to_string()
+			)
+		))
 	}
 }
 
@@ -605,102 +440,37 @@
 	<span class="kw">fn </span>visit_unary(<span class="kw-2">&amp;</span><span class="self">self</span>, unary: <span class="kw-2">&amp;</span>Unary) -&gt; <span class="prelude-ty">Result</span>&lt;Literal, String&gt; {
 		<span class="kw">let </span>right = unary.right.accept(<span class="self">self</span>)<span class="question-mark">?</span>;
 		<span class="kw">match </span>unary.operator {
-			Token::Minus =&gt; <span class="kw">match </span>right {
-				Literal::Int(i) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Int(-i)),
-				Literal::Float(f) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Float(-f)),
-				<span class="kw">_ </span>=&gt; ()
-			},
-			Token::Plus =&gt; <span class="kw">match </span>right {
-				Literal::Int(<span class="kw">_</span>) | Literal::Float(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(right),
-				<span class="kw">_ </span>=&gt; ()
-			},
-			Token::Not =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(!right.as_bool())),
-			<span class="kw">_ </span>=&gt; ()
-		};
-		<span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Unsupported unary operation: {}{}&quot;</span>, unary.operator, right))
+			Token::Minus =&gt; <span class="prelude-val">Ok</span>((-right)<span class="question-mark">?</span>),
+			Token::Plus =&gt; <span class="prelude-val">Ok</span>(right),
+			Token::Not =&gt; <span class="prelude-val">Ok</span>((!right)<span class="question-mark">?</span>),
+			<span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">"Unsupported unary operation: {}{}"</span>, unary.operator, right))
+		}
 	}
 
 	<span class="kw">fn </span>visit_binary(<span class="kw-2">&amp;</span><span class="self">self</span>, binary: <span class="kw-2">&amp;</span>Binary) -&gt; <span class="prelude-ty">Result</span>&lt;Literal, String&gt; {
 		<span class="kw">let </span>left = binary.left.accept(<span class="self">self</span>)<span class="question-mark">?</span>;
 		<span class="kw">let </span>right = binary.right.accept(<span class="self">self</span>)<span class="question-mark">?</span>;
-		<span class="kw">let </span>err = <span class="macro">format!</span>(<span class="string">&quot;Unsupported binary operation: {} {} {}&quot;</span>, left, binary.operator, right);
-		<span class="kw">if </span>left.is_numeric() &amp;&amp; right.is_numeric() {
-			<span class="kw">match </span>binary.operator {
-				Token::And =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Int(left.as_int()<span class="question-mark">? </span>&amp; right.as_int()<span class="question-mark">?</span>)),
-				Token::Or  =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Int(left.as_int()<span class="question-mark">? </span>| right.as_int()<span class="question-mark">?</span>)),
-				<span class="kw">_ </span>=&gt; ()
-			};
-			<span class="kw">if </span>left.is_float() || right.is_float() {
-				<span class="kw">match </span>binary.operator {
-					Token::Plus =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Float(left.as_float()<span class="question-mark">? </span>+ right.as_float()<span class="question-mark">?</span>)),
-					Token::Minus =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Float(left.as_float()<span class="question-mark">? </span>- right.as_float()<span class="question-mark">?</span>)),
-					Token::Multiply =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Float(left.as_float()<span class="question-mark">? </span>* right.as_float()<span class="question-mark">?</span>)),
-					Token::Divide =&gt; {
-						<span class="kw">if </span>right.as_float()<span class="question-mark">? </span>== <span class="number">0.0 </span>{
-							<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;Division by zero&quot;</span>.to_string())
-						}
-						<span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Float(left.as_float()<span class="question-mark">? </span>/ right.as_float()<span class="question-mark">?</span>))
-					},
-					Token::Modulo =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Float(left.as_float()<span class="question-mark">? </span>% right.as_float()<span class="question-mark">?</span>)),
-					Token::GreaterThan =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_float()<span class="question-mark">? </span>&gt; right.as_float()<span class="question-mark">?</span>)),
-					Token::GreaterEqual =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_float()<span class="question-mark">? </span>&gt;= right.as_float()<span class="question-mark">?</span>)),
-					Token::LessThan =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_float()<span class="question-mark">? </span>&lt; right.as_float()<span class="question-mark">?</span>)),
-					Token::LessEqual =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_float()<span class="question-mark">? </span>&lt;= right.as_float()<span class="question-mark">?</span>)),
-					Token::Equal =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_float()<span class="question-mark">? </span>== right.as_float()<span class="question-mark">?</span>)),
-					Token::NotEqual =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_float()<span class="question-mark">? </span>!= right.as_float()<span class="question-mark">?</span>)),
-					<span class="kw">_ </span>=&gt; ()
-				};
-			}
-			<span class="kw">else </span>{
-				<span class="kw">match </span>binary.operator {
-					Token::Plus =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Int(
-						left.as_int()<span class="question-mark">?
-						</span>.checked_add(right.as_int()<span class="question-mark">?</span>)
-						.ok_or(<span class="string">&quot;Overflow in addition&quot;</span>.to_string())<span class="question-mark">?
-					</span>)),
-					Token::Minus =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Int(
-						left.as_int()<span class="question-mark">?
-						</span>.checked_sub(right.as_int()<span class="question-mark">?</span>)
-						.ok_or(<span class="string">&quot;Overflow in subtraction&quot;</span>.to_string())<span class="question-mark">?
-					</span>)),
-					Token::Multiply =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Int(
-						left.as_int()<span class="question-mark">?
-						</span>.checked_mul(right.as_int()<span class="question-mark">?</span>)
-						.ok_or(<span class="string">&quot;Overflow in multiplication&quot;</span>.to_string())<span class="question-mark">?
-					</span>)),
-					Token::Divide =&gt; {
-						<span class="kw">if </span>right.as_int()<span class="question-mark">? </span>== <span class="number">0 </span>{
-							<span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;Division by zero&quot;</span>.to_string())
-						}
-						<span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Int(left.as_int()<span class="question-mark">? </span>/ right.as_int()<span class="question-mark">?</span>))
-					}
-					Token::Modulo =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Int(left.as_int()<span class="question-mark">? </span>% right.as_int()<span class="question-mark">?</span>)),
-					Token::GreaterThan =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_int()<span class="question-mark">? </span>&gt; right.as_int()<span class="question-mark">?</span>)),
-					Token::GreaterEqual =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_int()<span class="question-mark">? </span>&gt;= right.as_int()<span class="question-mark">?</span>)),
-					Token::LessThan =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_int()<span class="question-mark">? </span>&lt; right.as_int()<span class="question-mark">?</span>)),
-					Token::LessEqual =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_int()<span class="question-mark">? </span>&lt;= right.as_int()<span class="question-mark">?</span>)),
-					Token::Equal =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_int()<span class="question-mark">? </span>== right.as_int()<span class="question-mark">?</span>)),
-					Token::NotEqual =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(left.as_int()<span class="question-mark">? </span>!= right.as_int()<span class="question-mark">?</span>)),
-					<span class="kw">_ </span>=&gt; ()
-				};
-			}
+		<span class="kw">match </span>binary.operator {
+			Token::Plus =&gt; <span class="prelude-val">Ok</span>((left + right)<span class="question-mark">?</span>),
+			Token::Minus =&gt; <span class="prelude-val">Ok</span>((left - right)<span class="question-mark">?</span>),
+			Token::Multiply =&gt; <span class="prelude-val">Ok</span>((left * right)<span class="question-mark">?</span>),
+			Token::Divide =&gt; <span class="prelude-val">Ok</span>((left / right)<span class="question-mark">?</span>),
+			Token::Modulo =&gt; <span class="prelude-val">Ok</span>((left % right)<span class="question-mark">?</span>),
+			Token::And =&gt; <span class="prelude-val">Ok</span>(Literal::Bool(left.as_bool() &amp;&amp; right.as_bool())),
+			Token::Or =&gt; <span class="prelude-val">Ok</span>(Literal::Bool(left.as_bool() || right.as_bool())),
+			Token::BitAnd =&gt; <span class="prelude-val">Ok</span>((left &amp; right)<span class="question-mark">?</span>),
+			Token::BitOr =&gt; <span class="prelude-val">Ok</span>((left | right)<span class="question-mark">?</span>),
+			Token::BitXor =&gt; <span class="prelude-val">Ok</span>((left ^ right)<span class="question-mark">?</span>),
+			Token::BitShiftLeft =&gt; <span class="prelude-val">Ok</span>((left &lt;&lt; right)<span class="question-mark">?</span>),
+			Token::BitShiftRight =&gt; <span class="prelude-val">Ok</span>((left &gt;&gt; right)<span class="question-mark">?</span>),
+			Token::Equal =&gt; <span class="prelude-val">Ok</span>(Literal::Bool(left == right)),
+			Token::NotEqual =&gt; <span class="prelude-val">Ok</span>(Literal::Bool(left != right)),
+			Token::GreaterThan =&gt; <span class="prelude-val">Ok</span>(Literal::Bool(left &gt; right)),
+			Token::GreaterEqual =&gt; <span class="prelude-val">Ok</span>(Literal::Bool(left &gt;= right)),
+			Token::LessThan =&gt; <span class="prelude-val">Ok</span>(Literal::Bool(left &lt; right)),
+			Token::LessEqual =&gt; <span class="prelude-val">Ok</span>(Literal::Bool(left &lt;= right)),
+			<span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">"Unsupported binary operation: {} {} {}"</span>, left, binary.operator, right))
 		}
-		<span class="kw">else if </span>(left.is_bool() || right.is_bool()) &amp;&amp; !(left.is_str() || right.is_str()) {
-			<span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Bool(<span class="kw">match </span>binary.operator {
-				Token::Equal=&gt; left.as_bool() == right.as_bool(),
-				Token::NotEqual =&gt; left.as_bool() != right.as_bool(),
-				Token::And | Token::Minus =&gt; left.as_bool() &amp;&amp; right.as_bool(),
-				Token::Or | Token::Plus =&gt; left.as_bool() || right.as_bool(),
-				<span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(err)<span class="question-mark">?
-			</span>}));
-		}
-		<span class="kw">else if </span>left.is_str() || right.is_str() {
-			<span class="kw">return </span><span class="prelude-val">Ok</span>(Literal::Str(<span class="kw">match </span>binary.operator {
-				Token::Plus =&gt; left.as_str() + <span class="kw-2">&amp;</span>right.as_str(),
-				<span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(err)<span class="question-mark">?
-			</span>}));
-		}
-		<span class="prelude-val">Err</span>(err)
 	}
 }
 
@@ -724,6 +494,32 @@
 			}
 		};
 		<span class="prelude-val">Ok</span>(new_tree)
+	}
+
+	<span class="kw">fn </span>add2result(result: <span class="kw-2">&amp;mut </span>String, value: InterpreterValue) {
+		<span class="kw">if let </span>InterpreterValue::String(s) = value {
+			result.push_str(<span class="kw-2">&amp;</span>s);
+		}
+	}
+
+	<span class="kw">fn </span>get_iterable(<span class="kw-2">&amp;</span><span class="self">self</span>, lst_or_var: <span class="kw-2">&amp;</span>ListOrVariable) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;JsonExpression&gt;, String&gt; {
+		<span class="kw">let </span>ite = <span class="kw">match </span>lst_or_var {
+			ListOrVariable::List(json) =&gt; <span class="kw">match </span>json {
+				JsonExpression::Array(arr) =&gt; arr.clone(),
+				JsonExpression::Object(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"Cannot iterate over object"</span>.to_string()),
+				JsonExpression::Expression(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"Cannot iterate over expression"</span>.to_string())
+			},
+			ListOrVariable::Variable(var) =&gt; {
+				<span class="kw">let </span>json_tree = <span class="self">self</span>.ctx.get(var)<span class="question-mark">?</span>;
+				<span class="kw">let </span>json_expr = JsonExpression::from(json_tree);
+				<span class="kw">match </span>json_expr {
+					JsonExpression::Array(arr) =&gt; arr.clone(),
+					JsonExpression::Object(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"Cannot iterate over object"</span>.to_string()),
+					JsonExpression::Expression(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"Cannot iterate over expression"</span>.to_string())
+				}
+			}
+		};
+		<span class="prelude-val">Ok</span>(ite)
 	}
 }
 </code></pre></div></section></main></body></html>
