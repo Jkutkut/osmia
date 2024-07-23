@@ -632,3 +632,31 @@ macro_tests!(
 		"Nothing is null"
 	)
 );
+
+macro_tests!(
+	test_io,
+	(
+		gh_17_01,
+		r#"
+{{if (foo != null) && foo}}
+1. foo does exists
+{{fi}}
+{{if foo != null && foo}}
+2. foo does exists
+{{fi}}"#.trim(),
+		None,
+		""
+	),
+	(
+		gh_17_02,
+		r#"
+{{if (foo != null) && foo}}
+1. foo does exists
+{{fi}}
+{{if foo != null && foo}}
+2. foo does exists
+{{fi}}"#.trim(),
+		Some(r#"{"foo": "Something not null"}"#),
+		"1. foo does exists\n2. foo does exists\n"
+	)
+);
