@@ -1,3 +1,5 @@
+use crate::utils::code_trace;
+
 /// A simple word tokenizer.
 ///
 /// Takes a str and returns an iterator with the words.
@@ -139,7 +141,13 @@ impl<'a> std::iter::Iterator for Tokenizer<'a> {
 				("\"'".contains(previous_char) || "\"'".contains(current)) &&
 				(!":,[{".contains(previous_char) && !":,]})".contains(current))
 			{
-				return Some(Err("Missing whitespace before token!".to_string()));
+				return Some(Err(code_trace(
+					&self.text, self.current,
+					&format!(
+						"Missing whitespace between {:?} and {:?}:",
+						previous_char, current
+					)
+				)));
 			}
 		}
 		while self.current < self.text.len() {
