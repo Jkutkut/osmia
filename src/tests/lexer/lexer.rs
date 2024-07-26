@@ -483,6 +483,81 @@ macro_tests!(
 		]
 	),
 	(
+		expression02,
+		r#"{{ ("" == "") }}"#,
+		vec![
+			Token::DelimiterStart,
+			Token::ParentStart,
+			Token::Value(r#""""#.to_string()),
+			Token::Equal,
+			Token::Value(r#""""#.to_string()),
+			Token::ParentEnd,
+			Token::DelimiterEnd,
+			Token::Eof
+		]
+	),
+	(
+		expression03,
+		r#"Other line
+		{{(""=="")}}"#,
+		vec![
+			Token::Raw("Other line".to_string()),
+			Token::Raw("\n".to_string()),
+			Token::DelimiterStart,
+			Token::ParentStart,
+			Token::Value(r#""""#.to_string()),
+			Token::Equal,
+			Token::Value(r#""""#.to_string()),
+			Token::ParentEnd,
+			Token::DelimiterEnd,
+			Token::Eof
+		]
+	),
+	(
+		expression04,
+		r#"{{
+  (
+    ""==""
+  )
+}}"#,
+		vec![
+			Token::DelimiterStart,
+			Token::ParentStart,
+			Token::Value(r#""""#.to_string()),
+			Token::Equal,
+			Token::Value(r#""""#.to_string()),
+			Token::ParentEnd,
+			Token::DelimiterEnd,
+			Token::Eof
+		]
+	),
+	(
+		expression05,
+		r#"Other line
+		{{(""=="")(123!=""&&"">="")}}"#,
+		vec![
+			Token::Raw("Other line".to_string()),
+			Token::Raw("\n".to_string()),
+			Token::DelimiterStart,
+			Token::ParentStart,
+			Token::Value(r#""""#.to_string()),
+			Token::Equal,
+			Token::Value(r#""""#.to_string()),
+			Token::ParentEnd,
+			Token::ParentStart,
+			Token::Value("123".to_string()),
+			Token::NotEqual,
+			Token::Value(r#""""#.to_string()),
+			Token::And,
+			Token::Value(r#""""#.to_string()),
+			Token::GreaterEqual,
+			Token::Value(r#""""#.to_string()),
+			Token::ParentEnd,
+			Token::DelimiterEnd,
+			Token::Eof
+		]
+	),
+	(
 		same_expression01,
 		"{{ (1 + 2) }} {{ ( 1+2 ) }}",
 		vec![

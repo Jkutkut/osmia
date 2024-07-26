@@ -139,7 +139,7 @@ impl<'a> std::iter::Iterator for Tokenizer<'a> {
 			let current = chars.next()?;
 			if !(current.is_whitespace() || previous_char.is_whitespace()) &&
 				("\"'".contains(previous_char) || "\"'".contains(current)) &&
-				(!":,[{".contains(previous_char) && !":,]})".contains(current))
+				(!":,[{(=&".contains(previous_char) && !":,]})=><!&".contains(current))
 			{
 				return Some(Err(code_trace(
 					&self.text, self.current,
