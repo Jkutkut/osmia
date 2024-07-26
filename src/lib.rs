@@ -5,6 +5,7 @@ mod lexer;
 mod syntax_tree;
 mod tree_walker;
 mod interpreter;
+mod utils;
 
 #[cfg(test)]
 mod tests;

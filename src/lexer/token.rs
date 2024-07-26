@@ -69,6 +69,12 @@ pub enum Token {
 	Comma,
 	ArrayStart,
 	ArrayEnd,
+
+	// Functions
+	Function,
+	Question,
+	Spread,
+	Dot,
 }
 
 impl Token {
@@ -115,6 +121,10 @@ impl Token {
 			"," => Some(Token::Comma),
 			"[" => Some(Token::ArrayStart),
 			"]" => Some(Token::ArrayEnd),
+			"fn" => Some(Token::Function),
+			"?" => Some(Token::Question),
+			"..." => Some(Token::Spread),
+			"." => Some(Token::Dot),
 			_ => None
 		}
 	}
@@ -200,6 +210,10 @@ impl std::fmt::Display for Token {
 			Token::Comma => write!(f, ","),
 			Token::ArrayStart => write!(f, "["),
 			Token::ArrayEnd => write!(f, "]"),
+			Token::Function => write!(f, "fn"),
+			Token::Question => write!(f, "?"),
+			Token::Spread => write!(f, "..."),
+			Token::Dot => write!(f, "."),
 		}
 	}
 }
