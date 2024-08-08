@@ -64,8 +64,8 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 		))
 	}
 
-	fn visit_print(&self, print: &Expression) -> InterpreterResult {
-		let expr = print.accept(self)?;
+	fn visit_print(&self, content: &JsonExpression) -> InterpreterResult {
+		let expr = content.accept(self)?;
 		println!("{}", expr);
 		Ok((ExitStatus::False, InterpreterValue::Void))
 	}
@@ -158,6 +158,14 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 }
 
 impl ExprVisitor<Result<Literal, String>> for Interpreter {
+	fn visit_array(&self, arr: &Vec<JsonExpression>) -> Result<Literal, String> {
+		Ok(Literal::Str(arr.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(", ")))
+	}
+
+	fn visit_object(&self, obj: &HashMap<String, JsonExpression>) -> Result<Literal, String> {
+		Ok(Literal::Str(obj.iter().map(|(k, v)| format!("{}:{}", k, v.to_string())).collect::<Vec<String>>().join(", ")))
+	}
+
 	fn visit_expression(&self, expression: &Expression) -> Result<Literal, String> {
 		expression.accept(self)
 	}

@@ -1,5 +1,5 @@
 use crate::model::{
-	Expression,
+	Expression, JsonExpression,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
@@ -7,7 +7,7 @@ pub trait StmtVisitor<T> {
 	fn visit_stmt(&mut self, stmt: &Stmt) -> T;
 	fn visit_block(&mut self, block: &Block) -> T;
 	fn visit_raw(&self, raw: &str) -> T;
-	fn visit_print(&self, print: &Expression) -> T;
+	fn visit_print(&self, print: &JsonExpression) -> T;
 	fn visit_assign(&mut self, assign: &Assign) -> T;
 	fn visit_if(&mut self, block: &If) -> T;
 	fn visit_while(&mut self, block: &ConditionalBlock) -> T;

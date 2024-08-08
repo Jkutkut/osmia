@@ -1,5 +1,5 @@
 use crate::model::{
-	Expression, Literal, Unary, Binary, Grouping, Variable
+	Expression, Literal, Unary, Binary, Grouping, Variable, JsonExpression
 };
 use crate::syntax_tree::{
 	ExprVisitable, ExprVisitor
@@ -43,6 +43,16 @@ impl<T> ExprVisitable<T> for Expression {
 			Expression::Grouping(grouping) => grouping.accept(visitor),
 			Expression::Unary(unary) => unary.accept(visitor),
 			Expression::Binary(binary) => binary.accept(visitor),
+		}
+	}
+}
+
+impl<T> ExprVisitable<T> for JsonExpression {
+	fn accept(&self, visitor: &dyn ExprVisitor<T>) -> T {
+		match self {
+			JsonExpression::Array(arr) => visitor.visit_array(arr),
+			JsonExpression::Object(obj) => visitor.visit_object(obj),
+			JsonExpression::Expression(expr) => visitor.visit_expression(expr),
 		}
 	}
 }

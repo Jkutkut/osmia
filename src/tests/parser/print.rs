@@ -1,6 +1,6 @@
 use crate::lexer::Token;
 use crate::model::{
-	Expression, Binary, Literal,
+	Expression, Binary, Literal, JsonExpression,
 	Stmt
 };
 use super::{test_parser, should_fail};
@@ -17,7 +17,7 @@ fn token_expression_to_token_stmt(tokens: Vec<Token>) -> Vec<Token> {
 }
 
 #[cfg(test)]
-fn test_parser_print(tokens: Vec<Token>, expected: Expression) {
+fn test_parser_print(tokens: Vec<Token>, expected: JsonExpression) {
 	let tokens = token_expression_to_token_stmt(tokens);
 	let expected = Stmt::Print(expected);
 	test_parser(tokens, expected);
@@ -34,7 +34,7 @@ fn basic_parser() {
 		Token::Equal,
 		Token::Value("7".to_string())
 	];
-	let expected = Expression::Binary(Binary::new(
+	let expected = JsonExpression::Expression(Expression::Binary(Binary::new(
 		Expression::Binary(Binary::new(
 			Expression::Literal(Literal::Int(1)),
 			Token::Plus,
@@ -46,7 +46,7 @@ fn basic_parser() {
 		).unwrap()),
 		Token::Equal,
 		Expression::Literal(Literal::Int(7))
-	).unwrap());
+	).unwrap()));
 	test_parser_print(tokens, expected);
 }
 

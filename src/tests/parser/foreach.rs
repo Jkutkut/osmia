@@ -62,9 +62,9 @@ macro_tests!(
 				Variable::from_str("cell").unwrap(),
 				ListOrVariable::Variable(Variable::from_str("arr").unwrap()),
 				Stmt::Print(
-					Expression::Variable(
+					JsonExpression::Expression(Expression::Variable(
 						Variable::from_str("cell").unwrap()
-					)
+					))
 				)
 			))
 		))
@@ -99,7 +99,7 @@ macro_tests!(
 				JsonExpression::Expression(Expression::Literal(Literal::Int(2))),
 				JsonExpression::Expression(Expression::Literal(Literal::Int(3)))
 			])),
-			Stmt::Print(Expression::Variable(Variable::from_str("a").unwrap()))
+			Stmt::Print(JsonExpression::Expression(Expression::Variable(Variable::from_str("a").unwrap())))
 		))
 	)
 );

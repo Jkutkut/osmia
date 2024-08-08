@@ -15,7 +15,7 @@ use crate::model::{
 ///
 /// Block          → Stmt[] ;
 /// Raw            → "..." ;
-/// Print          → "{{" "print" expression ";" "}}" ;
+/// Print          → "{{" "print" json";" "}}" ;
 /// Expression     → "{{" expression "}}" ;
 /// Assign         → "{{" "assign" Variable "=" json "}}" ;
 /// If             → "{{" "if" Conditional ( "{{" "elseif" Conditional )* ( "{{" "else" Block )? "{{" "fi" "}}" ;
@@ -201,7 +201,7 @@ impl Parser {
 
 	fn print(&mut self) -> Result<Stmt, String> {
 		self.advance();
-		let expression = self.expression()?;
+		let expression = self.json_expression()?;
 		Ok(Stmt::Print(expression))
 	}
 

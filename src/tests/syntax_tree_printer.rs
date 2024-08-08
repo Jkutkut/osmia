@@ -158,7 +158,7 @@ macro_tests!(
 		test_print,
 		"print x",
 		Stmt::Print(
-			Expression::Variable(Variable::from_str("x").unwrap())
+			JsonExpression::Expression(Expression::Variable(Variable::from_str("x").unwrap()))
 		)
 	),
 	(

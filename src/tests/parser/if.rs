@@ -1,6 +1,6 @@
 use crate::lexer::Token;
 use crate::model::{
-	Expression, Literal, Binary, Variable,
+	Expression, Literal, Binary, Variable, JsonExpression,
 	Stmt, ConditionalBlock, If, Block
 };
 use super::{test_parser, should_fail};
@@ -32,9 +32,9 @@ macro_tests!(
 					Token::Equal,
 					Expression::Literal(Literal::from_str(r#""if""#).unwrap())
 				).unwrap()),
-				Stmt::Print(Expression::Literal(
+				Stmt::Print(JsonExpression::Expression(Expression::Literal(
 					Literal::from_str(r#""condition is if""#).unwrap())
-				)
+				))
 			),
 			None,
 			None
@@ -76,14 +76,14 @@ macro_tests!(
 					Token::Equal,
 					Expression::Literal(Literal::from_str(r#""if""#).unwrap())
 				).unwrap()),
-				Stmt::Print(Expression::Literal(
+				Stmt::Print(JsonExpression::Expression(Expression::Literal(
 					Literal::from_str(r#""condition is if""#).unwrap())
-				)
+				))
 			),
 			None,
-			Some(Stmt::Print(Expression::Literal(
+			Some(Stmt::Print(JsonExpression::Expression(Expression::Literal(
 				Literal::from_str(r#""condition is else""#).unwrap())
-			))
+			)))
 		))
 	),
 	//	{{if condition == "if"}}
@@ -146,9 +146,9 @@ macro_tests!(
 					Token::Equal,
 					Expression::Literal(Literal::from_str(r#""if""#).unwrap())
 				).unwrap()),
-				Stmt::Print(Expression::Literal(
+				Stmt::Print(JsonExpression::Expression(Expression::Literal(
 					Literal::from_str(r#""condition is if""#).unwrap())
-				)
+				))
 			),
 			Some(vec![
 				ConditionalBlock::new(
@@ -157,9 +157,9 @@ macro_tests!(
 						Token::Equal,
 						Expression::Literal(Literal::from_str(r#""elseif01""#).unwrap())
 					).unwrap()),
-					Stmt::Print(Expression::Literal(
+					Stmt::Print(JsonExpression::Expression(Expression::Literal(
 						Literal::from_str(r#""condition is elseif01""#).unwrap())
-					)
+					))
 				),
 				ConditionalBlock::new(
 					Expression::Binary(Binary::new(
@@ -167,14 +167,14 @@ macro_tests!(
 						Token::Equal,
 						Expression::Literal(Literal::from_str(r#""elseif02""#).unwrap())
 					).unwrap()),
-					Stmt::Print(Expression::Literal(
+					Stmt::Print(JsonExpression::Expression(Expression::Literal(
 						Literal::from_str(r#""condition is elseif02""#).unwrap())
-					)
+					))
 				),
 			]),
-			Some(Stmt::Print(Expression::Literal(
+			Some(Stmt::Print(JsonExpression::Expression(Expression::Literal(
 				Literal::from_str(r#""condition is else""#).unwrap())
-			))
+			)))
 		))
 	),
 	// {{if condition == "if"}}{{fi}}

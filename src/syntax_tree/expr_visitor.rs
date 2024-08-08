@@ -1,8 +1,13 @@
+use std::collections::HashMap;
 use crate::model::{
-	Expression, Literal, Unary, Binary, Grouping, Variable
+	Expression, JsonExpression,
+	Literal, Unary, Binary, Grouping, Variable,
 };
 
 pub trait ExprVisitor<T> {
+	fn visit_array(&self, arr: &Vec<JsonExpression>) -> T;
+	fn visit_object(&self, obj: &HashMap<String, JsonExpression>) -> T;
+
 	#[allow(unused)]
 	fn visit_expression(&self, expression: &Expression) -> T;
 	fn visit_literal(&self, literal: &Literal) -> T;

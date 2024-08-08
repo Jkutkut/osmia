@@ -1,6 +1,6 @@
 use crate::lexer::Token;
 use crate::model::{
-	Expression, Literal,
+	Expression, Literal, JsonExpression,
 	Stmt, ConditionalBlock, Block
 };
 use super::{test_parser, should_fail};
@@ -23,9 +23,9 @@ fn basic_test() {
 		],
 		Stmt::While(ConditionalBlock::new(
 			Expression::Literal(Literal::Bool(true)),
-			Stmt::Print(Expression::Literal(
+			Stmt::Print(JsonExpression::Expression(Expression::Literal(
 				Literal::from_str("\"hello\"").unwrap()
-			))
+			)))
 		))
 	);
 }
@@ -56,9 +56,9 @@ fn basic_test02() {
 					Stmt::Expression(Expression::Literal(
 						Literal::from_str("123").unwrap()
 					)),
-					Stmt::Print(Expression::Literal(
+					Stmt::Print(JsonExpression::Expression(Expression::Literal(
 						Literal::from_str("456").unwrap()
-					))
+					)))
 				]
 			))
 		))
@@ -96,14 +96,14 @@ fn nested_01() {
 			Expression::Literal(Literal::Bool(true)),
 			Stmt::Block(Block::new(
 				vec![
-					Stmt::Print(Expression::Literal(
+					Stmt::Print(JsonExpression::Expression(Expression::Literal(
 						Literal::from_str("\"loop\"").unwrap()
-					)),
+					))),
 					Stmt::While(ConditionalBlock::new(
 						Expression::Literal(Literal::Bool(true)),
-						Stmt::Print(Expression::Literal(
+						Stmt::Print(JsonExpression::Expression(Expression::Literal(
 							Literal::from_str("\"nested\"").unwrap()
-						))
+						)))
 					))
 				]
 			))

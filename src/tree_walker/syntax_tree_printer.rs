@@ -28,7 +28,7 @@ impl Visitor<String> for SyntaxTreePrinter {
 		raw.to_string()
 	}
 
-	fn visit_print(&self, expr: &Expression) -> String {
+	fn visit_print(&self, expr: &JsonExpression) -> String {
 		format!("print {}", expr.accept(self))
 	}
 

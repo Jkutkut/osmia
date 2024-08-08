@@ -1,12 +1,12 @@
 use crate::model::{
-	Expression, Block, Assign, If, ConditionalBlock, ForEach
+	Expression, Block, Assign, If, ConditionalBlock, ForEach, JsonExpression
 };
 
 #[derive(Debug, PartialEq)]
 pub enum Stmt {
 	Block(Block),
 	Raw(String),
-	Print(Expression),
+	Print(JsonExpression),
 	Expression(Expression),
 	Assign(Assign),
 	If(If),
@@ -22,7 +22,7 @@ impl std::fmt::Display for Stmt {
 			Stmt::Break => write!(f, "break"),
 			Stmt::Continue => write!(f, "continue"),
 			Stmt::Expression(expr) => write!(f, "${{{}}};", expr),
-			Stmt::Print(expr) => write!(f, "print({});", expr),
+			Stmt::Print(json) => write!(f, "print({});", json),
 			_ => write!(f, "{}", self),
 		}
 	}
