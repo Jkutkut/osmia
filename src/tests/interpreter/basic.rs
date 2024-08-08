@@ -19,5 +19,27 @@ macro_tests! {
 	(basic12, "{{true}} {{false}} {{null}}", "true false null"),
 	(basic13, "{{true}} {{false}} {{42}}", "true false 42"),
 	(basic14, "{{true}} {{false}} {{3.14}}", "true false 3.14"),
-	(basic15, r#"{{"Hello, world!"}} {{42}}"#, "Hello, world! 42")
+	(basic15, r#"{{"Hello, world!"}} {{42}}"#, "Hello, world! 42"),
+	(json01, "{{ [1, 2, 3] }}", "[1, 2, 3]"),
+	(json02, r#"{{ {"a": 1, "b": 2, "c": 3} }}"#, "{a: 1, b: 2, c: 3}"),
+	(
+		json03,
+		r#"{{ [ 1, 2, {"foo": [3, 4]} ] }}"#,
+		"[1, 2, {foo: [3, 4]}]"
+	),
+	(
+		json04,
+		r#"{{ {"bar": [4, 5, 6], "foo": [1, 2, 3]} }}"#,
+		"{bar: [4, 5, 6], foo: [1, 2, 3]}"
+	),
+	(
+		json05,
+		r#"{{ {} }} {{ [] }}"#,
+		"{} []"
+	),
+	(
+		json06,
+		r#"{{ { } }} {{ [ ] }}"#,
+		"{} []"
+	)
 }

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use crate::model::{
-	Expression, Literal, Unary, Binary, Grouping, Variable, JsonExpression,
+	Literal, Unary, Binary, Grouping, Variable, JsonExpression,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
@@ -24,7 +24,6 @@ pub trait Visitor<T> {
 	fn visit_object(&self, obj: &HashMap<String, JsonExpression>) -> T;
 
 	// Expression
-	fn visit_expression(&self, expression: &Expression) -> T;
 	fn visit_literal(&self, literal: &Literal) -> T;
 	fn visit_variable(&self, literal: &Variable) -> T;
 	fn visit_grouping(&self, grouping: &Grouping) -> T;

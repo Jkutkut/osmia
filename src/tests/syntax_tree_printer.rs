@@ -204,7 +204,7 @@ macro_tests!(
 	(
 		test_expr02,
 		"!!x * (23 - (-1 / 2)) == true && false",
-		Stmt::Expression(Expression::Binary(Binary::new(
+		Stmt::Expression(JsonExpression::Expression(Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
 				Expression::Unary(Unary::new(
 					Token::Not,
@@ -237,12 +237,12 @@ macro_tests!(
 				Token::And,
 				Expression::Literal(Literal::Bool(false))
 			).unwrap())
-		).unwrap()))
+		).unwrap())))
 	),
 	(
 		test_expr03,
 		"true && false || true",
-		Stmt::Expression(Expression::Binary(Binary::new(
+		Stmt::Expression(JsonExpression::Expression(Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
 				Expression::Literal(Literal::Bool(true)),
 				Token::And,
@@ -250,12 +250,12 @@ macro_tests!(
 			).unwrap()),
 			Token::Or,
 			Expression::Literal(Literal::Bool(true))
-		).unwrap()))
+		).unwrap())))
 	),
 	(
 		test_expr04,
 		"true || false && true",
-		Stmt::Expression(Expression::Binary(Binary::new(
+		Stmt::Expression(JsonExpression::Expression(Expression::Binary(Binary::new(
 			Expression::Literal(Literal::Bool(true)),
 			Token::Or,
 			Expression::Binary(Binary::new(
@@ -263,12 +263,12 @@ macro_tests!(
 				Token::And,
 				Expression::Literal(Literal::Bool(true))
 			).unwrap())
-		).unwrap()))
+		).unwrap())))
 	),
 	(
 		test_expr05,
 		"12 == 12 <= 12 < 13 > 12 >= 12 != 10",
-		Stmt::Expression(Expression::Binary(Binary::new(
+		Stmt::Expression(JsonExpression::Expression(Expression::Binary(Binary::new(
 			Expression::Binary(Binary::new(
 				Expression::Literal(Literal::Int(12)),
 				Token::Equal,
@@ -292,6 +292,6 @@ macro_tests!(
 					).unwrap())
 				).unwrap())
 			).unwrap())
-		).unwrap()))
+		).unwrap())))
 	)
 );

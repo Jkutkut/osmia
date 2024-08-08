@@ -15,7 +15,11 @@ impl<T> Visitable<T> for Stmt {
 			Stmt::Block(blocks) => visitor.visit_block(blocks),
 			Stmt::Raw(raw) => visitor.visit_raw(raw),
 			Stmt::Print(print) => visitor.visit_print(print),
-			Stmt::Expression(expression) => visitor.visit_expression(expression),
+			Stmt::Expression(json) => match json {
+				JsonExpression::Expression(expr) => expr.accept(visitor),
+				JsonExpression::Array(arr) => visitor.visit_array(arr),
+				JsonExpression::Object(obj) => visitor.visit_object(obj)
+			}
 			Stmt::Assign(assign) => assign.accept(visitor),
 			Stmt::If(if_stmt) => if_stmt.accept(visitor),
 			Stmt::While(while_stmt) => visitor.visit_while(while_stmt),

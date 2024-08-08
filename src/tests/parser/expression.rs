@@ -1,6 +1,7 @@
 use crate::lexer::Token;
 use crate::model::{
-	Expression, Binary, Unary, Grouping, Literal, Variable,
+	Expression, JsonExpression,
+	Binary, Unary, Grouping, Literal, Variable,
 	Stmt
 };
 use super::{test_parser, should_fail};
@@ -19,7 +20,7 @@ fn token_expression_to_token_stmt(tokens: Vec<Token>) -> Vec<Token> {
 #[cfg(test)]
 fn test_parser_expression(tokens: Vec<Token>, expected: Expression) {
 	let tokens = token_expression_to_token_stmt(tokens);
-	let expected = Stmt::Expression(expected);
+	let expected = Stmt::Expression(JsonExpression::Expression(expected));
 	test_parser(tokens, expected);
 }
 

@@ -4,11 +4,17 @@ use crate::syntax_tree::{
 	Visitor, Visitable
 };
 use crate::model::{
-	Expression, Literal, Unary, Binary, Grouping, Variable, JsonExpression,
+	Literal, Unary, Binary, Grouping, Variable, JsonExpression,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
 pub struct SyntaxTreePrinter;
+
+impl SyntaxTreePrinter {
+	pub fn new() -> Self {
+		Self
+	}
+}
 
 impl Visitor<String> for SyntaxTreePrinter {
 	// Stmt
@@ -97,18 +103,15 @@ impl Visitor<String> for SyntaxTreePrinter {
 	fn visit_object(&self, object: &HashMap<String, JsonExpression>) -> String {
 		let mut sorted_obj_arr = object.iter().collect::<Vec<_>>();
 		sorted_obj_arr.sort_by(|(k1, _), (k2, _)| k2.cmp(k1));
-		let obj = sorted_obj_arr.iter()
+		let mut obj_arr = sorted_obj_arr.iter()
 			.map(|(k, v)| format!(r#"{}: {}"#, k, v.accept(self)))
-			.collect::<Vec<String>>()
-			.join(", ");
+			.collect::<Vec<String>>();
+		obj_arr.sort();
+		let obj = obj_arr.join(", ");
 		format!("{{{}}}", obj)
 	}
 
 	// Expression
-	fn visit_expression(&self, expression: &Expression) -> String {
-		expression.accept(self)
-	}
-
 	fn visit_literal(&self, literal: &Literal) -> String {
 		match literal {
 			Literal::Float(f) => f.to_string(),

@@ -1,5 +1,5 @@
 use crate::model::{
-	Expression, JsonExpression,
+	JsonExpression,
 	Stmt, Block, Assign, ConditionalBlock, ForEach, If
 };
 
@@ -17,5 +17,5 @@ pub trait StmtVisitor<T> {
 	fn visit_continue(&self) -> T;
 
 	// Expression
-	fn visit_expression(&self, expression: &Expression) -> T;
+	fn visit_expression(&self, expression: &JsonExpression) -> T;
 }

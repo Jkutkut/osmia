@@ -53,9 +53,9 @@ fn basic_test02() {
 			Expression::Literal(Literal::Bool(true)),
 			Stmt::Block(Block::new(
 				vec![
-					Stmt::Expression(Expression::Literal(
+					Stmt::Expression(JsonExpression::Expression(Expression::Literal(
 						Literal::from_str("123").unwrap()
-					)),
+					))),
 					Stmt::Print(JsonExpression::Expression(Expression::Literal(
 						Literal::from_str("456").unwrap()
 					)))

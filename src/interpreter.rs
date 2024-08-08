@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use crate::lexer::Token;
 use crate::syntax_tree::{
-	StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
+	Visitor, StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
 };
 use crate::model::{
 	Expression, Literal, Binary, Unary, Grouping, Variable,
@@ -10,6 +10,7 @@ use crate::model::{
 	Ctx,
 	ExitStatus, InterpreterValue, InterpreterResult
 };
+use crate::tree_walker::SyntaxTreePrinter;
 
 pub struct Interpreter {
 	ctx: Ctx
@@ -147,7 +148,7 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 		Ok((ExitStatus::Continue, InterpreterValue::Void))
 	}
 
-	fn visit_expression(&self, expression: &Expression) -> InterpreterResult {
+	fn visit_expression(&self, expression: &JsonExpression) -> InterpreterResult {
 		Ok((
 			ExitStatus::Okay,
 			InterpreterValue::from(
@@ -159,11 +160,11 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 
 impl ExprVisitor<Result<Literal, String>> for Interpreter {
 	fn visit_array(&self, arr: &Vec<JsonExpression>) -> Result<Literal, String> {
-		Ok(Literal::Str(arr.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(", ")))
+		Ok(Literal::Str(SyntaxTreePrinter::new().visit_array(arr)))
 	}
 
 	fn visit_object(&self, obj: &HashMap<String, JsonExpression>) -> Result<Literal, String> {
-		Ok(Literal::Str(obj.iter().map(|(k, v)| format!("{}:{}", k, v.to_string())).collect::<Vec<String>>().join(", ")))
+		Ok(Literal::Str(SyntaxTreePrinter::new().visit_object(obj)))
 	}
 
 	fn visit_expression(&self, expression: &Expression) -> Result<Literal, String> {
