@@ -8,7 +8,8 @@ use crate::model::{
 	JsonExpression, ListOrVariable, JsonTree,
 	Stmt, ConditionalBlock, Block, Assign, If, ForEach,
 	Ctx,
-	ExitStatus, InterpreterValue, InterpreterResult
+	ExitStatus, InterpreterValue, InterpreterResult,
+	Call, MethodCall
 };
 use crate::tree_walker::SyntaxTreePrinter;
 
@@ -159,6 +160,7 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 }
 
 impl ExprVisitor<Result<Literal, String>> for Interpreter {
+	// Json
 	fn visit_array(&self, arr: &Vec<JsonExpression>) -> Result<Literal, String> {
 		Ok(Literal::Str(SyntaxTreePrinter::new().visit_array(arr)))
 	}
@@ -167,6 +169,16 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter {
 		Ok(Literal::Str(SyntaxTreePrinter::new().visit_object(obj)))
 	}
 
+	// Callable
+	fn visit_call(&self, call: &Call) -> Result<Literal, String> {
+		todo!() // TODO
+	}
+
+	fn visit_method_call(&self, method_call: &MethodCall) -> Result<Literal, String> {
+		todo!() // TODO
+	}
+
+	// Expression
 	fn visit_expression(&self, expression: &Expression) -> Result<Literal, String> {
 		expression.accept(self)
 	}

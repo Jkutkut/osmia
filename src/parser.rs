@@ -3,7 +3,8 @@ use crate::lexer::Token;
 use crate::model::{
 	Expression, Binary, Unary, Grouping, Literal, Variable,
 	JsonExpression, ListOrVariable,
-	Stmt, Block, Assign, ConditionalBlock, ForEach, If
+	Stmt, Block, Assign, ConditionalBlock, ForEach, If,
+	Callable, Call, MethodCall,
 };
 
 /// Parses a list of tokens into a syntax tree.
@@ -39,7 +40,9 @@ use crate::model::{
 /// bitshift       → term ( ( ">>" | "<<" ) term )* ;
 /// term           → factor ( ( "-" | "+" ) factor )* ;
 /// factor         → unary ( ( "/" | "*" ) unary )* ;
-/// unary          → ( "!" | "-" | "+" ) unary | primary ;
+/// unary          → ( "!" | "-" | "+" ) unary | call ;
+/// call           → primary ( "(" arguments? ")" )* ;
+/// arguments      → json ( "," json )* ;
 /// primary        → Literal | Variable | grouping;
 /// grouping       → "(" expression ")" ;
 /// ```
@@ -514,7 +517,48 @@ impl Parser {
 			let unary = Unary::new(operator, right)?;
 			return Ok(Expression::Unary(unary));
 		}
-		self.primary()
+		self.call()
+	}
+
+	fn call(&mut self) -> Result<Expression, String> {
+		let mut expr = self.primary()?;
+		while self.match_and_advance(&[Token::ParentStart]) {
+			let args = self.arguments()?;
+			self.consume(
+				Token::ParentEnd,
+				&format!("Unclosed {:?} in call (expected {:?})", Token::ParentStart, Token::ParentEnd)
+			)?;
+			let call = Callable::Call(Box::new(
+				Call::new(expr, args)
+			));
+			println!("call: {:?}", call);
+			expr = Expression::Callable(call);
+		}
+		if self.match_and_advance(&[Token::Question]) {
+			todo!(); // TODO
+			let call = match self.call()? {
+				Expression::Callable(c) => c,
+				_ => unreachable!()
+			};
+			expr = Expression::Callable(Callable::MethodCall(Box::new(
+				MethodCall::new(expr, call)
+			)));
+		}
+		Ok(expr)
+	}
+
+	fn arguments(&mut self) -> Result<Vec<JsonExpression>, String> {
+		let mut args = Vec::new();
+		if !self.check_current(&Token::ParentEnd) {
+			loop {
+				let json = self.json_expression()?;
+				args.push(json);
+				if !self.match_and_advance(&[Token::Comma]) {
+					break;
+				}
+			}
+		}
+		Ok(args)
 	}
 
 	fn primary(&mut self) -> Result<Expression, String> {

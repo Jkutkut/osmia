@@ -1,7 +1,8 @@
 use crate::model::{
 	Expression, Literal, Unary, Binary, Grouping, Variable,
 	JsonExpression, ListOrVariable,
-	Stmt, Assign, ConditionalBlock, ForEach, If
+	Stmt, Assign, ConditionalBlock, ForEach, If,
+	Callable, Call, MethodCall
 };
 use crate::syntax_tree::{
 	Visitable, Visitor
@@ -118,6 +119,28 @@ impl<T> Visitable<T> for Expression {
 			Expression::Grouping(grouping) => grouping.accept(visitor),
 			Expression::Unary(unary) => unary.accept(visitor),
 			Expression::Binary(binary) => binary.accept(visitor),
+			Expression::Callable(callable) => callable.accept(visitor),
 		}
+	}
+}
+
+impl<T> Visitable<T> for Callable {
+	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
+		match self {
+			Callable::Call(call) => call.accept(visitor),
+			Callable::MethodCall(method) => method.accept(visitor),
+		}
+	}
+}
+
+impl<T> Visitable<T> for Call {
+	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
+		visitor.visit_call(self)
+	}
+}
+
+impl<T> Visitable<T> for MethodCall {
+	fn accept(&self, visitor: &dyn Visitor<T>) -> T {
+		visitor.visit_method_call(self)
 	}
 }

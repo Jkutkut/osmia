@@ -1,4 +1,4 @@
-use super::{Literal, Grouping, Unary, Binary, Variable};
+use super::{Literal, Grouping, Unary, Binary, Variable, Callable};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
@@ -6,7 +6,8 @@ pub enum Expression {
 	Variable(Variable),
 	Grouping(Grouping),
 	Unary(Unary),
-	Binary(Binary)
+	Binary(Binary),
+	Callable(Callable),
 }
 
 impl std::fmt::Display for Expression {
@@ -16,7 +17,8 @@ impl std::fmt::Display for Expression {
 			Expression::Variable(v) => write!(f, "{}", v),
 			Expression::Grouping(g) => write!(f, "{}", g),
 			Expression::Unary(u) => write!(f, "{}", u),
-			Expression::Binary(b) => write!(f, "{}", b)
+			Expression::Binary(b) => write!(f, "{}", b),
+			Expression::Callable(c) => write!(f, "{}", c),
 		}
 	}
 }

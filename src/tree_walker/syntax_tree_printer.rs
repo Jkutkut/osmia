@@ -5,7 +5,8 @@ use crate::syntax_tree::{
 };
 use crate::model::{
 	Literal, Unary, Binary, Grouping, Variable, JsonExpression,
-	Stmt, Block, Assign, ConditionalBlock, ForEach, If
+	Stmt, Block, Assign, ConditionalBlock, ForEach, If,
+	Call, MethodCall
 };
 
 pub struct SyntaxTreePrinter;
@@ -109,6 +110,15 @@ impl Visitor<String> for SyntaxTreePrinter {
 		obj_arr.sort();
 		let obj = obj_arr.join(", ");
 		format!("{{{}}}", obj)
+	}
+
+	// Callable
+	fn visit_call(&self, call: &Call) -> String {
+		call.to_string()
+	}
+
+	fn visit_method_call(&self, method_call: &MethodCall) -> String {
+		method_call.to_string()
 	}
 
 	// Expression

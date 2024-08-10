@@ -6,6 +6,7 @@ mod loop_blocks;
 mod r#if;
 mod r#while;
 mod foreach;
+mod call;
 
 use crate::lexer::Token;
 use crate::model::Stmt;
@@ -39,8 +40,8 @@ fn test_parser(
 	println!("\nParsed:              {}", parsed_result_str);
 	println!("Original - Expected: {}\n", expected_str);
 	assert_eq!(parsed_result_str, expected_str);
-	println!("Parsed:              {:#?}", parsed_result);
-	println!("Original - Expected: {:#?}\n", expected);
+	println!("Parsed:\n{:#?}", parsed_result);
+	println!("Original - Expected:\n{:#?}\n", expected);
 	assert_eq!(parsed_result, expected);
 }
 

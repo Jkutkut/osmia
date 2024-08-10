@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use crate::model::{
 	Literal, Unary, Binary, Grouping, Variable, JsonExpression,
-	Stmt, Block, Assign, ConditionalBlock, ForEach, If
+	Stmt, Block, Assign, ConditionalBlock, ForEach, If,
+	Call, MethodCall
 };
 
 pub trait Visitor<T> {
@@ -29,4 +30,8 @@ pub trait Visitor<T> {
 	fn visit_grouping(&self, grouping: &Grouping) -> T;
 	fn visit_unary(&self, unary: &Unary) -> T;
 	fn visit_binary(&self, binary: &Binary) -> T;
+
+	// Callable
+	fn visit_call(&self, call: &Call) -> T;
+	fn visit_method_call(&self, method_call: &MethodCall) -> T;
 }
