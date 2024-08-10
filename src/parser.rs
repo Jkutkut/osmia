@@ -40,8 +40,9 @@ use crate::model::{
 /// bitshift       → term ( ( ">>" | "<<" ) term )* ;
 /// term           → factor ( ( "-" | "+" ) factor )* ;
 /// factor         → unary ( ( "/" | "*" ) unary )* ;
-/// unary          → ( "!" | "-" | "+" ) unary | call ;
-/// call           → primary ( "(" arguments? ")" )* ;
+/// unary          → ( "!" | "-" | "+" ) unary | method ;
+/// method         → ( primary | call ) ( "?" call )* ;
+/// call           → primary ( "(" arguments? ")" )+ ;
 /// arguments      → json ( "," json )* ;
 /// primary        → Literal | Variable | grouping;
 /// grouping       → "(" expression ")" ;
@@ -517,7 +518,22 @@ impl Parser {
 			let unary = Unary::new(operator, right)?;
 			return Ok(Expression::Unary(unary));
 		}
-		self.call()
+		self.method()
+	}
+
+	fn method(&mut self) -> Result<Expression, String> {
+		let mut expr = self.call()?;
+		while self.match_and_advance(&[Token::Question]) {
+			let call = match self.call()? {
+				Expression::Callable(c) => c,
+				_ => return Err(format!(
+					"Expected a method call after {}",
+					Token::Question
+				))
+			};
+			expr = Expression::Callable(Callable::new_method_call(expr, call));
+		}
+		Ok(expr)
 	}
 
 	fn call(&mut self) -> Result<Expression, String> {
@@ -526,23 +542,13 @@ impl Parser {
 			let args = self.arguments()?;
 			self.consume(
 				Token::ParentEnd,
-				&format!("Unclosed {:?} in call (expected {:?})", Token::ParentStart, Token::ParentEnd)
+				&format!(
+					"Unclosed {:?} in call (expected {:?})",
+					Token::ParentStart, Token::ParentEnd
+				)
 			)?;
-			let call = Callable::Call(Box::new(
-				Call::new(expr, args)
-			));
-			println!("call: {:?}", call);
+			let call = Callable::new_call(expr, args);
 			expr = Expression::Callable(call);
-		}
-		if self.match_and_advance(&[Token::Question]) {
-			todo!(); // TODO
-			let call = match self.call()? {
-				Expression::Callable(c) => c,
-				_ => unreachable!()
-			};
-			expr = Expression::Callable(Callable::MethodCall(Box::new(
-				MethodCall::new(expr, call)
-			)));
 		}
 		Ok(expr)
 	}
