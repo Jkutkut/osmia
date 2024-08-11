@@ -3,7 +3,7 @@ use crate::model::{
 	Stmt, Expression, JsonExpression,
 	Binary, Grouping,
 	Variable, Literal,
-	Callable, Call, MethodCall,
+	Callable,
 };
 use super::{test_parser, should_fail};
 use crate::macro_tests;
@@ -21,11 +21,9 @@ macro_tests!(
 			Token::Eof
 		],
 		Stmt::Expression(JsonExpression::Expression(
-			Expression::Callable(Callable::Call(
-				Box::new(Call::new(
-					Expression::Variable(Variable::from_str("foo").unwrap()),
-					Vec::new()
-				))
+			Expression::Callable(Callable::new_call(
+				Expression::Variable(Variable::from_str("foo").unwrap()),
+				Vec::new()
 			))
 		))
 	),
@@ -41,15 +39,13 @@ macro_tests!(
 			Token::Eof
 		],
 		Stmt::Expression(JsonExpression::Expression(
-			Expression::Callable(Callable::Call(
-				Box::new(Call::new(
-					Expression::Variable(Variable::from_str("foo").unwrap()),
-					vec!(
-						JsonExpression::Expression(
-							Expression::Variable(Variable::from_str("bar").unwrap())
-						)
+			Expression::Callable(Callable::new_call(
+				Expression::Variable(Variable::from_str("foo").unwrap()),
+				vec!(
+					JsonExpression::Expression(
+						Expression::Variable(Variable::from_str("bar").unwrap())
 					)
-				))
+				)
 			))
 		))
 	),
@@ -67,18 +63,16 @@ macro_tests!(
 			Token::Eof
 		],
 		Stmt::Expression(JsonExpression::Expression(
-			Expression::Callable(Callable::Call(
-				Box::new(Call::new(
-					Expression::Variable(Variable::from_str("foo").unwrap()),
-					vec!(
-						JsonExpression::Expression(
-							Expression::Literal(Literal::from_str("12").unwrap())
-						),
-						JsonExpression::Expression(
-							Expression::Literal(Literal::from_str("34").unwrap())
-						)
+			Expression::Callable(Callable::new_call(
+				Expression::Variable(Variable::from_str("foo").unwrap()),
+				vec!(
+					JsonExpression::Expression(
+						Expression::Literal(Literal::from_str("12").unwrap())
+					),
+					JsonExpression::Expression(
+						Expression::Literal(Literal::from_str("34").unwrap())
 					)
-				))
+				)
 			))
 		))
 	),
@@ -95,16 +89,12 @@ macro_tests!(
 			Token::Eof
 		],
 		Stmt::Expression(JsonExpression::Expression(
-			Expression::Callable(Callable::Call(
-				Box::new(Call::new(
-					Expression::Callable(Callable::Call(
-						Box::new(Call::new(
-							Expression::Variable(Variable::from_str("foo").unwrap()),
-							Vec::new()
-						))
-					)),
+			Expression::Callable(Callable::new_call(
+				Expression::Callable(Callable::new_call(
+					Expression::Variable(Variable::from_str("foo").unwrap()),
 					Vec::new()
-				))
+				)),
+				Vec::new()
 			))
 		))
 	),
@@ -123,24 +113,20 @@ macro_tests!(
 			Token::Eof
 		],
 		Stmt::Expression(JsonExpression::Expression(
-			Expression::Callable(Callable::Call(
-				Box::new(Call::new(
-					Expression::Callable(Callable::Call(
-						Box::new(Call::new(
-							Expression::Variable(Variable::from_str("foo").unwrap()),
-							vec!(
-								JsonExpression::Expression(
-									Expression::Literal(Literal::from_str("1").unwrap())
-								)
-							)
-						))
-					)),
+			Expression::Callable(Callable::new_call(
+				Expression::Callable(Callable::new_call(
+					Expression::Variable(Variable::from_str("foo").unwrap()),
 					vec!(
 						JsonExpression::Expression(
-							Expression::Literal(Literal::from_str("2").unwrap())
+							Expression::Literal(Literal::from_str("1").unwrap())
 						)
 					)
-				))
+				)),
+				vec!(
+					JsonExpression::Expression(
+						Expression::Literal(Literal::from_str("2").unwrap())
+					)
+				)
 			))
 		))
 	),

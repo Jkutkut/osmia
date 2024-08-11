@@ -79,3 +79,18 @@ impl std::fmt::Display for MethodCall {
 		write!(f, "{}{}{}", self.expr, Token::Question, self.call)
 	}
 }
+
+// pub trait Callable {
+// 	let arity: u8;
+// 
+// 	fn arity(&self) -> u8 {
+// 		self.arity
+// 	}
+// 
+// 	fn call(&self, args: Vec<Expression>) -> Result<Expression, String>;
+// }
+// 
+// pub struct FuctionCall {
+// 	ft: String; // TODO
+// 	args: Vec<Json>,
+// }

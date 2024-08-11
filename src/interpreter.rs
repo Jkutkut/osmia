@@ -171,10 +171,12 @@ impl ExprVisitor<Result<Literal, String>> for Interpreter {
 	}
 
 	// Callable
+	#[allow(unused_variables)]
 	fn visit_call(&self, call: &Call) -> Result<Literal, String> {
 		todo!() // TODO
 	}
 
+	#[allow(unused_variables)]
 	fn visit_method_call(&self, method_call: &MethodCall) -> Result<Literal, String> {
 		todo!() // TODO
 	}
