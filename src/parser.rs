@@ -12,7 +12,7 @@ use crate::model::{
 /// ## Structure:
 /// ```text
 /// program        → Stmt
-/// Stmt           → Block | Raw | Print | Expression | Assign | If | While | ForEach | Break | Continue
+/// Stmt           → Block | Raw | Print | Expression | Assign | If | While | ForEach | Break | Continue | FunctionDecl | Return
 ///
 /// Block          → Stmt[] ;
 /// Raw            → "..." ;
@@ -25,6 +25,11 @@ use crate::model::{
 /// ForEach        → "{{" "foreach" Variable "in" ListOrVariable "}}" Stmt "{{" "done" "}}" ;
 /// Break          → "{{" "break" "}}" ;
 /// Continue       → "{{" "continue" "}}" ;
+/// FunctionDecl   → "{{" "fn" function "}}" Block "{{" "done" "}}" ;
+/// function       → Identifier ( ";" parameters )? ;
+/// parameters     → parameter ( "," parameter)* ( "," "..." Identifier )?
+/// parameter      → Identifier ("=" json)? ;
+/// Return         → "{{" "return" json? "}}" ;
 ///
 /// json           → object | array | expression ;
 /// jsonObject     → "{" ( Literal ":" json "," )* ( Literal ":" json )? "}" ;
