@@ -16,6 +16,10 @@ impl<'a> Lexer<'a> {
 		}
 	}
 
+	pub fn new_osmia() -> Self {
+		Lexer::new("{{", "}}")
+	}
+
 	pub fn scan(&self, input: &'a str) -> Result<Vec<Token>, String> {
 		let mut tokens: Vec<Token> = Vec::new();
 		let input_arr: &[u8] = input.as_bytes();

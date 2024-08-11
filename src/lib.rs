@@ -208,13 +208,18 @@ impl Osmia {
 		Ctx::from_str(ctx)
 	}
 
+	fn compile_code(lexer: Lexer, code: &str) -> Result<Stmt, String> {
+		Parser::new(lexer.scan(code)?).parse()
+	}
+
 	pub fn code(code: &str) -> Result<Stmt, String> {
-		Self::custom_code(code, "{{", "}}")
+		Self::compile_code(Lexer::new_osmia(), code)
 	}
 
 	pub fn custom_code(code: &str, start_delimiter: &str, end_delimiter: &str) -> Result<Stmt, String> {
-		let lexer = Lexer::new(start_delimiter, end_delimiter);
-		let tokens = lexer.scan(code)?;
-		Parser::new(tokens).parse()
+		Self::compile_code(
+			Lexer::new(start_delimiter, end_delimiter),
+			code
+		)
 	}
 }

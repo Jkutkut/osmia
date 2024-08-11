@@ -27,7 +27,7 @@ fn run_interpreter(
 ) -> Result<String, String> {
 	println!("Running interpreter: {}", code);
 	println!("  - Code: {}", &code);
-	let lexer = Lexer::new("{{", "}}");
+	let lexer = Lexer::new_osmia();
 	let tokens = lexer.scan(code).unwrap();
 	println!("  - Tokens: {:?}", tokens);
 	let tokens = tokens.iter().map(|t| t.clone()).collect::<Vec<Token>>();

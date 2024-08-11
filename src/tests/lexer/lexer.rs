@@ -4,11 +4,6 @@ use crate::lexer::Lexer;
 use crate::macro_tests;
 
 #[cfg(test)]
-fn lexer() -> Lexer<'static> {
-	Lexer::new("{{", "}}")
-}
-
-#[cfg(test)]
 fn check_result(
 	real: Result<Vec<Token>, String>,
 	expected: Vec<Token>
@@ -32,8 +27,7 @@ fn lexer_test(
 	input: &str,
 	expected: Vec<Token>
 ) {
-	let lexer = lexer();
-	let result = lexer.scan(input);
+	let result = Lexer::new_osmia().scan(input);
 	check_result(result, expected);
 }
 
@@ -41,8 +35,7 @@ fn lexer_test(
 fn lexer_fail_test(
 	input: &str
 ) {
-	let lexer = lexer();
-	let result = lexer.scan(input);
+	let result = Lexer::new_osmia().scan(input);
 	if let Ok(_) = result {
 		panic!("Should fail");
 	}
