@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::convert::TryFrom;
 use serde::{Deserialize, Serialize};
 
 use crate::model::{
@@ -24,7 +25,7 @@ impl JsonTree {
 			.map_err(|err| err.to_string())
 	}
 
-	pub fn from_literal(literal: &Literal) -> JsonTree {
+	pub fn from_literal(literal: &Literal) -> Self {
 		match literal {
 			Literal::Str(s) => JsonTree::Str(s.to_string()),
 			Literal::Int(i) => JsonTree::Number(*i),
@@ -33,9 +34,13 @@ impl JsonTree {
 			Literal::Null => JsonTree::Null
 		}
 	}
+}
 
-	pub fn from(expr: &JsonExpression) -> Result<Self, String> {
-		let tree = match expr {
+impl TryFrom<&JsonExpression> for JsonTree {
+	type Error = String;
+
+	fn try_from(expr: &JsonExpression) -> Result<Self, Self::Error> {
+		Ok(match expr {
 			JsonExpression::Expression(expr) => match expr {
 				Expression::Literal(literal) => match literal {
 					Literal::Str(s) => JsonTree::Str(s.to_string()),
@@ -48,14 +53,13 @@ impl JsonTree {
 			},
 			JsonExpression::Array(arr) => JsonTree::Array(
 				arr.iter()
-					.map(|x| JsonTree::from(x))
+					.map(|x| JsonTree::try_from(x))
 					.collect::<Result<Vec<JsonTree>, String>>()?
 			),
 			JsonExpression::Object(obj) => JsonTree::Object(obj.iter().map(|(k, v)| {
-				(k.to_string(), Box::new(JsonTree::from(v).unwrap()))
+				(k.to_string(), Box::new(JsonTree::try_from(v).unwrap()))
 			}).collect())
-		};
-		Ok(tree)
+		})
 	}
 }
 

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::convert::TryFrom;
 use crate::lexer::Token;
 use crate::syntax_tree::{
 	Visitor, StmtVisitor, ExprVisitor, StmtVisitable, ExprVisitable
@@ -74,7 +75,7 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 
 	fn visit_assign(&mut self, assign: &Assign) -> InterpreterResult {
 		let value = self.eval_json(assign.expression())?;
-		let tree = JsonTree::from(&value)?;
+		let tree = JsonTree::try_from(&value)?;
 		self.ctx.set(assign.variable(), tree)?;
 		Ok((ExitStatus::Okay, InterpreterValue::Void))
 	}
@@ -121,7 +122,7 @@ impl StmtVisitor<InterpreterResult> for Interpreter {
 		let mut exit_status = ExitStatus::False;
 		for item in self.get_iterable(for_block.list())? {
 			let item = self.eval_json(&item)?;
-			let item = JsonTree::from(&item)?;
+			let item = JsonTree::try_from(&item)?;
 			self.ctx.set(for_block.variable(), item)?;
 			exit_status = ExitStatus::Okay;
 			let (block_exit_status, r) = for_block.body().accept(self)?;
