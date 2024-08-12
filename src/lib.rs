@@ -7,23 +7,28 @@ mod tests;
 
 pub trait CodeInterpreter: for<'a> From<&'a str> {
 	type Output;
-	// TODO error
+	type Error;
+
+	type LexerCode;
+	type ParserCode;
 
 	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-	fn new_lexer() -> impl Lexer;
-	fn new_parser() -> impl Parser;
-	fn new_interpreter() -> impl Interpreter<Self::Output>;
+	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::Error>;
+	fn new_parser() -> impl Parser<Self::LexerCode, Self::ParserCode, Self::Error>;
+	fn new_interpreter() -> impl Interpreter<Self::ParserCode, Self::Output, Self::Error>;
 
-	fn run(&self, code: &str) -> Self::Output {
+	fn run(&self, code: &str) -> Result<Self::Output, Self::Error> {
 		let lexer = Self::new_lexer();
+		let lexed = lexer.lex(code)?;
 		let parser = Self::new_parser();
+		let parsed = parser.parse(lexed)?;
 		let interpreter = Self::new_interpreter();
-		let lexed = lexer.lex(code);
-		let parsed = parser.parse(lexed);
 		interpreter.interpret(parsed)
 	}
 }
+
+type OsmiaError = String;
 
 /// Default osmia template engine API.
 pub struct Osmia;
@@ -32,24 +37,24 @@ impl Osmia {
 	pub fn new() -> Self {
 		Self
 	}
-
-	pub fn run_code(&self, code: &str) -> String {
-		self.run(code)
-	}
 }
 
 impl CodeInterpreter for Osmia {
 	type Output = OsmiaOutput;
+	type Error = String;
 
-	fn new_lexer() -> impl Lexer {
+	type LexerCode = LexerCode;
+	type ParserCode = ParserCode;
+
+	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::Error> {
 		OsmiaLexer::osmia()
 	}
 
-	fn new_parser() -> impl Parser {
+	fn new_parser() -> impl Parser<Self::LexerCode, Self::ParserCode, Self::Error> {
 		OsmiaParser::new()
 	}
 
-	fn new_interpreter() -> impl Interpreter<Self::Output> {
+	fn new_interpreter() -> impl Interpreter<Self::ParserCode, Self::Output, Self::Error> {
 		OsmiaInterpreter::new()
 	}
 }
@@ -64,8 +69,8 @@ impl From<&str> for Osmia {
 // Lexer
 type LexerCode = Vec<String>;
 
-pub trait Lexer {
-	fn lex(&self, code: &str) -> LexerCode;
+pub trait Lexer<T, E> {
+	fn lex(&self, code: &str) -> Result<T, E>;
 }
 
 struct OsmiaLexer<'a> {
@@ -85,9 +90,9 @@ impl<'a> OsmiaLexer<'a> {
 	}
 }
 
-impl Lexer for OsmiaLexer<'_> {
+impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
 	#[allow(unused_variables)]
-	fn lex(&self, code: &str) -> LexerCode {
+	fn lex(&self, code: &str) -> Result<LexerCode, OsmiaError> {
 		todo!() // TODO
 		// Lex code
 	}
@@ -96,8 +101,8 @@ impl Lexer for OsmiaLexer<'_> {
 // Parser
 type ParserCode = String;
 
-pub trait Parser {
-	fn parse(&self, code: LexerCode) -> ParserCode;
+pub trait Parser<I, T, E> {
+	fn parse(&self, code: I) -> Result<T, E>;
 }
 
 pub struct OsmiaParser;
@@ -108,9 +113,9 @@ impl OsmiaParser {
 	}
 }
 
-impl Parser for OsmiaParser {
+impl Parser<LexerCode, ParserCode, OsmiaError> for OsmiaParser {
 	#[allow(unused_variables)]
-	fn parse(&self, code: LexerCode) -> ParserCode {
+	fn parse(&self, code: LexerCode) -> Result<ParserCode, OsmiaError> {
 		todo!() // TODO
 		// Parse code
 	}
@@ -119,8 +124,8 @@ impl Parser for OsmiaParser {
 // Interpreter
 type OsmiaOutput = String;
 
-pub trait Interpreter<T> {
-	fn interpret(&self, code: ParserCode) -> T;
+pub trait Interpreter<I, T, E> {
+	fn interpret(&self, code: I) -> Result<T, E>;
 }
 
 struct OsmiaInterpreter;
@@ -131,9 +136,9 @@ impl OsmiaInterpreter {
 	}
 }
 
-impl Interpreter<OsmiaOutput> for OsmiaInterpreter {
+impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter {
 	#[allow(unused_variables)]
-	fn interpret(&self, code: ParserCode) -> OsmiaOutput {
+	fn interpret(&self, code: ParserCode) -> Result<OsmiaOutput, OsmiaError> {
 		todo!() // TODO
 		// Interpret code
 	}
