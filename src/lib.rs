@@ -5,6 +5,8 @@ mod utils;
 #[cfg(test)]
 mod tests;
 
+use model::ctx::Ctx;
+
 pub trait CodeInterpreter: for<'a> From<&'a str> {
 	type Output;
 	type Error;
@@ -29,16 +31,15 @@ pub trait CodeInterpreter: for<'a> From<&'a str> {
 }
 
 type OsmiaError = String;
-type OsmiaCtx = String;
 
 /// Default osmia template engine API.
 pub struct Osmia<'ctx> {
 	#[allow(dead_code)]
-	ctx: std::cell::RefCell<&'ctx mut OsmiaCtx>,
+	ctx: std::cell::RefCell<&'ctx mut Ctx>,
 }
 
 impl<'ctx> Osmia<'ctx> {
-	pub fn new(ctx: &'ctx mut OsmiaCtx) -> Self {
+	pub fn new(ctx: &'ctx mut Ctx) -> Self {
 		Self {
 			ctx: std::cell::RefCell::new(ctx),
 		}
