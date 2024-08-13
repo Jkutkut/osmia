@@ -32,7 +32,7 @@ test_backtrace:
 	${DOCKER_RUN} ${RUN_ATTRS} -e RUST_BACKTRACE=1 --entrypoint cargo jkutkut/docker4rust test
 
 doc:
-	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust doc --lib --examples
+	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust doc --lib --examples --document-private-items
 
 doc_release:
 	@echo "Ensuring repo has no uncommited changes..."
