@@ -29,17 +29,23 @@ pub trait CodeInterpreter: for<'a> From<&'a str> {
 }
 
 type OsmiaError = String;
+type OsmiaCtx = String;
 
 /// Default osmia template engine API.
-pub struct Osmia;
+pub struct Osmia<'ctx> {
+	#[allow(dead_code)]
+	ctx: std::cell::RefCell<&'ctx mut OsmiaCtx>,
+}
 
-impl Osmia {
-	pub fn new() -> Self {
-		Self
+impl<'ctx> Osmia<'ctx> {
+	pub fn new(ctx: &'ctx mut OsmiaCtx) -> Self {
+		Self {
+			ctx: std::cell::RefCell::new(ctx),
+		}
 	}
 }
 
-impl CodeInterpreter for Osmia {
+impl CodeInterpreter for Osmia<'_> {
 	type Output = OsmiaOutput;
 	type Error = String;
 
@@ -59,7 +65,7 @@ impl CodeInterpreter for Osmia {
 	}
 }
 
-impl From<&str> for Osmia {
+impl From<&str> for Osmia<'_> {
 	fn from(_: &str) -> Self {
 		todo!() // TODO
 		// Parse json str as ctx
