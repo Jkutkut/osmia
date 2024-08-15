@@ -1,4 +1,4 @@
-/// Allows to make execute multiple tests with less boilerplate code.
+/// This macro simplifies running multiple tests with less boilerplate code.
 ///
 /// # Examples
 /// ```rust
