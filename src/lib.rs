@@ -123,11 +123,13 @@ impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
 /// print          → "{{" "print" expression "}}"
 /// comment        → "{{" "#" expression "}}"
 /// assign         → "{{" identifier "=" expression "}}"
-/// if             → "{{" "if" conditional ( "{{" "elseif" conditional )* ( "{{" "else" block )? "{{" "fi" "}}"
+/// if             → "{{" "if" conditional ( elseif )* ( else )? "{{" "fi" "}}"
+/// elseif         → "{{" "elseif" conditional
+/// else           → "{{" "else" block
 /// conditional    → expression "}}" stmt
 /// while          → "{{" "while" conditional "done" "}}"
 /// for            → "{{" "for" identifier "in" iterable "}}" stmt "{{" "done" "}}"
-//  iterable       → expression
+/// iterable       → expression
 /// break          → "{{" "break" "}}"
 /// continue       → "{{" "continue" "}}"
 /// return         → "{{" "return" expression? "}}"
@@ -135,11 +137,8 @@ impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
 /// parameters     → parameter ( "," parameter )* ( "," "..." identifier)?
 /// parameter      → identifier ( "=" expression )?
 ///
-///
-//  lambda         → "(" parameters? ")" "=> {" block "}"
-///
-///
-//  expression     → logic_or
+/// expression     → lambda | logic_or
+/// lambda         → "fn" "(" parameters? ")" "=>" expression
 /// logic_or       → logic_and ( "||" logic_and )*
 /// logic_and      → equality ( "&&" equality )*
 /// equality       → bitwise ( ( "!=" | "==" ) bitwise )*
@@ -150,16 +149,16 @@ impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
 /// factor         → unary ( ( "/" | "*" ) unary )*
 /// unary          → ( "!" | "-" | "+" )* method_call
 /// method_call    → primary ( "?" call )*
-//  primary        → literal | variable | call | grouping | array | object
+/// primary        → literal | call | array | object | grouping
+/// literal        → float | int | string | boolean | null
 /// call           → variable ( "(" arguments? ")" )*
 /// arguments      → expression ( "," expression )*
-//  variable       → obj
+/// variable       → obj
 /// obj            → array ( "." identifier )*
 /// arr            → identifier ( "[" expression "]" )*
-//  identifier     → ?
-/// literal        → float | int | string | boolean | null
 /// array          → "[" ( expression? ( "," expression )* )? "]"
-/// object         → "{" ( expression ":" expression ( "," expression ":" expression )* )? "}"
+/// object         → "{" ( object_entry ( "," object_entry )* )? "}"
+/// object_entry   → expression ":" expression
 /// grouping       → "(" expression ")"
 /// ```
 type ParserCode = String;
