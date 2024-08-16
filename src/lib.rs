@@ -106,6 +106,62 @@ impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
 }
 
 // Parser
+
+/// Parsing documentation: // TODO
+///
+/// ## Structure:
+/// ```text
+/// program        → stmt
+/// stmt           → block | raw | evaluation | print | comment | assign |
+///                  if | while | foreach |
+///                  break | continue | return |
+///                  function
+///
+/// block          → ( stmt )*
+/// raw            → "..."
+/// evaluation     → "{{" expression "}}"
+/// print          → "{{" "print" expression "}}"
+/// comment        → "{{" "#" expression "}}"
+/// assign         → "{{" identifier "=" expression "}}"
+/// if             → "{{" "if" conditional ( "{{" "elseif" conditional )* ( "{{" "else" block )? "{{" "fi" "}}"
+/// conditional    → expression "}}" stmt
+/// while          → "{{" "while" conditional "done" "}}"
+/// for            → "{{" "for" identifier "in" iterable "}}" stmt "{{" "done" "}}"
+//  iterable       → expression
+/// break          → "{{" "break" "}}"
+/// continue       → "{{" "continue" "}}"
+/// return         → "{{" "return" expression? "}}"
+/// function       → "{{" "fn" identifier ( ";" parameters )? "}}" block "{{" "done" "}}"
+/// parameters     → parameter ( "," parameter )* ( "," "..." identifier)?
+/// parameter      → identifier ( "=" expression )?
+///
+///
+//  lambda         → "(" parameters? ")" "=> {" block "}"
+///
+///
+//  expression     → logic_or
+/// logic_or       → logic_and ( "||" logic_and )*
+/// logic_and      → equality ( "&&" equality )*
+/// equality       → bitwise ( ( "!=" | "==" ) bitwise )*
+/// bitwise        → comparison ( ( "&" | "|" | "^" ) comparison )*
+/// comparison     → bitshift ( ( ">" | ">=" | "<" | "<=" ) bitshift )*
+/// bitshift       → term ( ( ">>" | "<<" ) term )*
+/// term           → factor ( ( "-" | "+" ) factor )*
+/// factor         → unary ( ( "/" | "*" ) unary )*
+/// unary          → ( "!" | "-" | "+" )* method_call
+/// method_call    → primary ( "?" call )*
+//  primary        → literal | variable | call | grouping | array | object
+/// call           → variable ( "(" arguments? ")" )*
+/// arguments      → expression ( "," expression )*
+//  variable       → obj
+/// obj            → array ( "." identifier )*
+/// arr            → identifier ( "[" expression "]" )*
+//  identifier     → ?
+/// literal        → float | int | string | boolean | null
+/// array          → "[" ( expression? ( "," expression )* )? "]"
+/// object         → "{" ( expression ":" expression ( "," expression ":" expression )* )? "}"
+/// grouping       → "(" expression ")"
+/// ```
 type ParserCode = String;
 
 pub trait Parser<I, T, E> {
