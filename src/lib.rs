@@ -20,13 +20,22 @@ pub trait CodeInterpreter: for<'a> From<&'a str> {
 	fn new_parser() -> impl Parser<Self::LexerCode, Self::ParserCode, Self::Error>;
 	fn new_interpreter() -> impl Interpreter<Self::ParserCode, Self::Output, Self::Error>;
 
+	fn lex(code: &str) -> Result<Self::LexerCode, Self::Error> {
+		Self::new_lexer().lex(code)
+	}
+
+	fn parse(code: Self::LexerCode) -> Result<Self::ParserCode, Self::Error> {
+		Self::new_parser().parse(code)
+	}
+
+	fn interpret(code: Self::ParserCode) -> Result<Self::Output, Self::Error> {
+		Self::new_interpreter().interpret(code)
+	}
+
 	fn run(&self, code: &str) -> Result<Self::Output, Self::Error> {
-		let lexer = Self::new_lexer();
-		let lexed = lexer.lex(code)?;
-		let parser = Self::new_parser();
-		let parsed = parser.parse(lexed)?;
-		let interpreter = Self::new_interpreter();
-		interpreter.interpret(parsed)
+		let lexed = Self::lex(code)?;
+		let parsed = Self::parse(lexed)?;
+		Self::interpret(parsed)
 	}
 }
 
