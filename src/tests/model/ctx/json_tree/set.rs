@@ -182,6 +182,6 @@ macro_tests!(
 			JsonTreeKey::Key("key".to_string())
 		],
 		JsonTree::Value(JsonValue::Int(1)),
-		JsonTreeError::KeyNotFound(JsonTreeKey::Key("nonexistent".to_string()))
-	)
+		JsonTreeError::KeyNotFound(JsonTreeKey::Key("nonexistent".to_string())),
+	),
 );

@@ -36,7 +36,7 @@
 macro_rules! macro_tests {
 	(
 		$ft:ident,
-		$(($test_name:ident, $($ex:expr),*)),*
+		$(($test_name:ident, $($ex:expr),* $(,)? )),* $(,)?
 	) => {
 		$(
 			#[test]
