@@ -5,7 +5,7 @@ mod utils;
 #[cfg(test)]
 mod tests;
 
-use model::ctx::Ctx;
+use model::ctx;
 
 pub trait CodeInterpreter: for<'a> From<&'a str> {
 	type Output;
@@ -13,12 +13,13 @@ pub trait CodeInterpreter: for<'a> From<&'a str> {
 
 	type LexerCode;
 	type ParserCode;
+	type Ctx;
 
 	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::Error>;
 	fn new_parser() -> impl Parser<Self::LexerCode, Self::ParserCode, Self::Error>;
-	fn new_interpreter() -> impl Interpreter<Self::ParserCode, Self::Output, Self::Error>;
+	fn new_interpreter(ctx: &mut Self::Ctx) -> impl Interpreter<Self::ParserCode, Self::Output, Self::Error>;
 
 	fn lex(code: &str) -> Result<Self::LexerCode, Self::Error> {
 		Self::new_lexer().lex(code)
@@ -28,39 +29,41 @@ pub trait CodeInterpreter: for<'a> From<&'a str> {
 		Self::new_parser().parse(code)
 	}
 
-	fn interpret(code: Self::ParserCode) -> Result<Self::Output, Self::Error> {
-		Self::new_interpreter().interpret(code)
+	fn interpret(ctx: &mut Self::Ctx, code: Self::ParserCode) -> Result<Self::Output, Self::Error> {
+		Self::new_interpreter(ctx).interpret(code)
 	}
 
-	fn run(&self, code: &str) -> Result<Self::Output, Self::Error> {
-		let lexed = Self::lex(code)?;
-		let parsed = Self::parse(lexed)?;
-		Self::interpret(parsed)
-	}
+	fn run(&mut self, code: &str) -> Result<Self::Output, Self::Error>;
 }
 
 type OsmiaError = String;
 
 /// Default osmia template engine API.
-pub struct Osmia<'ctx> {
-	#[allow(dead_code)]
-	ctx: std::cell::RefCell<&'ctx mut Ctx>,
+pub struct Osmia {
+	ctx: ctx::Ctx,
 }
 
-impl<'ctx> Osmia<'ctx> {
-	pub fn new(ctx: &'ctx mut Ctx) -> Self {
+impl Osmia {
+	fn new(ctx: ctx::Ctx) -> Self {
 		Self {
-			ctx: std::cell::RefCell::new(ctx),
+			ctx,
 		}
 	}
 }
 
-impl CodeInterpreter for Osmia<'_> {
+impl Default for Osmia {
+	fn default() -> Self {
+		Self::new(ctx::Ctx::Object(std::collections::HashMap::new())) // TODO
+	}
+}
+
+impl CodeInterpreter for Osmia {
 	type Output = OsmiaOutput;
 	type Error = String;
 
 	type LexerCode = LexerCode;
 	type ParserCode = ParserCode;
+	type Ctx = ctx::Ctx;
 
 	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::Error> {
 		OsmiaLexer::osmia()
@@ -70,12 +73,18 @@ impl CodeInterpreter for Osmia<'_> {
 		OsmiaParser::new()
 	}
 
-	fn new_interpreter() -> impl Interpreter<Self::ParserCode, Self::Output, Self::Error> {
-		OsmiaInterpreter::new()
+	fn new_interpreter(ctx: &mut Self::Ctx) -> impl Interpreter<Self::ParserCode, Self::Output, Self::Error> {
+		OsmiaInterpreter::new(ctx)
+	}
+
+	fn run(&mut self, code: &str) -> Result<Self::Output, Self::Error> {
+		let lexed = Self::lex(code)?;
+		let parsed = Self::parse(lexed)?;
+		Self::interpret(&mut self.ctx, parsed)
 	}
 }
 
-impl From<&str> for Osmia<'_> {
+impl From<&str> for Osmia {
 	fn from(_: &str) -> Self {
 		todo!() // TODO
 		// Parse json str as ctx
@@ -193,21 +202,29 @@ impl Parser<LexerCode, ParserCode, OsmiaError> for OsmiaParser {
 }
 
 // Interpreter
+use std::cell::RefCell;
+
 type OsmiaOutput = String;
 
 pub trait Interpreter<I, T, E> {
 	fn interpret(&self, code: I) -> Result<T, E>;
 }
 
-struct OsmiaInterpreter;
+struct OsmiaInterpreter<'ctx> {
+	#[allow(dead_code)]
+	ctx: RefCell<&'ctx mut ctx::Ctx>,
+}
 
-impl OsmiaInterpreter {
-	pub fn new() -> Self {
-		Self
+
+impl<'ctx> OsmiaInterpreter<'ctx> {
+	pub fn new(ctx: &'ctx mut ctx::Ctx) -> Self {
+		Self {
+			ctx: std::cell::RefCell::new(ctx),
+		}
 	}
 }
 
-impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter {
+impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter<'_> {
 	#[allow(unused_variables)]
 	fn interpret(&self, code: ParserCode) -> Result<OsmiaOutput, OsmiaError> {
 		todo!() // TODO
