@@ -40,7 +40,7 @@ pub type LexerCode = Vec<String>;
 /// comparison     → bitshift ( ( ">" | ">=" | "<" | "<=" ) bitshift )*
 /// bitshift       → term ( ( ">>" | "<<" ) term )*
 /// term           → factor ( ( "-" | "+" ) factor )*
-/// factor         → unary ( ( "/" | "*" ) unary )*
+/// factor         → unary ( ( "/" | "*" | "%" ) unary )*
 /// unary          → ( "!" | "-" | "+" )* method_call
 /// method_call    → primary ( "?" call )*
 /// primary        → literal | call | array | object | grouping
