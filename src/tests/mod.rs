@@ -2,7 +2,9 @@ mod model;
 
 use crate::Osmia;
 use crate::CodeInterpreter;
-use crate::ctx::Ctx;
+use crate::types::{
+	Ctx,
+};
 
 #[allow(dead_code)]
 #[cfg(test)]

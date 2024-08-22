@@ -18,5 +18,3 @@ pub enum JsonValue {
 	Bool(bool),
 	Null,
 }
-
-pub type Ctx = JsonTree<String, JsonValue>;
