@@ -1,4 +1,4 @@
 pub mod ctx;
 mod interpreter;
-mod lexer;
+pub mod lexer;
 mod parser;
