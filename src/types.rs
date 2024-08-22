@@ -54,6 +54,15 @@ pub type LexerCode = Vec<String>;
 /// object         → "{" ( object_entry ( "," object_entry )* )? "}"
 /// object_entry   → expression ":" expression
 /// grouping       → "(" expression ")"
+///
+/// identifier     → alpha ( alpha | digit )*
+/// alpha          → [a-zA-Z_]
+/// digit          → [0-9]
+/// int            → digit+
+/// float          → int "." int
+/// boolean        → "true" | "false"
+/// null           → "null"
+/// string         → '"' ( [^"] )* '"'
 /// ```
 pub type ParserCode = String;
 
