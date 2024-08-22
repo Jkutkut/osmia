@@ -16,7 +16,7 @@ pub type LexerCode = Vec<String>;
 /// evaluation     → "{{" expression "}}"
 /// print          → "{{" "print" expression "}}"
 /// comment        → "{{" "#" expression "}}"
-/// assign         → "{{" identifier "=" expression "}}"
+/// assign         → "{{" variable "=" expression "}}"
 /// if             → "{{" "if" conditional ( elseif )* ( else )? "{{" "fi" "}}"
 /// elseif         → "{{" "elseif" conditional
 /// else           → "{{" "else" block
