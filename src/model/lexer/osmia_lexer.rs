@@ -22,7 +22,7 @@ impl<'a> OsmiaLexer<'a> {
 impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
 	#[allow(unused_variables)]
 	fn lex(&self, code: &str) -> Result<LexerCode, OsmiaError> {
-		todo!() // TODO
-		// Lex code
+		// TODO Lex code
+		Err("Not implemented".into())
 	}
 }

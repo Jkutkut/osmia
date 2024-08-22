@@ -1,5 +1,7 @@
+use crate::model::lexer::Token;
+
 /// TODO
-pub type LexerCode = Vec<String>;
+pub type LexerCode = Vec<Token>;
 
 /// Parsing documentation: // TODO
 ///
