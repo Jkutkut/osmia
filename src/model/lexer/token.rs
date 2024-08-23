@@ -85,6 +85,24 @@ pub enum Token {
 	Question,
 }
 
+impl Token {
+	pub fn new_raw(s: &str) -> Self {
+		Self::Raw(s.to_string())
+	}
+
+	pub fn new_str(s: &str) -> Self {
+		Self::Str(s.to_string())
+	}
+
+	pub fn new_alpha(s: &str) -> Self {
+		Self::Alpha(s.to_string())
+	}
+
+	pub fn new_int(s: &str) -> Self {
+		Self::Int(s.to_string())
+	}
+}
+
 macro_rules! impl_token_traits {
 	(
 		$( $variant:ident <=> $str_value:expr $(,)? ),*
@@ -126,7 +144,7 @@ macro_rules! impl_token_traits {
 
 impl_token_traits!(
 	// File
-	NewLine <=> "\n",
+	NewLine <=> "\\n",
 	Eof <=> "Eof",
 
 	// Delimiters
