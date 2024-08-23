@@ -39,6 +39,9 @@ fn test(
 		_ => ()
 	};
 	// Parsing
+	if let (None, None) = (&parsed, &execution) {
+		return;
+	}
 	let mut parsed_code = None;
 	if let Some(tokens) = lexed_code {
 		println!("- Parsing lexed code...");
