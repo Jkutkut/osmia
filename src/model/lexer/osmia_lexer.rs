@@ -51,8 +51,17 @@ impl<'a> LexerScanner<'a> {
 }
 
 impl<'a> LexerScanner<'a> {
-	fn error(&self, msg: String) -> Result<LexerCode, String> {
-		Err(format!("Line {}: {}", self.current_line, msg))
+	fn error(&self, msg: String) -> String {
+		if cfg!(debug_assertions) {
+			format!(
+				"Line {}: {}\nTokens: {:?}",
+				self.current_line, msg,
+				self.tokens
+			)
+		}
+		else {
+			format!("Line {}: {}", self.current_line, msg)
+		}
 	}
 
 	fn code_left(&self) -> bool {
@@ -161,22 +170,22 @@ impl<'a> LexerScanner<'a> { // TODO move to public impl block
 			}
 			else {
 				while self.code_left() && self.current().is_ascii_whitespace() {
-					if self.current() == b'\n' {
-						self.consume_new_line();
-					}
-					else {
+					if self.current() != b'\n' {
 						self.advance();
 					}
+					self.consume_new_line();
 				}
 				self.consume_end_delimiter();
-				self.consume_token()?;
+				if self.in_stmt {
+					self.consume_token()?;
+				}
 			}
 		}
 		if self.in_stmt {
-			return self.error(format!(
+			return Err(self.error(format!(
 				"Unexpected end of statement. Expected '{}'",
 				self.end_delimiter
-			));
+			)));
 		}
 		self.tokens.push(Token::Eof);
 		Ok(self.tokens.clone())

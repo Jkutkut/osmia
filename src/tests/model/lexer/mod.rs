@@ -28,6 +28,8 @@ fn lexer_test_fail(
 	match lexer.lex(code) {
 		Ok(t) => panic!("Should fail but gave: {:?}", t),
 		Err(err) => {
+			println!("Error: {}", err);
+			println!("Expected piece: {}", piece_error);
 			assert!(err.to_lowercase().contains(piece_error));
 		}
 	}

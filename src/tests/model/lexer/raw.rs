@@ -19,11 +19,21 @@ macro_tests!(
 	(stmt_start_02,"\n{{}}",vec![Token::NewLine,Token::StmtStart,Token::StmtEnd]),
 	(stmt_start_03,"{{\n\n\t      \n  }}",vec![Token::StmtStart,Token::NewLine,Token::NewLine,Token::NewLine,Token::StmtEnd]),
 	(stmt_start_04,"{{}}\n",vec![Token::StmtStart,Token::StmtEnd,Token::NewLine]),
+	(stmt_start_05,"This is a {{}} block with {{}}{{}} {{}} multiple blocks",vec![
+		Token::new_raw("This is a "),
+		Token::StmtStart, Token::StmtEnd,
+		Token::new_raw(" block with "),
+		Token::StmtStart, Token::StmtEnd,
+		Token::StmtStart, Token::StmtEnd,
+		Token::new_raw(" "),
+		Token::StmtStart, Token::StmtEnd,
+		Token::new_raw(" multiple blocks")
+	]),
 );
 
 macro_tests!(
 	lexer_test_fail,
 	(invalid_stmt_start_01,"{{\n\n\t      \n  ", "}}"),
-	// (invalid_stmt_start_02,"{{ {", "}}"),
-	// (invalid_stmt_start_03,"{{ }", "}}"),
+	(invalid_stmt_start_02,"{{ {", "}}"),
+	(invalid_stmt_start_03,"{{ }", "}}"),
 );
