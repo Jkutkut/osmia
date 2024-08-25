@@ -1,6 +1,7 @@
 mod token;
 mod raw;
 mod number;
+mod simple_token;
 
 use crate::macro_tests;
 use crate::model::lexer::{

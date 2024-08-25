@@ -168,6 +168,32 @@ impl<'a> LexerScanner<'a> {
 			return Ok(());
 		}
 		// TODO implement
+		{
+			let special_tokens = ["..."];
+			for special_token in special_tokens {
+				if self.consume(special_token) {
+					self.tokens.push(Token::try_from(special_token).unwrap());
+					return Ok(());
+				}
+			}
+			let mut pieces: Vec<String> = Vec::new();
+			if self.current_index() + 1 < self.code.len() {
+				pieces.push(self.pick_string(
+					self.current_index(), self.current_index() + 2
+				).unwrap());
+			}
+			pieces.push((self.current() as char).to_string());
+			for piece in pieces {
+				match Token::try_from(piece.as_str()) {
+					Err(_) => (),
+					Ok(token) => {
+						self.consume(piece.as_str());
+						self.tokens.push(token);
+						return Ok(());
+					}
+				}
+			}
+		}
 		if self.current().is_ascii_digit() {
 			let mut nbr = self.consume_int()?;
 			if self.code_left() && self.current() == b'.' {
