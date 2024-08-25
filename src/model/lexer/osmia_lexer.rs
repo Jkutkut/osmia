@@ -50,17 +50,25 @@ impl<'a> LexerScanner<'a> {
 	}
 }
 
+use crate::utils::code_trace;
 impl<'a> LexerScanner<'a> {
 	fn error(&self, msg: String) -> String {
+		let code_str: String = self.code.iter().map(|b| *b as char).collect();
 		if cfg!(debug_assertions) {
-			format!(
-				"Line {}: {}\nTokens: {:?}",
-				self.current_line, msg,
-				self.tokens
+			code_trace(
+				&code_str, self.current_index(),
+				&format!(
+					"Line {}: {}\nTokens: {:?}",
+					self.current_line, msg,
+					self.tokens
+				)
 			)
 		}
 		else {
-			format!("Line {}: {}", self.current_line, msg)
+			code_trace(
+				&code_str, self.current_index(),
+				&format!("Line {}: {}", self.current_line, msg)
+			)
 		}
 	}
 
