@@ -33,6 +33,14 @@ macro_tests!(
 		Token::Colon, Token::SemiColon,
 		Token::Spread, Token::Question,
 	]),
+	(keyword_tokens, "print assign fn return if elseif else fi while for in continue break done true false null", vec![
+		Token::Print, Token::Assign,
+		Token::Function, Token::Return,
+		Token::If, Token::ElseIf, Token::Else, Token::Fi,
+		Token::While, Token::For, Token::In,
+		Token::Continue, Token::Break, Token::Done,
+		Token::Bool(true), Token::Bool(false), Token::Null
+	]),
 );
 
 macro_tests!(

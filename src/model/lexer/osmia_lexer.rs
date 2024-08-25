@@ -195,6 +195,12 @@ impl<'a> LexerScanner<'a> {
 			("#", Token::Comment), (",", Token::Comma), (":", Token::Colon),
 			(";", Token::SemiColon), ("?", Token::Question),
 			("^", Token::BitXor),
+			("print", Token::Print), ("assign", Token::Assign),
+			("fn", Token::Function), ("return", Token::Return),
+			("if", Token::If), ("elseif", Token::ElseIf), ("else", Token::Else), ("fi", Token::Fi),
+			("while", Token::While), ("for", Token::For), ("in", Token::In),
+			("continue", Token::Continue), ("break", Token::Break), ("done", Token::Done),
+			("true", Token::Bool(true)), ("false", Token::Bool(false)), ("null", Token::Null),
 		]) {
 			return Ok(());
 		}
