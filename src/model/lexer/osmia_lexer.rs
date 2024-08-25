@@ -199,13 +199,32 @@ impl<'a> LexerScanner<'a> {
 			if self.code_left() && self.current() == b'.' {
 				self.advance();
 				let frac = self.consume_int()?;
-				println!("Frac: {}", frac);
 				if self.code_left() && self.current() == b'.' {
 					return Err(self.error("Unexpected dot in float number".to_string()));
 				}
 				nbr = format!("{}.{}", nbr, frac);
 			}
 			self.tokens.push(Token::Number(nbr));
+		}
+		else if "\"'".contains(self.current() as char) {
+			let start = self.current_index();
+			let delim = self.current();
+			loop {
+				self.advance();
+				self.consume_new_line();
+				if !self.code_left() || self.current() == delim {
+					break;
+				}
+			}
+			if self.current() != delim {
+				return Err(self.error(format!(
+					"Unexpected end of string. Expected {:?}",
+					delim
+				)));
+			}
+			self.advance();
+			let content = self.pick_string(start, self.current_index());
+			self.tokens.push(Token::Str(content.unwrap()));
 		}
 		else {
 			return Err(self.error(format!(
