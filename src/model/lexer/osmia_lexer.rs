@@ -91,9 +91,13 @@ impl<'a> LexerScanner<'a> {
 		self.index += 1;
 	}
 
+	fn force_consume(&mut self, lex: &str) {
+		self.index += lex.len();
+	}
+
 	fn consume(&mut self, lex: &str) -> bool {
 		if self.is_match(lex) {
-			self.index += lex.len();
+			self.force_consume(lex);
 			true
 		} else {
 			false
@@ -163,72 +167,40 @@ impl<'a> LexerScanner<'a> {
 		}
 	}
 
+	fn consume_in_order(&mut self, options: Vec<(&str, Token)>) -> bool {
+		for (lex, token) in options {
+			if self.consume(lex) {
+				self.tokens.push(token);
+				return true;
+			}
+		}
+		false
+	}
+
 	fn consume_token(&mut self) -> Result<(), String> {
 		if !self.code_left() {
 			return Ok(());
 		}
-		// TODO implement
-		// keywords, bool, null
-		// alpha
-		{ // TODO refactor
-			let special_tokens = ["..."];
-			for special_token in special_tokens {
-				if self.consume(special_token) {
-					self.tokens.push(Token::try_from(special_token).unwrap());
-					return Ok(());
-				}
-			}
-			let mut pieces: Vec<String> = Vec::new();
-			if self.current_index() + 1 < self.code.len() {
-				pieces.push(self.pick_string(
-					self.current_index(), self.current_index() + 2
-				).unwrap());
-			}
-			pieces.push((self.current() as char).to_string());
-			for piece in pieces {
-				match Token::try_from(piece.as_str()) {
-					Err(_) => (),
-					Ok(token) => {
-						self.consume(piece.as_str());
-						self.tokens.push(token);
-						return Ok(());
-					}
-				}
-			}
+		if self.consume_in_order(vec![
+			("(", Token::ParentStart), (")", Token::ParentEnd), ("{", Token::ObjectStart),
+			("}", Token::ObjectEnd), ("[", Token::ArrayStart), ("]", Token::ArrayEnd),
+			("+", Token::Plus), ("-", Token::Minus), ("*", Token::Mult), ("/", Token::Div), ("%", Token::Mod),
+			("...", Token::Spread), (".", Token::Dot),
+			("==", Token::Equal), ("=", Token::AssignEq),
+			("<=", Token::LessEqual), ("<<", Token::BitShiftLeft), ("<", Token::Less),
+			(">=", Token::GreaterEqual), (">>", Token::BitShiftRight), (">", Token::Greater),
+			("!=", Token::NotEqual), ("!", Token::Not),
+			("&&", Token::And), ("&", Token::BitAnd),
+			("||", Token::Or), ("|", Token::BitOr),
+			("#", Token::Comment), (",", Token::Comma), (":", Token::Colon),
+			(";", Token::SemiColon), ("?", Token::Question),
+			("^", Token::BitXor),
+		]) {
+			return Ok(());
 		}
-		match self.current() {
-			b'0'..=b'9' => {
-				let mut nbr = self.consume_int()?;
-				if self.code_left() && self.current() == b'.' {
-					self.advance();
-					let frac = self.consume_int()?;
-					if self.code_left() && self.current() == b'.' {
-						return Err(self.error("Unexpected dot in float number".to_string()));
-					}
-					nbr = format!("{}.{}", nbr, frac);
-				}
-				self.tokens.push(Token::Number(nbr));
-			},
-			b'"' | b'\'' => {
-				let start = self.current_index();
-				let delim = self.current();
-				loop {
-					self.advance();
-					self.consume_new_line();
-					if !self.code_left() || self.current() == delim {
-						break;
-					}
-				}
-				if self.current() != delim {
-					return Err(self.error(format!(
-						"Unexpected end of string. Expected {:?}",
-						delim
-					)));
-				}
-				self.advance();
-				let content = self.pick_string(start, self.current_index());
-				self.tokens.push(Token::Str(content.unwrap()));
-			},
+		match self.current() as char {
+			'0'..='9' => self.consume_number()?,
+			'"' | '\'' => self.consume_string()?,
 			_ => return Err(self.error(format!(
 				"Unexpected token at {:?}",
 				self.current() as char
@@ -245,6 +217,42 @@ impl<'a> LexerScanner<'a> {
 		Ok(self.pick_string(start, self.current_index()).ok_or(self.error(
 			"Expected numeric digits".to_string()
 		))?)
+	}
+
+	fn consume_number(&mut self) -> Result<(), String> {
+		let mut nbr = self.consume_int()?;
+		if self.code_left() && self.current() == b'.' {
+			self.advance();
+			let frac = self.consume_int()?;
+			if self.code_left() && self.current() == b'.' {
+				return Err(self.error("Unexpected dot in float number".to_string()));
+			}
+			nbr = format!("{}.{}", nbr, frac);
+		}
+		self.tokens.push(Token::Number(nbr));
+		Ok(())
+	}
+
+	fn consume_string(&mut self) -> Result<(), String> {
+		let start = self.current_index();
+		let delim = self.current();
+		loop {
+			self.advance();
+			self.consume_new_line();
+			if !self.code_left() || self.current() == delim {
+				break;
+			}
+		}
+		if self.current() != delim {
+			return Err(self.error(format!(
+				"Unexpected end of string. Expected {:?}",
+				delim
+			)));
+		}
+		self.advance();
+		let content = self.pick_string(start, self.current_index());
+		self.tokens.push(Token::Str(content.unwrap()));
+		Ok(())
 	}
 }
 
