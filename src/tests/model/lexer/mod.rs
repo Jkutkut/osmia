@@ -1,5 +1,6 @@
 mod token;
 mod raw;
+mod number;
 
 use crate::macro_tests;
 use crate::model::lexer::{
@@ -9,14 +10,33 @@ use crate::model::lexer::{
 use crate::tests::test;
 
 #[cfg(test)]
+fn expr_wrap(
+	code: &mut String,
+	tokens: &mut Vec<Token>
+) {
+	code.insert_str(0, "{{");
+	code.push_str("}}");
+	tokens.insert(0, Token::StmtStart);
+	tokens.push(Token::StmtEnd);
+}
+
+#[cfg(test)]
 fn lexer_test(
 	code: &str,
-	tokens: Vec<Token>
+	mut tokens: Vec<Token>
 ) {
-	let mut new_tokens = Vec::new();
-	new_tokens.extend(tokens);
-	new_tokens.push(Token::Eof);
-	test(Some(code), Some(new_tokens), None, None);
+	tokens.push(Token::Eof);
+	test(Some(code), Some(tokens), None, None);
+}
+
+#[cfg(test)]
+fn lexer_expression_test(
+	code: &str,
+	mut tokens: Vec<Token>
+) {
+	let mut code = code.to_string();
+	expr_wrap(&mut code, &mut tokens);
+	lexer_test(&code, tokens);
 }
 
 #[cfg(test)]
@@ -33,4 +53,14 @@ fn lexer_test_fail(
 			assert!(err.to_lowercase().contains(piece_error));
 		}
 	}
+}
+
+#[cfg(test)]
+fn lexer_expression_test_fail(
+	code: &str,
+	piece_error: &str
+) {
+	let mut code = code.to_string();
+	expr_wrap(&mut code, &mut vec![]);
+	lexer_test_fail(&code, piece_error);
 }

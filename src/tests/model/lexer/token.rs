@@ -28,7 +28,8 @@ macro_tests! {
 	(debug_token_raw, Token::Raw("This is raw".to_string()), "Raw(This is raw)"),
 	(debug_token_str, Token::Str("string".to_string()), r#"Str("string")"#),
 	(debug_token_alpha, Token::Alpha("abcd".to_string()), "Alpha(abcd)"),
-	(debug_token_int, Token::Int("123".to_string()), "Int(123)"),
+	(debug_token_int, Token::Number("123".to_string()), "Number(123)"),
+	(debug_token_float, Token::Number("123.123".to_string()), "Number(123.123)"),
 	(debug_token_bool_true, Token::Bool(true), "Bool(true)"),
 	(debug_token_bool_false, Token::Bool(false), "Bool(false)"),
 }

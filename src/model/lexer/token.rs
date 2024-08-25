@@ -72,7 +72,7 @@ pub enum Token {
 	// Primary
 	Str(String),
 	Alpha(String),
-	Int(String),
+	Number(String),
 	Bool(bool),
 	Null,
 
@@ -98,8 +98,8 @@ impl Token {
 		Self::Alpha(s.to_string())
 	}
 
-	pub fn new_int(s: &str) -> Self {
-		Self::Int(s.to_string())
+	pub fn new_number(s: &str) -> Self {
+		Self::Number(s.to_string())
 	}
 }
 
@@ -134,7 +134,7 @@ macro_rules! impl_token_traits {
 				Raw(s) <=> "Raw({s})",
 				Str(s) <=> "Str({s:?})",
 				Alpha(s) <=> "Alpha({s})",
-				Int(s) <=> "Int({s})",
+				Number(s) <=> "Number({s})",
 				Bool(b) <=> "Bool({b})",
 				$( $variant <=> $str_value ),*
 			)

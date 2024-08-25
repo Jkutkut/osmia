@@ -164,8 +164,40 @@ impl<'a> LexerScanner<'a> {
 	}
 
 	fn consume_token(&mut self) -> Result<(), String> {
+		if !self.code_left() {
+			return Ok(());
+		}
 		// TODO implement
+		if self.current().is_ascii_digit() {
+			let mut nbr = self.consume_int()?;
+			if self.code_left() && self.current() == b'.' {
+				self.advance();
+				let frac = self.consume_int()?;
+				println!("Frac: {}", frac);
+				if self.code_left() && self.current() == b'.' {
+					return Err(self.error("Unexpected dot in float number".to_string()));
+				}
+				nbr = format!("{}.{}", nbr, frac);
+			}
+			self.tokens.push(Token::Number(nbr));
+		}
+		else {
+			return Err(self.error(format!(
+				"Unexpected token at {:?}",
+				self.current() as char
+			)));
+		}
 		Ok(())
+	}
+
+	fn consume_int(&mut self) -> Result<String, String> {
+		let start = self.current_index();
+		while self.code_left() && self.current().is_ascii_digit() {
+			self.advance();
+		}
+		Ok(self.pick_string(start, self.current_index()).ok_or(self.error(
+			"Expected numeric digits".to_string()
+		))?)
 	}
 }
 
