@@ -237,6 +237,7 @@ impl<'a> LexerScanner<'a> {
 		match self.current() as char {
 			'0'..='9' => self.consume_number()?,
 			'"' | '\'' => self.consume_string()?,
+			'_' | 'a'..='z' | 'A'..='Z' => self.consume_identifier()?,
 			_ => return Err(self.error(format!(
 				"Unexpected token at {:?}",
 				self.current() as char
@@ -291,4 +292,15 @@ impl<'a> LexerScanner<'a> {
 		Ok(())
 	}
 
+	fn consume_identifier(&mut self) -> Result<(), String> {
+		let start = self.current_index();
+		while self.code_left() && (self.current().is_ascii_alphanumeric() || self.current() == b'_') {
+			self.advance();
+		}
+		let content = self.pick_string(start, self.current_index());
+		self.tokens.push(Token::Alpha(content.ok_or(self.error(
+			"Expected identifier".to_string()
+		))?));
+		Ok(())
+	}
 }

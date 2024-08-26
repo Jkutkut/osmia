@@ -3,6 +3,7 @@ mod raw;
 mod number;
 mod simple_token;
 mod string;
+mod variable;
 
 use crate::macro_tests;
 use crate::model::lexer::{
