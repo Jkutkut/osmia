@@ -25,6 +25,7 @@ impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
 }
 
 use crate::model::lexer::Token;
+use crate::utils::code_trace;
 
 struct LexerScanner<'a> {
 	start_delimiter: &'a str,
@@ -48,9 +49,37 @@ impl<'a> LexerScanner<'a> {
 			in_stmt: false
 		}
 	}
+
+	pub fn scan(&mut self) -> Result<LexerCode, String> {
+		while self.code_left() {
+			if !self.in_stmt {
+				self.consume_raw();
+				self.consume_start_delimiter();
+			}
+			else {
+				while self.code_left() && self.current().is_ascii_whitespace() {
+					if self.current() != b'\n' {
+						self.advance();
+					}
+					self.consume_new_line();
+				}
+				self.consume_end_delimiter();
+				if self.in_stmt {
+					self.consume_token()?;
+				}
+			}
+		}
+		if self.in_stmt {
+			return Err(self.error(format!(
+				"Unexpected end of statement. Expected '{}'",
+				self.end_delimiter
+			)));
+		}
+		self.tokens.push(Token::Eof);
+		Ok(self.tokens.clone())
+	}
 }
 
-use crate::utils::code_trace;
 impl<'a> LexerScanner<'a> {
 	fn error(&self, msg: String) -> String {
 		let code_str: String = self.code.iter().map(|b| *b as char).collect();
@@ -91,17 +120,23 @@ impl<'a> LexerScanner<'a> {
 		self.index += 1;
 	}
 
-	fn force_consume(&mut self, lex: &str) {
-		self.index += lex.len();
-	}
-
 	fn consume(&mut self, lex: &str) -> bool {
 		if self.is_match(lex) {
-			self.force_consume(lex);
+			self.index += lex.len();
 			true
 		} else {
 			false
 		}
+	}
+
+	fn consume_in_order(&mut self, options: Vec<(&str, Token)>) -> bool {
+		for (lex, token) in options {
+			if self.consume(lex) {
+				self.tokens.push(token);
+				return true;
+			}
+		}
+		false
 	}
 
 	fn is_match(&self, expected: &str) -> bool {
@@ -165,16 +200,6 @@ impl<'a> LexerScanner<'a> {
 			self.in_stmt = false;
 			self.tokens.push(Token::StmtEnd);
 		}
-	}
-
-	fn consume_in_order(&mut self, options: Vec<(&str, Token)>) -> bool {
-		for (lex, token) in options {
-			if self.consume(lex) {
-				self.tokens.push(token);
-				return true;
-			}
-		}
-		false
 	}
 
 	fn consume_token(&mut self) -> Result<(), String> {
@@ -260,35 +285,5 @@ impl<'a> LexerScanner<'a> {
 		self.tokens.push(Token::Str(content.unwrap()));
 		Ok(())
 	}
-}
 
-impl<'a> LexerScanner<'a> { // TODO move to public impl block
-	pub fn scan(&mut self) -> Result<LexerCode, String> {
-		while self.code_left() {
-			if !self.in_stmt {
-				self.consume_raw();
-				self.consume_start_delimiter();
-			}
-			else {
-				while self.code_left() && self.current().is_ascii_whitespace() {
-					if self.current() != b'\n' {
-						self.advance();
-					}
-					self.consume_new_line();
-				}
-				self.consume_end_delimiter();
-				if self.in_stmt {
-					self.consume_token()?;
-				}
-			}
-		}
-		if self.in_stmt {
-			return Err(self.error(format!(
-				"Unexpected end of statement. Expected '{}'",
-				self.end_delimiter
-			)));
-		}
-		self.tokens.push(Token::Eof);
-		Ok(self.tokens.clone())
-	}
 }
