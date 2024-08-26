@@ -11,35 +11,35 @@ macro_tests!(
 		"= == != & | ^ > >= < <= << >> + - * / % ! && ||",
 		vec![
 			// Equality
-			Token::AssignEq, Token::Equal, Token::NotEqual,
+			Token::AssignEq, Token::Whitespace, Token::Equal, Token::Whitespace, Token::NotEqual, Token::Whitespace,
 			// Bitwise
-			Token::BitAnd, Token::BitOr, Token::BitXor,
+			Token::BitAnd, Token::Whitespace, Token::BitOr, Token::Whitespace, Token::BitXor, Token::Whitespace,
 			// Comparison
-			Token::Greater, Token::GreaterEqual,
-			Token::Less, Token::LessEqual,
+			Token::Greater, Token::Whitespace, Token::GreaterEqual, Token::Whitespace,
+			Token::Less, Token::Whitespace, Token::LessEqual, Token::Whitespace,
 			// Bitshift
-			Token::BitShiftLeft, Token::BitShiftRight,
+			Token::BitShiftLeft, Token::Whitespace, Token::BitShiftRight, Token::Whitespace,
 			// Arithmetic
-			Token::Plus, Token::Minus,
-			Token::Mult, Token::Div,
-			Token::Mod,
+			Token::Plus, Token::Whitespace, Token::Minus, Token::Whitespace,
+			Token::Mult, Token::Whitespace, Token::Div, Token::Whitespace,
+			Token::Mod, Token::Whitespace,
 			// Logical
-			Token::Not, Token::And, Token::Or,
+			Token::Not, Token::Whitespace, Token::And, Token::Whitespace, Token::Or,
 		]
 	),
 	(simple_tokens_special, "# . , : ; ... ?", vec![
-		Token::Comment,
-		Token::Dot, Token::Comma,
-		Token::Colon, Token::SemiColon,
-		Token::Spread, Token::Question,
+		Token::Comment, Token::Whitespace,
+		Token::Dot, Token::Whitespace, Token::Comma, Token::Whitespace,
+		Token::Colon, Token::Whitespace, Token::SemiColon, Token::Whitespace,
+		Token::Spread, Token::Whitespace, Token::Question,
 	]),
 	(keyword_tokens, "print assign fn return if elseif else fi while for in continue break done true false null", vec![
-		Token::Print, Token::Assign,
-		Token::Function, Token::Return,
-		Token::If, Token::ElseIf, Token::Else, Token::Fi,
-		Token::While, Token::For, Token::In,
-		Token::Continue, Token::Break, Token::Done,
-		Token::Bool(true), Token::Bool(false), Token::Null
+		Token::Print, Token::Whitespace, Token::Assign, Token::Whitespace,
+		Token::Function, Token::Whitespace, Token::Return, Token::Whitespace,
+		Token::If, Token::Whitespace, Token::ElseIf, Token::Whitespace, Token::Else, Token::Whitespace, Token::Fi, Token::Whitespace,
+		Token::While, Token::Whitespace, Token::For, Token::Whitespace, Token::In, Token::Whitespace,
+		Token::Continue, Token::Whitespace, Token::Break, Token::Whitespace, Token::Done, Token::Whitespace,
+		Token::Bool(true), Token::Whitespace, Token::Bool(false), Token::Whitespace, Token::Null
 	]),
 );
 

@@ -4,7 +4,7 @@ macro_tests!(
 	lexer_expression_test,
 	(string_01, r#""hello world""#, vec![Token::new_str(r#""hello world""#)]),
 	(string_02, r#"'hello world'"#, vec![Token::new_str(r#"'hello world'"#)]),
-	(string_03, r#"'hello' "world""#, vec![Token::new_str(r#"'hello'"#), Token::new_str(r#""world""#)]),
+	(string_03, r#"'hello' "world""#, vec![Token::new_str(r#"'hello'"#), Token::Whitespace, Token::new_str(r#""world""#)]),
 	(string_04, r#"'hello'"world""#, vec![Token::new_str(r#"'hello'"#), Token::new_str(r#""world""#)]),
 	(string_05, r#"''"#, vec![Token::new_str(r#"''"#)]),
 	(string_06, r#""""#, vec![Token::new_str(r#""""#)]),

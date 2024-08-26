@@ -37,10 +37,6 @@ macro_tests! {
 macro_tests! {
 	combined_test,
 
-	// File
-	(debug_token_newline, Token::NewLine,"\\n"),
-	(debug_token_eof, Token::Eof,"Eof"),
-
 	// Delimiters
 	(debug_token_stmtstart, Token::StmtStart, "{{"),
 	(debug_token_stmtend, Token::StmtEnd, "}}"),

@@ -57,9 +57,14 @@ impl<'a> LexerScanner<'a> {
 				self.consume_start_delimiter();
 			}
 			else {
+				let mut white_space = false;
 				while self.code_left() && self.current().is_ascii_whitespace() {
 					if self.current() != b'\n' {
 						self.advance();
+						if !white_space {
+							self.tokens.push(Token::Whitespace);
+							white_space = true;
+						}
 					}
 					self.consume_new_line();
 				}

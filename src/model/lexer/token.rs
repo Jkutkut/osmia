@@ -4,6 +4,7 @@ pub enum Token {
 
 	// File
 	NewLine,
+	Whitespace,
 	Eof,
 
 	// Delimiters
@@ -124,6 +125,11 @@ macro_rules! impl_token_traits {
 		crate::impl_debug!(
 			Token,
 			(
+				// File
+				NewLine <=> "\\n",
+				Whitespace <=> "space",
+				Eof <=> "Eof",
+
 				// Format values
 				StmtStart <=> "{{{{",
 				StmtEnd <=> "}}}}",
@@ -143,10 +149,6 @@ macro_rules! impl_token_traits {
 }
 
 impl_token_traits!(
-	// File
-	NewLine <=> "\\n",
-	Eof <=> "Eof",
-
 	// Delimiters
 	ParentStart <=> "(",
 	ParentEnd <=> ")",

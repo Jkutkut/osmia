@@ -17,7 +17,9 @@ macro_tests!(
 	(raw_text,"Hey there! This is a raw text chunk",vec![Token::new_raw("Hey there! This is a raw text chunk")]),
 	(stmt_start_01,"{{}}",vec![Token::StmtStart,Token::StmtEnd]),
 	(stmt_start_02,"\n{{}}",vec![Token::NewLine,Token::StmtStart,Token::StmtEnd]),
-	(stmt_start_03,"{{\n\n\t      \n  }}",vec![Token::StmtStart,Token::NewLine,Token::NewLine,Token::NewLine,Token::StmtEnd]),
+	(stmt_start_03,"{{\n\n\t      \n  }}",vec![
+		Token::StmtStart, Token::NewLine, Token::NewLine, Token::Whitespace, Token::NewLine, Token::StmtEnd
+	]),
 	(stmt_start_04,"{{}}\n",vec![Token::StmtStart,Token::StmtEnd,Token::NewLine]),
 	(stmt_start_05,"This is a {{}} block with {{}}{{}} {{}} multiple blocks",vec![
 		Token::new_raw("This is a "),
