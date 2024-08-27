@@ -29,9 +29,9 @@ fn test(
 			println!("- Comparing lexed code...");
 			println!("real    : {:?}", lexed_code);
 			println!("expected: {:?}", tokens);
-			for (real, expected) in lexed_code.iter().zip(tokens.iter()) {
+			for (i, (real, expected)) in lexed_code.iter().zip(tokens.iter()).enumerate() {
 				if real != expected {
-					println!("{:?} vs {:?}: They are not the same.", real, expected);
+					println!("{:?} vs {:?}: They are not the same. (idx: {})", real, expected, i);
 				}
 			}
 			assert_eq!(lexed_code, &tokens);
