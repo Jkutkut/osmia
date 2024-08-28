@@ -1,4 +1,5 @@
 mod model;
+mod osmia;
 mod utils;
 
 use crate::Osmia;

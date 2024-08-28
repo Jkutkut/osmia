@@ -1,0 +1,566 @@
+use super::*;
+
+macro_tests! {
+	test,
+	(
+		empty,
+		Some(""),
+		Some(vec![
+			Token::Eof
+		]),
+		None,
+		None // ""
+	),
+	(
+		just_text,
+		Some("Hello, world!"),
+		Some(vec![
+			Token::new_raw("Hello, world!"),
+			Token::Eof
+		]),
+		None,
+		None // "Hello, world!"
+	),
+	(
+		basic01,
+		Some("{{true}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Bool(true),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "true"
+	),
+	(
+		basic02,
+		Some("{{false}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Bool(false),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "false"
+	),
+	(
+		basic03,
+		Some("{{null}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Null,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "null"
+	),
+	(
+		basic04,
+		Some("{{42}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::new_number("42"),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "42"
+	),
+	(
+		basic05,
+		Some("{{3.14}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::new_number("3.14"),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "3.14"
+	),
+	(
+		basic06,
+		Some(r#"{{"Hello, world!"}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::new_str(r#""Hello, world!""#),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "Hello, world!"
+	),
+	(
+		basic07,
+		Some(r#"{{""}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::new_str(r#""""#),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // ""
+	),
+	(
+		basic08,
+		Some(r#"{{"\n"}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::new_str(r#""\n""#),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "\\n"
+	),
+	(
+		basic09,
+		Some(r#"{{"\r"}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::new_str(r#""\r""#),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "\\r"
+	),
+	(
+		basic10,
+		Some(r#"{{"\t"}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::new_str(r#""\t""#),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "\\t"
+	),
+	(
+		basic11,
+		Some("{{true}} {{false}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Bool(true),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::Bool(false),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "true false"
+	),
+	(
+		basic12,
+		Some("{{true}} {{false}} {{null}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Bool(true),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::Bool(false),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::Null,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "true false null"
+	),
+	(
+		basic13,
+		Some("{{true}} {{false}} {{42}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Bool(true),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::Bool(false),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::new_number("42"),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "true false 42"
+	),
+	(
+		basic14,
+		Some("{{true}} {{false}} {{3.14}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Bool(true),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::Bool(false),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::new_number("3.14"),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "true false 3.14"
+	),
+	(
+		basic15,
+		Some(r#"{{"Hello, world!"}} {{42}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::new_str(r#""Hello, world!""#),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::new_number("42"),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "Hello, world! 42"
+	),
+	(
+		precedence,
+		Some("{{ 1 + 2 * 3 / (4 + 5) == 1 + (2 * 3) % 9 == true }}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::new_number("1"),
+			Token::Whitespace,
+			Token::Plus,
+			Token::Whitespace,
+			Token::new_number("2"),
+			Token::Whitespace,
+			Token::Mult,
+			Token::Whitespace,
+			Token::new_number("3"),
+			Token::Whitespace,
+			Token::Div,
+			Token::Whitespace,
+			Token::ParentStart,
+			Token::new_number("4"),
+			Token::Whitespace,
+			Token::Plus,
+			Token::Whitespace,
+			Token::new_number("5"),
+			Token::ParentEnd,
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_number("1"),
+			Token::Whitespace,
+			Token::Plus,
+			Token::Whitespace,
+			Token::ParentStart,
+			Token::new_number("2"),
+			Token::Whitespace,
+			Token::Mult,
+			Token::Whitespace,
+			Token::new_number("3"),
+			Token::ParentEnd,
+			Token::Whitespace,
+			Token::Mod,
+			Token::Whitespace,
+			Token::new_number("9"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::Bool(true),
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None
+	),
+	(
+		unary_operators01,
+		Some("{{ !!true == !false == (-(-1) == 1) != false }}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::Not,
+			Token::Not,
+			Token::Bool(true),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::Not,
+			Token::Bool(false),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::ParentStart,
+			Token::Minus,
+			Token::ParentStart,
+			Token::Minus,
+			Token::new_number("1"),
+			Token::ParentEnd,
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_number("1"),
+			Token::ParentEnd,
+			Token::Whitespace,
+			Token::NotEqual,
+			Token::Whitespace,
+			Token::Bool(false),
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None
+	),
+	(
+		unary_operators02,
+		Some("{{ ---1 == -(-(-(1))) == -1 }}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::Minus,
+			Token::Minus,
+			Token::Minus,
+			Token::new_number("1"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::Minus,
+			Token::ParentStart,
+			Token::Minus,
+			Token::ParentStart,
+			Token::Minus,
+			Token::ParentStart,
+			Token::new_number("1"),
+			Token::ParentEnd,
+			Token::ParentEnd,
+			Token::ParentEnd,
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::Minus,
+			Token::new_number("1"),
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None
+	),
+	(
+		grouping,
+		Some("{{ (1 + 2) * 3 == 9 }}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ParentStart,
+			Token::new_number("1"),
+			Token::Whitespace,
+			Token::Plus,
+			Token::Whitespace,
+			Token::new_number("2"),
+			Token::ParentEnd,
+			Token::Whitespace,
+			Token::Mult,
+			Token::Whitespace,
+			Token::new_number("3"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_number("9"),
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None
+	),
+	(
+		json01,
+		Some("{{ [1, 2, 3] }}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::new_number("1"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("2"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("3"),
+			Token::ArrayEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "[1, 2, 3]"
+	),
+	(
+		json02,
+		Some(r#"{{ {"a": 1, "b": 2, "c": 3} }}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ObjectStart,
+			Token::new_str(r#""a""#),
+			Token::Colon,
+			Token::Whitespace,
+			Token::new_number("1"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_str(r#""b""#),
+			Token::Colon,
+			Token::Whitespace,
+			Token::new_number("2"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_str(r#""c""#),
+			Token::Colon,
+			Token::Whitespace,
+			Token::new_number("3"),
+			Token::ObjectEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "{a: 1, b: 2, c: 3}"
+	),
+	(
+		json03,
+		Some(r#"{{ [ 1, 2, {"foo": [3, 4]} ] }}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::Whitespace,
+			Token::new_number("1"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("2"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::ObjectStart,
+			Token::new_str(r#""foo""#),
+			Token::Colon,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::new_number("3"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("4"),
+			Token::ArrayEnd,
+			Token::ObjectEnd,
+			Token::Whitespace,
+			Token::ArrayEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "[1, 2, {foo: [3, 4]}]"
+	),
+	(
+		json04,
+		Some(r#"{{ {"bar": [4, 5, 6], "foo": [1, 2, 3]} }}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ObjectStart,
+			Token::new_str(r#""bar""#),
+			Token::Colon,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::new_number("4"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("5"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("6"),
+			Token::ArrayEnd,
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_str(r#""foo""#),
+			Token::Colon,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::new_number("1"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("2"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("3"),
+			Token::ArrayEnd,
+			Token::ObjectEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "{bar: [4, 5, 6], foo: [1, 2, 3]}"
+	),
+	(
+		json05,
+		Some(r#"{{ {} }} {{ [] }}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ObjectStart,
+			Token::ObjectEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::ArrayEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "{} []"
+	),
+	(
+		json06,
+		Some(r#"{{ { } }} {{ [ ] }}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ObjectStart,
+			Token::Whitespace,
+			Token::ObjectEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::Whitespace,
+			Token::ArrayEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		None // "{} []"
+	),
+}
