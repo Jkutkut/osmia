@@ -14,7 +14,7 @@ macro_tests!(
 			Token::StmtStart,
 			Token::Print,
 			Token::Whitespace,
-			Token::new_str(r#""Hello, world!""#),
+			Token::new_str("Hello, world!"),
 			Token::StmtEnd,
 			Token::StmtStart,
 			Token::Done,

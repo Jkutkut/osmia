@@ -159,18 +159,23 @@ impl<'a> LexerScanner<'a> {
 		true
 	}
 
-	fn pick_string(&self, start: usize, mut end: usize) -> Option<String> { if end > self.code.len() {
+	fn pick_string(&self, start: usize, mut end: usize) -> Option<String> {
+		if end > self.code.len() {
 			end = self.code.len() - 1;
 		}
 		if start > end {
 			panic!("Invalid range");
 		}
-		if start == end {
-			return None;
-		}
 		Some(String::from_utf8_lossy(
 			&self.code[start..end]
 		).to_string())
+	}
+
+	fn pick_non_empty_string(&self, start: usize, end: usize) -> Option<String> {
+		match self.pick_string(start, end)? {
+			s if s.is_empty() => None,
+			s => Some(s)
+		}
 	}
 }
 
@@ -180,7 +185,7 @@ impl<'a> LexerScanner<'a> {
 		while self.code_left() && !self.is_match(self.start_delimiter) && self.current() != b'\n' {
 			self.advance();
 		}
-		if let Some(content) = self.pick_string(start, self.current_index()) {
+		if let Some(content) = self.pick_non_empty_string(start, self.current_index()) {
 			self.tokens.push(Token::Raw(content));
 		}
 		self.consume_new_line();
@@ -252,7 +257,7 @@ impl<'a> LexerScanner<'a> {
 		while self.code_left() && self.current().is_ascii_digit() {
 			self.advance();
 		}
-		Ok(self.pick_string(start, self.current_index()).ok_or(self.error(
+		Ok(self.pick_non_empty_string(start, self.current_index()).ok_or(self.error(
 			"Expected numeric digits".to_string()
 		))?)
 	}
@@ -288,7 +293,7 @@ impl<'a> LexerScanner<'a> {
 			)));
 		}
 		self.advance();
-		let content = self.pick_string(start, self.current_index());
+		let content = self.pick_string(start + 1, self.current_index() - 1);
 		self.tokens.push(Token::Str(content.unwrap()));
 		Ok(())
 	}

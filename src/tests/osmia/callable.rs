@@ -111,7 +111,7 @@ macro_tests!(
 			Token::ParentEnd,
 			Token::Comma,
 			Token::Whitespace,
-			Token::new_str(r#""hello""#),
+			Token::new_str("hello"),
 			Token::ParentEnd,
 			Token::Whitespace,
 			Token::StmtEnd,
@@ -270,7 +270,7 @@ macro_tests!(
 		Some(vec![
 			Token::StmtStart,
 			Token::Whitespace,
-			Token::new_str(r#""str""#),
+			Token::new_str("str"),
 			Token::Question,
 			Token::new_alpha("foo"),
 			Token::ParentStart,

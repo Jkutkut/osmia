@@ -86,7 +86,7 @@ macro_tests! {
 		Some(r#"{{"Hello, world!"}}"#),
 		Some(vec![
 			Token::StmtStart,
-			Token::new_str(r#""Hello, world!""#),
+			Token::new_str("Hello, world!"),
 			Token::StmtEnd,
 			Token::Eof
 		]),
@@ -98,7 +98,7 @@ macro_tests! {
 		Some(r#"{{""}}"#),
 		Some(vec![
 			Token::StmtStart,
-			Token::new_str(r#""""#),
+			Token::new_str(""),
 			Token::StmtEnd,
 			Token::Eof
 		]),
@@ -107,39 +107,49 @@ macro_tests! {
 	),
 	(
 		basic08,
-		Some(r#"{{"\n"}}"#),
+		Some("{{\"\\n\"}}{{\"\n\"}}"),
 		Some(vec![
 			Token::StmtStart,
-			Token::new_str(r#""\n""#),
+			Token::new_str("\\n"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::NewLine,
+			Token::new_str("\n"),
 			Token::StmtEnd,
 			Token::Eof
 		]),
 		None,
-		None // "\\n"
+		None // "\\n\n"
 	),
 	(
 		basic09,
-		Some(r#"{{"\r"}}"#),
+		Some("{{\"\\r\"}}{{\"\r\"}}"),
 		Some(vec![
 			Token::StmtStart,
-			Token::new_str(r#""\r""#),
+			Token::new_str("\\r"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::new_str("\r"),
 			Token::StmtEnd,
 			Token::Eof
 		]),
 		None,
-		None // "\\r"
+		None // "\\r\r"
 	),
 	(
 		basic10,
-		Some(r#"{{"\t"}}"#),
+		Some("{{\"\\t\"}}{{\"\t\"}}"),
 		Some(vec![
 			Token::StmtStart,
-			Token::new_str(r#""\t""#),
+			Token::new_str("\\t"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::new_str("\t"),
 			Token::StmtEnd,
 			Token::Eof
 		]),
 		None,
-		None // "\\t"
+		None // "\\t\t"
 	),
 	(
 		basic11,
@@ -222,7 +232,7 @@ macro_tests! {
 		Some(r#"{{"Hello, world!"}} {{42}}"#),
 		Some(vec![
 			Token::StmtStart,
-			Token::new_str(r#""Hello, world!""#),
+			Token::new_str("Hello, world!"),
 			Token::StmtEnd,
 			Token::new_raw(" "),
 			Token::StmtStart,
@@ -418,19 +428,19 @@ macro_tests! {
 			Token::StmtStart,
 			Token::Whitespace,
 			Token::ObjectStart,
-			Token::new_str(r#""a""#),
+			Token::new_str("a"),
 			Token::Colon,
 			Token::Whitespace,
 			Token::new_number("1"),
 			Token::Comma,
 			Token::Whitespace,
-			Token::new_str(r#""b""#),
+			Token::new_str("b"),
 			Token::Colon,
 			Token::Whitespace,
 			Token::new_number("2"),
 			Token::Comma,
 			Token::Whitespace,
-			Token::new_str(r#""c""#),
+			Token::new_str("c"),
 			Token::Colon,
 			Token::Whitespace,
 			Token::new_number("3"),
@@ -457,7 +467,7 @@ macro_tests! {
 			Token::Comma,
 			Token::Whitespace,
 			Token::ObjectStart,
-			Token::new_str(r#""foo""#),
+			Token::new_str("foo"),
 			Token::Colon,
 			Token::Whitespace,
 			Token::ArrayStart,
@@ -483,7 +493,7 @@ macro_tests! {
 			Token::StmtStart,
 			Token::Whitespace,
 			Token::ObjectStart,
-			Token::new_str(r#""bar""#),
+			Token::new_str("bar"),
 			Token::Colon,
 			Token::Whitespace,
 			Token::ArrayStart,
@@ -497,7 +507,7 @@ macro_tests! {
 			Token::ArrayEnd,
 			Token::Comma,
 			Token::Whitespace,
-			Token::new_str(r#""foo""#),
+			Token::new_str("foo"),
 			Token::Colon,
 			Token::Whitespace,
 			Token::ArrayStart,
