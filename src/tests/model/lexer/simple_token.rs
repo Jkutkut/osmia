@@ -30,7 +30,7 @@ macro_tests!(
 	(simple_tokens_special, "# . , : ; ... ?", vec![
 		Token::Comment, Token::Whitespace,
 		Token::Dot, Token::Whitespace, Token::Comma, Token::Whitespace,
-		Token::Colon, Token::Whitespace, Token::SemiColon, Token::Whitespace,
+		Token::Colon, Token::Whitespace, Token::Semicolon, Token::Whitespace,
 		Token::Spread, Token::Whitespace, Token::Question,
 	]),
 	(keyword_tokens, "print assign fn return if elseif else fi while for in continue break done true false null", vec![

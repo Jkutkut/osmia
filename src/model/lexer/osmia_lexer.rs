@@ -223,7 +223,7 @@ impl<'a> LexerScanner<'a> {
 			("&&", Token::And), ("&", Token::BitAnd),
 			("||", Token::Or), ("|", Token::BitOr),
 			("#", Token::Comment), (",", Token::Comma), (":", Token::Colon),
-			(";", Token::SemiColon), ("?", Token::Question),
+			(";", Token::Semicolon), ("?", Token::Question),
 			("^", Token::BitXor),
 			("print", Token::Print), ("assign", Token::Assign),
 			("fn", Token::Function), ("return", Token::Return),

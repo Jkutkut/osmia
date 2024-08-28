@@ -107,7 +107,7 @@ macro_tests! {
 	(debug_token_dot, Token::Dot,"."),
 	(debug_token_comma, Token::Comma,","),
 	(debug_token_colon, Token::Colon,":"),
-	(debug_token_semicolon, Token::SemiColon,";"),
+	(debug_token_semicolon, Token::Semicolon,";"),
 	(debug_token_spread, Token::Spread,"..."),
 	(debug_token_question, Token::Question,"?")
 }

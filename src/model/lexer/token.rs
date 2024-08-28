@@ -81,7 +81,7 @@ pub enum Token {
 	Dot,
 	Comma,
 	Colon,
-	SemiColon,
+	Semicolon,
 	Spread,
 	Question,
 }
@@ -215,7 +215,7 @@ impl_token_traits!(
 	Dot <=> ".",
 	Comma <=> ",",
 	Colon <=> ":",
-	SemiColon <=> ";",
+	Semicolon <=> ";",
 	Spread <=> "...",
 	Question <=> "?",
 );
