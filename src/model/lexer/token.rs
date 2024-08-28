@@ -84,6 +84,7 @@ pub enum Token {
 	Semicolon,
 	Spread,
 	Question,
+	Arrow,
 }
 
 impl Token {
@@ -218,4 +219,5 @@ impl_token_traits!(
 	Semicolon <=> ";",
 	Spread <=> "...",
 	Question <=> "?",
+	Arrow <=> "=>"
 );

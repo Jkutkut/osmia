@@ -109,5 +109,6 @@ macro_tests! {
 	(debug_token_colon, Token::Colon,":"),
 	(debug_token_semicolon, Token::Semicolon,";"),
 	(debug_token_spread, Token::Spread,"..."),
-	(debug_token_question, Token::Question,"?")
+	(debug_token_question, Token::Question,"?"),
+	(debug_token_arrow, Token::Arrow, "=>"),
 }

@@ -216,6 +216,7 @@ impl<'a> LexerScanner<'a> {
 			("}", Token::ObjectEnd), ("[", Token::ArrayStart), ("]", Token::ArrayEnd),
 			("+", Token::Plus), ("-", Token::Minus), ("*", Token::Mult), ("/", Token::Div), ("%", Token::Mod),
 			("...", Token::Spread), (".", Token::Dot),
+			("=>", Token::Arrow),
 			("==", Token::Equal), ("=", Token::AssignEq),
 			("<=", Token::LessEqual), ("<<", Token::BitShiftLeft), ("<", Token::Less),
 			(">=", Token::GreaterEqual), (">>", Token::BitShiftRight), (">", Token::Greater),
