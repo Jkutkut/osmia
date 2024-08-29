@@ -1,6 +1,7 @@
 use crate::model::lexer::Token;
+use crate::model::code::Stmt;
 
-/// TODO
+/// The type of the lexer's output.
 pub type LexerCode = Vec<Token>;
 
 /// Parsing documentation: // TODO
@@ -66,7 +67,7 @@ pub type LexerCode = Vec<Token>;
 /// null           → "null"
 /// string         → '"' ( [^"] )* '"'
 /// ```
-pub type ParserCode = String;
+pub type ParserCode = Stmt;
 
 /// TODO
 pub type OsmiaOutput = String;
