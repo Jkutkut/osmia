@@ -8,7 +8,7 @@ macro_tests! {
 		Some(vec![
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(Block::new())),
 		None // ""
 	),
 	(
@@ -18,7 +18,7 @@ macro_tests! {
 			Token::new_raw("Hello, world!"),
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Raw("Hello, world!".to_string())),
 		None // "Hello, world!"
 	),
 	(

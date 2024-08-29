@@ -5,8 +5,11 @@ macro_tests!(
 	(
 		identity,
 		Some("Hello, world!"),
-		None,
-		None,
+		Some(vec![
+			Token::new_raw("Hello, world!"),
+			Token::Eof
+		]),
+		Some(Stmt::Raw("Hello, world!".to_string())),
 		None
 		// None,
 		// "Hello, world!"
