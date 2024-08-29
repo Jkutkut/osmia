@@ -17,6 +17,9 @@ use model::ctx;
 use model::lexer::{
 	Lexer, OsmiaLexer,
 };
+use model::parser::{
+	Parser, OsmiaParser,
+};
 
 pub trait CodeInterpreter: for<'a> From<&'a str> {
 	type Output;
@@ -97,28 +100,6 @@ impl From<&str> for Osmia {
 	fn from(_: &str) -> Self {
 		todo!() // TODO
 		// Parse json str as ctx
-	}
-}
-
-// Parser
-
-pub trait Parser<I, T, E> {
-	fn parse(&self, code: I) -> Result<T, E>;
-}
-
-pub struct OsmiaParser;
-
-impl OsmiaParser {
-	pub fn new() -> Self {
-		Self
-	}
-}
-
-impl Parser<LexerCode, ParserCode, OsmiaError> for OsmiaParser {
-	#[allow(unused_variables)]
-	fn parse(&self, code: LexerCode) -> Result<ParserCode, OsmiaError> {
-		todo!() // TODO
-		// Parse code
 	}
 }
 
