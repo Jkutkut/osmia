@@ -231,12 +231,6 @@ impl<'a> LexerScanner<'a> {
 			("#", Token::Comment), (",", Token::Comma), (":", Token::Colon),
 			(";", Token::Semicolon), ("?", Token::Question),
 			("^", Token::BitXor),
-			("print", Token::Print), ("assign", Token::Assign),
-			("fn", Token::Function), ("return", Token::Return),
-			("if", Token::If), ("elseif", Token::ElseIf), ("else", Token::Else), ("fi", Token::Fi),
-			("while", Token::While), ("for", Token::For), ("in", Token::In),
-			("continue", Token::Continue), ("break", Token::Break), ("done", Token::Done),
-			("true", Token::Bool(true)), ("false", Token::Bool(false)), ("null", Token::Null),
 		]) {
 			return Ok(());
 		}
@@ -303,10 +297,29 @@ impl<'a> LexerScanner<'a> {
 		while self.code_left() && (self.current().is_ascii_alphanumeric() || self.current() == b'_') {
 			self.advance();
 		}
-		let content = self.pick_string(start, self.current_index());
-		self.tokens.push(Token::Alpha(content.ok_or(self.error(
+		let content: String = self.pick_string(start, self.current_index()).ok_or(self.error(
 			"Expected identifier".to_string()
-		))?));
+		))?;
+		self.tokens.push(match content.as_str() {
+			"print" => Token::Print,
+			"assign" => Token::Assign,
+			"fn" => Token::Function,
+			"return" => Token::Return,
+			"if" => Token::If,
+			"elseif" => Token::ElseIf,
+			"else" => Token::Else,
+			"fi" => Token::Fi,
+			"while" => Token::While,
+			"for" => Token::For,
+			"in" => Token::In,
+			"continue" => Token::Continue,
+			"break" => Token::Break,
+			"done" => Token::Done,
+			"true" => Token::Bool(true),
+			"false" => Token::Bool(false),
+			"null" => Token::Null,
+			_ => Token::Alpha(content)
+		});
 		Ok(())
 	}
 }
