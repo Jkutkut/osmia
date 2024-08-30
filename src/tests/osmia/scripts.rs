@@ -147,7 +147,22 @@ macro_tests!(
 	(
 		complex_value01,
 		Some("Hello, {{name.first}} {{name.last}}!"),
-		None,
+		Some(vec![
+			Token::new_raw("Hello, "),
+			Token::StmtStart,
+			Token::new_alpha("name"),
+			Token::Dot,
+			Token::new_alpha("first"),
+			Token::StmtEnd,
+			Token::new_raw(" "),
+			Token::StmtStart,
+			Token::new_alpha("name"),
+			Token::Dot,
+			Token::new_alpha("last"),
+			Token::StmtEnd,
+			Token::new_raw("!"),
+			Token::Eof
+		]),
 		None,
 		None
 		// Some(r#"

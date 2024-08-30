@@ -61,3 +61,9 @@ doc_release:
 
 clean:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust clean
+
+prepare_commit:
+	${EDITOR} Cargo.toml
+	make test
+	git add Cargo.toml Cargo.lock; git add -N .;
+	git add -p

@@ -30,7 +30,7 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Expr(Expr::Bool(true))),
 		None // "true"
 	),
 	(
@@ -42,7 +42,7 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Expr(Expr::Bool(false))),
 		None // "false"
 	),
 	(
@@ -54,7 +54,7 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Expr(Expr::Null)),
 		None // "null"
 	),
 	(
@@ -66,7 +66,7 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Expr(Expr::Int(42))),
 		None // "42"
 	),
 	(
@@ -78,7 +78,7 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Expr(Expr::Float(3.14))),
 		None // "3.14"
 	),
 	(
@@ -90,7 +90,7 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Expr(Expr::new_str("Hello, world!"))),
 		None // "Hello, world!"
 	),
 	(
@@ -102,7 +102,7 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Expr(Expr::new_str(""))),
 		None // ""
 	),
 	(
@@ -118,7 +118,10 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::Expr(Expr::new_str("\\n")),
+			Stmt::Expr(Expr::new_str("\n")),
+		].into())),
 		None // "\\n\n"
 	),
 	(
@@ -133,7 +136,10 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::Expr(Expr::new_str("\\r")),
+			Stmt::Expr(Expr::new_str("\r")),
+		].into())),
 		None // "\\r\r"
 	),
 	(
@@ -148,7 +154,10 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::Expr(Expr::new_str("\\t")),
+			Stmt::Expr(Expr::new_str("\t")),
+		].into())),
 		None // "\\t\t"
 	),
 	(
@@ -164,7 +173,11 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::Expr(Expr::Bool(true)),
+			Stmt::new_raw(" "),
+			Stmt::Expr(Expr::Bool(false)),
+		].into())),
 		None // "true false"
 	),
 	(
@@ -184,7 +197,13 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::Expr(Expr::Bool(true)),
+			Stmt::new_raw(" "),
+			Stmt::Expr(Expr::Bool(false)),
+			Stmt::new_raw(" "),
+			Stmt::Expr(Expr::Null),
+		].into())),
 		None // "true false null"
 	),
 	(
@@ -204,7 +223,13 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::Expr(Expr::Bool(true)),
+			Stmt::new_raw(" "),
+			Stmt::Expr(Expr::Bool(false)),
+			Stmt::new_raw(" "),
+			Stmt::Expr(Expr::Int(42)),
+		].into())),
 		None // "true false 42"
 	),
 	(
@@ -240,7 +265,11 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::Expr(Expr::new_str("Hello, world!")),
+			Stmt::new_raw(" "),
+			Stmt::Expr(Expr::Int(42)),
+		].into())),
 		None // "Hello, world! 42"
 	),
 	(

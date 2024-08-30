@@ -24,3 +24,9 @@ impl From<Block> for Vec<Stmt> {
 		block.stmts
 	}
 }
+
+impl From<Vec<Stmt>> for Block {
+	fn from(stmts: Vec<Stmt>) -> Self {
+		Self { stmts }
+	}
+}

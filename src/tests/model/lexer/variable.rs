@@ -38,6 +38,16 @@ macro_tests!(
 		Token::new_alpha("foo"), Token::Dot, Token::new_alpha("bar"),
 		Token::Whitespace, Token::new_alpha("baz")
 	]),
+	(inner_keyword_01, "if_", vec![Token::new_alpha("if_")]),
+	(inner_keyword_02, "while_", vec![Token::new_alpha("while_")]),
+	(inner_keyword_03, "for_", vec![Token::new_alpha("for_")]),
+	(inner_keyword_04, "_in", vec![Token::new_alpha("_in")]),
+	(inner_keyword_05, "_if", vec![Token::new_alpha("_if")]),
+	(inner_keyword_06, "_while", vec![Token::new_alpha("_while")]),
+	(inner_keyword_07, "_for", vec![Token::new_alpha("_for")]),
+	(inner_keyword_08, "_if_", vec![Token::new_alpha("_if_")]),
+	(inner_keyword_09, "_while_", vec![Token::new_alpha("_while_")]),
+	(inner_keyword_10, "_for_", vec![Token::new_alpha("_for_")]),
 );
 
 macro_tests!(
