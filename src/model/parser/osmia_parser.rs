@@ -5,6 +5,7 @@ use crate::types::{
 	OsmiaError,
 };
 use crate::model::code::*;
+use crate::model::ctx::JsonTreeKey;
 
 pub struct OsmiaParser;
 
@@ -290,17 +291,18 @@ impl OsmiaParserImpl {
 	}
 
 	fn obj(&mut self) -> Result<Variable, OsmiaError> {
-		self.arr() // TODO
-		// .
-		// self.identifier() // TODO
-		// *
+		let mut var = self.arr()?;
+		while self.match_and_advance(&[Token::Dot]) {
+			var.push(self.identifier()?)
+		}
+		Ok(var)
 	}
 
 	fn arr(&mut self) -> Result<Variable, OsmiaError> {
-		self.identifier() // TODO
 		// [
 		// self.expr() // TODO
 		// ]*
+		Ok(Variable::from_vec(vec![self.identifier()?]))
 	}
 
 	fn array(&mut self) -> Result<Expr, OsmiaError> {
@@ -331,7 +333,7 @@ impl OsmiaParserImpl {
 		// )
 	}
 
-	fn identifier(&mut self) -> Result<Variable, OsmiaError> {
+	fn identifier(&mut self) -> Result<JsonTreeKey<String>, OsmiaError> {
 		let key = match self.advance() {
 			Token::Alpha(s) => s.as_str().into(),
 			_ => return Err(self.error(&format!(
@@ -339,6 +341,6 @@ impl OsmiaParserImpl {
 				self.get_previous()
 			)))
 		};
-		Ok(Variable::from_vec(vec![key]))
+		Ok(key)
 	}
 }

@@ -33,7 +33,9 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Variable(strarr2var(vec![
+			"foo", "bar"
+		])).into()),
 		None
 		// r#"{"foo": {"bar": "baz"}}"#,
 		// "baz"
@@ -42,20 +44,22 @@ macro_tests!(
 	),
 	(
 		variable03,
-		Some("{{ foo.bar.baz }}"),
+		Some("{{ foo._bar.baz }}"),
 		Some(vec![
 			Token::StmtStart,
 			Token::Whitespace,
 			Token::new_alpha("foo"),
 			Token::Dot,
-			Token::new_alpha("bar"),
+			Token::new_alpha("_bar"),
 			Token::Dot,
 			Token::new_alpha("baz"),
 			Token::Whitespace,
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Variable(strarr2var(vec![
+			"foo", "_bar", "baz"
+		])).into()),
 		None
 		// r#"{"foo": {"bar": {"baz": "qux"}}}"#,
 		// "qux"
