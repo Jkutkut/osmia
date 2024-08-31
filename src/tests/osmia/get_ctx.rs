@@ -13,7 +13,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Variable(strarr2var(vec!["foo"])).into()),
 		None
 		// r#"{"foo": "bar"}"#,
 		// "bar"
@@ -199,5 +199,33 @@ macro_tests!(
 		None
 		// r#"{"foo": {"bar": "baz"}, "v": "bar"}"#,
 		// "baz"
+	),
+	(
+		advanced_variable_name01,
+		Some(r#"{{ foo123_bar }}{{_hidden123}}{{_1}}{{z_}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::new_alpha("foo123_bar"),
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::new_alpha("_hidden123"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::new_alpha("_1"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::new_alpha("z_"),
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		Some(Stmt::Block(vec![
+			Expr::Variable(strarr2var(vec!["foo123_bar"])).into(),
+			Expr::Variable(strarr2var(vec!["_hidden123"])).into(),
+			Expr::Variable(strarr2var(vec!["_1"])).into(),
+			Expr::Variable(strarr2var(vec!["z_"])).into()
+		].into())),
+		None
 	)
 );

@@ -249,7 +249,13 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Expr::Bool(true).into(),
+			Stmt::new_raw(" "),
+			Expr::Bool(false).into(),
+			Stmt::new_raw(" "),
+			Expr::Float(3.14).into(),
+		].into())),
 		None // "true false 3.14"
 	),
 	(

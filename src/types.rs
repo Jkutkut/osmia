@@ -65,7 +65,7 @@ pub type LexerCode = Vec<Token>;
 /// float          → int "." int
 /// boolean        → "true" | "false"
 /// null           → "null"
-/// string         → '"' ( [^"] )* '"'
+/// string         → '"' ( [^"] )* '"' | "'" ( [^'] )* "'"
 /// ```
 pub type ParserCode = Stmt;
 

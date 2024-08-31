@@ -17,3 +17,8 @@ use crate::macro_tests;
 use super::test;
 use crate::model::lexer::Token;
 use crate::model::code::*;
+
+#[cfg(test)]
+fn strarr2var(arr: Vec<&str>) -> Variable {
+	Variable::from_vec(arr.into_iter().map(|s| s.into()).collect())
+}

@@ -92,14 +92,25 @@ impl OsmiaParserImpl {
 			false => Err(error(self))
 		}
 	}
+
+	fn match_and_advance(&mut self, types: &[Token]) -> bool {
+		for token_type in types {
+			if self.check_current(token_type) {
+				self.advance();
+				return true
+			}
+		}
+		false
+	}
+
+	fn consume_while_match(&mut self, types: &[Token]) {
+		while self.match_and_advance(types) {}
+	}
 }
 
 impl OsmiaParserImpl {
-	fn consume_new_lines(&mut self) {
-		while !self.done() && self.check_current(&Token::NewLine) {
-			self.advance();
-			self.line += 1;
-		}
+	fn consume_new_lines(&mut self) { // TODO refactor
+		self.consume_while_match(&[Token::NewLine]);
 	}
 
 	fn block(&mut self) -> Result<Stmt, OsmiaError> {
@@ -134,13 +145,20 @@ impl OsmiaParserImpl {
 
 	fn stmt(&mut self, return_none_with: &Option<Vec<Token>>) -> Result<Option<Stmt>, OsmiaError> {
 		let stmt: Stmt = match self.get_current() {
-			_ => self.expr()?.into(),
+			_ => self.expr_stmt()?,
 		};
 		self.consume(
 			Token::StmtEnd,
 			|parser| parser.error(&format!("Expected '{:?}'", Token::StmtEnd))
 		)?;
 		Ok(Some(stmt))
+	}
+
+	fn expr_stmt(&mut self) -> Result<Stmt, OsmiaError> {
+		self.consume_while_match(&[Token::NewLine, Token::Whitespace]); // TODO newlines not counted
+		let stmt = self.expr()?.into();
+		self.consume_while_match(&[Token::NewLine, Token::Whitespace]); // TODO newlines not counted
+		Ok(stmt)
 	}
 
 	fn parameters(&mut self) -> Result<(), OsmiaError> { // TODO
@@ -162,7 +180,6 @@ impl OsmiaParserImpl {
 	}
 
 	fn expr(&mut self) -> Result<Expr, OsmiaError> {
-		self.consume_new_lines();
 		match self.get_current() {
 			Token::Function => self.lambda(),
 			_ => self.logic_or()
@@ -216,11 +233,13 @@ impl OsmiaParserImpl {
 	}
 
 	fn primary(&mut self) -> Result<Expr, OsmiaError> {
-		self.literal() // TODO
-		// self.call() // TODO
-		// self.array() // TODO
-		// self.object() // TODO
-		// self.grouping() // TODO
+		match self.get_current() {
+			Token::ArrayStart => self.array(),
+			Token::ObjectStart => self.object(),
+			Token::ParentStart => self.grouping(),
+			Token::Str(_) | Token::Number(_) | Token::Bool(_) | Token::Null => self.literal(),
+			_ => self.call(),
+		}
 	}
 
 	fn literal(&mut self) -> Result<Expr, OsmiaError> {
@@ -267,17 +286,17 @@ impl OsmiaParserImpl {
 	}
 
 	fn variable(&mut self) -> Result<Expr, OsmiaError> {
-		self.obj() // TODO
+		Ok(self.obj()?.into()) // TODO
 	}
 
-	fn obj(&mut self) -> Result<Expr, OsmiaError> {
+	fn obj(&mut self) -> Result<Variable, OsmiaError> {
 		self.arr() // TODO
 		// .
 		// self.identifier() // TODO
 		// *
 	}
 
-	fn arr(&mut self) -> Result<Expr, OsmiaError> {
+	fn arr(&mut self) -> Result<Variable, OsmiaError> {
 		self.identifier() // TODO
 		// [
 		// self.expr() // TODO
@@ -312,7 +331,14 @@ impl OsmiaParserImpl {
 		// )
 	}
 
-	fn identifier(&mut self) -> Result<Expr, OsmiaError> {
-		todo!() // TODO
+	fn identifier(&mut self) -> Result<Variable, OsmiaError> {
+		let key = match self.advance() {
+			Token::Alpha(s) => s.as_str().into(),
+			_ => return Err(self.error(&format!(
+				"Invalid identifier: {:?}",
+				self.get_previous()
+			)))
+		};
+		Ok(Variable::from_vec(vec![key]))
 	}
 }
