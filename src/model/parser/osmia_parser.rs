@@ -143,13 +143,84 @@ impl OsmiaParserImpl {
 		Ok(Some(stmt))
 	}
 
+	fn parameters(&mut self) -> Result<(), OsmiaError> { // TODO
+		todo!() // TODO
+		// self.parameter()
+		// ,
+		// self.parameter()
+		// *
+		// ...
+		// self.identifier()
+		// ?
+	}
+
+	fn parameter(&mut self) -> Result<(), OsmiaError> { // TODO
+		todo!() // TODO
+		// self.identifier()
+		// :
+		// self.expr()
+	}
+
 	fn expr(&mut self) -> Result<Expr, OsmiaError> {
 		self.consume_new_lines();
+		match self.get_current() {
+			Token::Function => self.lambda(),
+			_ => self.logic_or()
+		}
+	}
+
+	fn lambda(&mut self) -> Result<Expr, OsmiaError> {
+		todo!() // TODO
+	}
+
+	fn logic_or(&mut self) -> Result<Expr, OsmiaError> {
+		self.logic_and() // TODO
+	}
+
+	fn logic_and(&mut self) -> Result<Expr, OsmiaError> {
+		self.equality() // TODO
+	}
+
+	fn equality(&mut self) -> Result<Expr, OsmiaError> {
+		self.bitwise() // TODO
+	}
+
+	fn bitwise(&mut self) -> Result<Expr, OsmiaError> {
+		self.comparison() // TODO
+	}
+
+	fn comparison(&mut self) -> Result<Expr, OsmiaError> {
+		self.bitshift() // TODO
+	}
+
+	fn bitshift(&mut self) -> Result<Expr, OsmiaError> {
+		self.term() // TODO
+	}
+
+	fn term(&mut self) -> Result<Expr, OsmiaError> {
+		self.factor() // TODO
+	}
+
+	fn factor(&mut self) -> Result<Expr, OsmiaError> {
+		self.unary() // TODO
+	}
+
+	fn unary(&mut self) -> Result<Expr, OsmiaError> {
+		self.method_call() // TODO
+	}
+
+	fn method_call(&mut self) -> Result<Expr, OsmiaError> {
 		self.primary() // TODO
+		// if ?
+		// self.call() // TODO
 	}
 
 	fn primary(&mut self) -> Result<Expr, OsmiaError> {
-		self.literal()
+		self.literal() // TODO
+		// self.call() // TODO
+		// self.array() // TODO
+		// self.object() // TODO
+		// self.grouping() // TODO
 	}
 
 	fn literal(&mut self) -> Result<Expr, OsmiaError> {
@@ -178,5 +249,70 @@ impl OsmiaParserImpl {
 		};
 		self.advance();
 		Ok(expr)
+	}
+
+	fn call(&mut self) -> Result<Expr, OsmiaError> {
+		self.variable() // TODO
+		// if (
+		// self.arguments() // TODO
+		// )
+	}
+
+	fn arguments(&mut self) -> Result<Expr, OsmiaError> {
+		// self.expr()
+		// ,
+		// self.expr()
+		// *
+		todo!() // TODO
+	}
+
+	fn variable(&mut self) -> Result<Expr, OsmiaError> {
+		self.obj() // TODO
+	}
+
+	fn obj(&mut self) -> Result<Expr, OsmiaError> {
+		self.arr() // TODO
+		// .
+		// self.identifier() // TODO
+		// *
+	}
+
+	fn arr(&mut self) -> Result<Expr, OsmiaError> {
+		self.identifier() // TODO
+		// [
+		// self.expr() // TODO
+		// ]*
+	}
+
+	fn array(&mut self) -> Result<Expr, OsmiaError> {
+		// [ // TODO
+		// self.expr() // TODO
+		// *
+		// ]
+		todo!() // TODO
+	}
+
+	fn object(&mut self) -> Result<Expr, OsmiaError> {
+		// { // TODO
+		// self.object_entry() // TODO
+		// *
+		// }
+		todo!() // TODO
+	}
+
+	fn object_entry(&mut self) -> Result<Expr, OsmiaError> {
+		self.expr() // TODO
+		// :
+		// self.expr() // TODO
+	}
+
+	fn grouping(&mut self) -> Result<Expr, OsmiaError> {
+		// (
+		self.expr() // TODO
+		// )
+	}
+
+	fn identifier(&mut self) -> Result<Expr, OsmiaError> {
+		todo!() // TODO
 	}
 }
