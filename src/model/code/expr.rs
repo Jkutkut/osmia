@@ -6,6 +6,7 @@ pub enum Expr {
 	Grouping(Grouping),
 	Unary(Unary),
 
+	Array(Array),
 	Variable(Variable),
 
 	Float(f64),
@@ -36,6 +37,12 @@ impl From<Grouping> for Expr {
 impl From<Unary> for Expr {
 	fn from(u: Unary) -> Self {
 		Self::Unary(u)
+	}
+}
+
+impl From<Array> for Expr {
+	fn from(a: Array) -> Self {
+		Self::Array(a)
 	}
 }
 

@@ -360,11 +360,25 @@ impl OsmiaParserImpl {
 	}
 
 	fn array(&mut self) -> Result<Expr, OsmiaError> {
-		// [ // TODO
-		// self.expr() // TODO
-		// *
-		// ]
-		todo!() // TODO
+		self.consume(Token::ArrayStart, |parser| parser.error(&format!(
+			"Expected start of array, got: {:?}",
+			parser.get_current()
+		)))?;
+		let mut arr = vec![];
+		self.consume_whitespaces();
+		if !self.match_and_advance(&[Token::ArrayEnd]) {
+			arr.push(self.expr()?.into());
+			self.consume_whitespaces();
+			while !self.match_and_advance(&[Token::ArrayEnd]) {
+				self.consume(Token::Comma, |parser| parser.error(&format!(
+					"Expected comma, got: {:?}",
+					parser.get_current()
+				)))?;
+				self.consume_whitespaces();
+				arr.push(self.expr()?.into());
+			}
+		}
+		Ok(Array::new(arr).into())
 	}
 
 	fn object(&mut self) -> Result<Expr, OsmiaError> {

@@ -555,7 +555,11 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Array(Array::new(vec![
+			Expr::Int(1).into(),
+			Expr::Int(2).into(),
+			Expr::Int(3).into()
+		])).into()),
 		None // "[1, 2, 3]"
 	),
 	(
