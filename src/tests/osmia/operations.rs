@@ -1976,7 +1976,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(9223372036854775807), Token::Plus, Expr::Int(1)).into()),
 		None // r#"{}"#
 	),
 	(
@@ -2013,7 +2013,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(9223372036854775807), Token::Mult, Expr::Int(2)).into()),
 		None // r#"{}"#
 	),
 	(

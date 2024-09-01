@@ -289,17 +289,21 @@ impl OsmiaParserImpl {
 			Token::Bool(b) => Expr::Bool(*b),
 			Token::Str(s) => Expr::Str(s.to_string()),
 			Token::Number(n) => {
-				if let Ok(i) = n.parse::<i64>() {
-					Expr::Int(i)
-				}
-				else if let Ok(f) = n.parse::<f64>() {
-					Expr::Float(f)
-				}
-				else {
-					return Err(self.error(&format!(
-						"Could not parse number: {}",
-						n
-					)));
+				match n.contains('.') {
+					true => match n.parse::<f64>() {
+						Ok(f) => Expr::Float(f),
+						Err(_) => return Err(self.error(&format!(
+							"Could not parse float: {}",
+							n
+						)))
+					},
+					false => match n.parse::<i64>() {
+						Ok(i) => Expr::Int(i),
+						Err(_) => return Err(self.error(&format!(
+							"Could not parse int: {}",
+							n
+						)))
+					}
 				}
 			},
 			_ => return Err(self.error(&format!(
