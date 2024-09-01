@@ -13,7 +13,9 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		Some(Expr::Variable(strarr2var(vec!["foo"])).into()),
+		Some(Expr::Variable(Variable::from_vec(vec![
+			JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+		])).into()),
 		None
 		// r#"{"foo": "bar"}"#,
 		// "bar"
@@ -33,8 +35,9 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		Some(Expr::Variable(strarr2var(vec![
-			"foo", "bar"
+		Some(Expr::Variable(Variable::from_vec(vec![
+			JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+			JsonTreeKeyExpression::JsonTreeKey("bar".into()),
 		])).into()),
 		None
 		// r#"{"foo": {"bar": "baz"}}"#,
@@ -57,8 +60,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		Some(Expr::Variable(strarr2var(vec![
-			"foo", "_bar", "baz"
+		Some(Expr::Variable(Variable::from_vec(vec![
+			JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+			JsonTreeKeyExpression::JsonTreeKey("_bar".into()),
+			JsonTreeKeyExpression::JsonTreeKey("baz".into()),
 		])).into()),
 		None
 		// r#"{"foo": {"bar": {"baz": "qux"}}}"#,
@@ -87,7 +92,17 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("arr".into()),
+				JsonTreeKeyExpression::Expr(Expr::Int(0)),
+			])).into(),
+			Stmt::new_raw(" "),
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("arr".into()),
+				JsonTreeKeyExpression::Expr(Expr::Int(1)),
+			])).into()
+		].into())),
 		None
 		// r#"{"arr": ["foo", "bar"]}"#,
 		// "foo bar"
@@ -119,7 +134,19 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("arr".into()),
+				JsonTreeKeyExpression::Expr(Expr::Int(0)),
+				JsonTreeKeyExpression::JsonTreeKey("name".into()),
+			])).into(),
+			Stmt::new_raw(" "),
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("arr".into()),
+				JsonTreeKeyExpression::Expr(Expr::Int(1)),
+				JsonTreeKeyExpression::JsonTreeKey("surname".into()),
+			])).into(),
+		].into())),
 		None
 		// r#"{"arr": [{"name": "foo"}, {"name": "bar", "surname": "baz"}]}"#,
 		// "foo baz"
@@ -142,7 +169,12 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Variable(Variable::from_vec(vec![
+			JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+			JsonTreeKeyExpression::Expr(Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("v".into())
+			]))),
+		])).into()),
 		None
 		// r#"{"foo": [1, 2, 3], "v": 1}"#,
 		// "2"
@@ -161,7 +193,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Variable(Variable::from_vec(vec![
+			JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+			JsonTreeKeyExpression::Expr(Expr::new_str("bar")),
+		])).into()),
 		None
 		// r#"{"foo": {"bar": "baz"}, "v": 1}"#,
 		// "baz"
@@ -180,7 +215,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Variable(Variable::from_vec(vec![
+			JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+			JsonTreeKeyExpression::Expr(Expr::new_str("bar")),
+		])).into()),
 		None
 		// r#"{"foo": {"bar": "baz"}, "v": 1}"#,
 		// "baz"
@@ -199,7 +237,12 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Variable(Variable::from_vec(vec![
+			JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+			JsonTreeKeyExpression::Expr(Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("v".into()),
+			]))),
+		])).into()),
 		None
 		// r#"{"foo": {"bar": "baz"}, "v": "bar"}"#,
 		// "baz"
@@ -225,10 +268,18 @@ macro_tests!(
 			Token::Eof
 		]),
 		Some(Stmt::Block(vec![
-			Expr::Variable(strarr2var(vec!["foo123_bar"])).into(),
-			Expr::Variable(strarr2var(vec!["_hidden123"])).into(),
-			Expr::Variable(strarr2var(vec!["_1"])).into(),
-			Expr::Variable(strarr2var(vec!["z_"])).into()
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("foo123_bar".into()),
+			])).into(),
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("_hidden123".into()),
+			])).into(),
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("_1".into()),
+			])).into(),
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("z_".into()),
+			])).into(),
 		].into())),
 		None
 	)

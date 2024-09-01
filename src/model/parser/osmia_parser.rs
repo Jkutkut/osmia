@@ -293,16 +293,21 @@ impl OsmiaParserImpl {
 	fn obj(&mut self) -> Result<Variable, OsmiaError> {
 		let mut var = self.arr()?;
 		while self.match_and_advance(&[Token::Dot]) {
-			var.push(self.identifier()?)
+			var.push(self.identifier()?.into())
 		}
 		Ok(var)
 	}
 
 	fn arr(&mut self) -> Result<Variable, OsmiaError> {
-		// [
-		// self.expr() // TODO
-		// ]*
-		Ok(Variable::from_vec(vec![self.identifier()?]))
+		let mut arr = vec![self.identifier()?.into()];
+		while self.match_and_advance(&[Token::ArrayStart]) {
+			arr.push(self.expr()?.into());
+			self.consume(Token::ArrayEnd, |parser| parser.error(&format!(
+				"Expected end of array, got: {:?}",
+				parser.get_current()
+			)))?;
+		}
+		Ok(Variable::from_vec(arr))
 	}
 
 	fn array(&mut self) -> Result<Expr, OsmiaError> {
