@@ -329,7 +329,43 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			new_binary(
+				new_binary(
+					Expr::Int(1).into(),
+					Token::Plus,
+					new_binary(
+						new_binary(
+							Expr::Int(2).into(),
+							Token::Mult,
+							Expr::Int(3).into()
+						),
+						Token::Div,
+						Grouping::new(new_binary(
+							Expr::Int(4).into(),
+							Token::Plus,
+							Expr::Int(5).into()
+						)).into()
+					).into()
+				).into(),
+				Token::Equal,
+				new_binary(
+					Expr::Int(1).into(),
+					Token::Plus,
+					new_binary(
+						Grouping::new(new_binary(
+							Expr::Int(2).into(),
+							Token::Mult,
+							Expr::Int(3).into()
+						)).into(),
+						Token::Mod,
+						Expr::Int(9).into()
+					).into()
+				).into()
+			).into(),
+			Token::Equal,
+			Expr::Bool(true).into()
+		).into()),
 		None
 	),
 	(
@@ -431,7 +467,19 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			new_binary(
+				Grouping::new(new_binary(
+					Expr::Int(1).into(),
+					Token::Plus,
+					Expr::Int(2).into()
+				)).into(),
+				Token::Mult,
+				Expr::Int(3).into()
+			).into(),
+			Token::Equal,
+			Expr::Int(9).into()
+		).into()),
 		None
 	),
 	(

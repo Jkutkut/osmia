@@ -95,6 +95,9 @@ impl OsmiaParserImpl {
 	}
 
 	fn match_and_advance(&mut self, types: &[Token]) -> bool {
+		if self.done() {
+			return false;
+		}
 		for token_type in types {
 			if self.check_current(token_type) {
 				self.advance();
@@ -107,11 +110,42 @@ impl OsmiaParserImpl {
 	fn consume_while_match(&mut self, types: &[Token]) {
 		while self.match_and_advance(types) {}
 	}
+
+	fn binary(
+		&mut self,
+		ops: &[Token],
+		side: fn(&mut Self) -> Result<Expr, OsmiaError>,
+	) -> Result<Expr, OsmiaError> {
+		let mut expr = side(self)?;
+		self.consume_whitespaces();
+		while self.match_and_advance(ops) {
+			let op: Option<BinaryOp> = self.get_previous().into();
+			self.consume_whitespaces();
+			expr = Binary::new(
+				expr,
+				op.unwrap(),
+				side(self)?,
+			).into();
+			self.consume_whitespaces();
+		}
+		Ok(expr)
+	}
 }
 
 impl OsmiaParserImpl {
-	fn consume_new_lines(&mut self) { // TODO refactor
+	fn consume_new_lines(&mut self) {
 		self.consume_while_match(&[Token::NewLine]);
+	}
+
+	fn consume_whitespaces(&mut self) {
+		while !self.done() {
+			match self.get_current() {
+				Token::Whitespace => (),
+				Token::NewLine => self.line += 1,
+				_ => return
+			};
+			self.advance();
+		}
 	}
 
 	fn block(&mut self) -> Result<Stmt, OsmiaError> {
@@ -150,15 +184,18 @@ impl OsmiaParserImpl {
 		};
 		self.consume(
 			Token::StmtEnd,
-			|parser| parser.error(&format!("Expected '{:?}'", Token::StmtEnd))
+			|parser| parser.error(&format!(
+				"Expected '{:?}', got '{:?}'",
+				Token::StmtEnd, parser.get_current()
+			))
 		)?;
 		Ok(Some(stmt))
 	}
 
 	fn expr_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume_while_match(&[Token::NewLine, Token::Whitespace]); // TODO newlines not counted
+		self.consume_whitespaces();
 		let stmt = self.expr()?.into();
-		self.consume_while_match(&[Token::NewLine, Token::Whitespace]); // TODO newlines not counted
+		self.consume_whitespaces();
 		Ok(stmt)
 	}
 
@@ -192,35 +229,38 @@ impl OsmiaParserImpl {
 	}
 
 	fn logic_or(&mut self) -> Result<Expr, OsmiaError> {
-		self.logic_and() // TODO
+		self.binary(&[Token::Or], |parser| parser.logic_and())
 	}
 
 	fn logic_and(&mut self) -> Result<Expr, OsmiaError> {
-		self.equality() // TODO
+		self.binary(&[Token::And], |parser| parser.equality())
 	}
 
 	fn equality(&mut self) -> Result<Expr, OsmiaError> {
-		self.bitwise() // TODO
+		self.binary(&[Token::Equal, Token::NotEqual], |parser| parser.bitwise())
 	}
 
 	fn bitwise(&mut self) -> Result<Expr, OsmiaError> {
-		self.comparison() // TODO
+		self.binary(&[Token::BitAnd, Token::BitOr, Token::BitXor], |parser| parser.comparison())
 	}
 
 	fn comparison(&mut self) -> Result<Expr, OsmiaError> {
-		self.bitshift() // TODO
+		self.binary(
+			&[Token::Greater, Token::GreaterEqual, Token::Less, Token::LessEqual],
+			|parser| parser.bitshift(),
+		)
 	}
 
 	fn bitshift(&mut self) -> Result<Expr, OsmiaError> {
-		self.term() // TODO
+		self.binary(&[Token::BitShiftLeft, Token::BitShiftRight], |parser| parser.term())
 	}
 
 	fn term(&mut self) -> Result<Expr, OsmiaError> {
-		self.factor() // TODO
+		self.binary(&[Token::Plus, Token::Minus], |parser| parser.factor())
 	}
 
 	fn factor(&mut self) -> Result<Expr, OsmiaError> {
-		self.unary() // TODO
+		self.binary(&[Token::Mult, Token::Div, Token::Mod], |parser| parser.unary())
 	}
 
 	fn unary(&mut self) -> Result<Expr, OsmiaError> {
@@ -333,9 +373,18 @@ impl OsmiaParserImpl {
 	}
 
 	fn grouping(&mut self) -> Result<Expr, OsmiaError> {
-		// (
-		self.expr() // TODO
-		// )
+		self.consume(Token::ParentStart, |parser| parser.error(&format!(
+			"Expected start of grouping, got: {:?}",
+			parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		let expr = self.expr()?;
+		self.consume_whitespaces();
+		self.consume(Token::ParentEnd, |parser| parser.error(&format!(
+			"Expected end of grouping, got: {:?}",
+			parser.get_current()
+		)))?;
+		Ok(Grouping::new(expr).into())
 	}
 
 	fn identifier(&mut self) -> Result<JsonTreeKey<String>, OsmiaError> {

@@ -17,3 +17,8 @@ use crate::macro_tests;
 use super::test;
 use crate::model::lexer::Token;
 use crate::model::code::*;
+
+fn new_binary(left: Expr, op: Token, right: Expr) -> Expr {
+	let op: Option<BinaryOp> = (&op).into();
+	Binary::new(left, op.unwrap(), right).into()
+}

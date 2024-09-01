@@ -3,16 +3,6 @@ use super::*;
 macro_tests!(
 	test,
 	(
-		static_template,
-		Some("hello world!"),
-		Some(vec![
-			Token::new_raw("hello world!"),
-			Token::Eof
-		]),
-		None,
-		None // "hello world!"
-	),
-	(
 		int01,
 		Some("{{ 1 + 2 }} {{ 1 - 2 }} {{ 3 * 5 }} {{ 3 / 5 }} {{ 3 % 5 }} {{ 7 && 5 }} {{ 7 || 5 }}"),
 		Some(vec![
@@ -87,7 +77,21 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Int(1), Token::Plus, Expr::Int(2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(1), Token::Minus, Expr::Int(2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Mult, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Div, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Mod, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(7), Token::And, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(7), Token::Or, Expr::Int(5)).into()
+		].into())),
 		None // "3 -1 15 0 3 true true"
 	),
 	(
@@ -135,7 +139,15 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Int(5), Token::And, Expr::Int(0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(0), Token::And, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(5), Token::Or, Expr::Int(0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(0), Token::Or, Expr::Int(5)).into()
+		].into())),
 		None // "false false true true"
 	),
 	(
@@ -213,7 +225,21 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Float(1.2), Token::Plus, Expr::Float(2.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(1.2), Token::Minus, Expr::Float(2.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(3.2), Token::Mult, Expr::Float(5.2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(3.2), Token::Div, Expr::Float(4.2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(3.2), Token::Mod, Expr::Float(5.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(7.2), Token::And, Expr::Float(5.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(7.0), Token::Or, Expr::Float(5.2)).into()
+		].into())),
 		None // "3.2 -0.8 16.64 0.7619047619047619 3.2 true true"
 	),
 	(
@@ -261,7 +287,15 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Float(5.0), Token::And, Expr::Float(0.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(0.0), Token::And, Expr::Float(5.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(5.0), Token::Or, Expr::Float(0.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(0.0), Token::Or, Expr::Float(5.0)).into()
+		].into())),
 		None // "false false true true"
 	),
 	(
@@ -329,7 +363,19 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Int(3), Token::Greater, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::GreaterEqual, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Less, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::LessEqual, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Equal, Expr::Int(5)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::NotEqual, Expr::Int(5)).into()
+		].into())),
 		None // "false false true true false true"
 	),
 	(
@@ -397,7 +443,19 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Float(3.0), Token::Greater, Expr::Float(5.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(3.0), Token::GreaterEqual, Expr::Float(5.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(3.0), Token::Less, Expr::Float(5.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(3.0), Token::LessEqual, Expr::Float(5.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(3.0), Token::Equal, Expr::Float(5.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(3.0), Token::NotEqual, Expr::Float(5.0)).into()
+		].into())),
 		None // "false false true true false true"
 	),
 	(
@@ -485,7 +543,23 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Int(1), Token::Plus, Expr::Float(2.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(1.0), Token::Plus, Expr::Int(2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(1), Token::Minus, Expr::Float(2.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(1.0), Token::Minus, Expr::Int(2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(1), Token::Mult, Expr::Float(2.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(1.0), Token::Mult, Expr::Int(2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(1), Token::Div, Expr::Float(2.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(1.0), Token::Div, Expr::Int(2)).into()
+		].into())),
 		None // "3 3 -1 -1 2 2 0.5 0.5"
 	),
 	(
@@ -533,7 +607,15 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Int(1), Token::Div, Expr::Int(2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(1.0), Token::Div, Expr::Int(2)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(1), Token::Div, Expr::Float(2.0)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Float(1.0), Token::Div, Expr::Float(2.0)).into()
+		].into())),
 		None // "0 0.5 0.5 0.5"
 	),
 	(
@@ -581,7 +663,15 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Bool(true), Token::And, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Bool(true), Token::And, Expr::Bool(false)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Bool(false), Token::And, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Bool(false), Token::And, Expr::Bool(false)).into()
+		].into())),
 		None // "true false false false"
 	),
 	(
@@ -629,7 +719,15 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Bool(true), Token::Or, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Bool(true), Token::Or, Expr::Bool(false)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Bool(false), Token::Or, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Bool(false), Token::Or, Expr::Bool(false)).into()
+		].into())),
 		None // "true true true false"
 	),
 	(
@@ -687,7 +785,19 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::new_str("hello"), Token::Plus, Expr::new_str(" world")).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::new_str("null: "), Token::Plus, Expr::Null).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::new_str("true: "), Token::Plus, Expr::Bool(true)).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::new_str("false: "), Token::Plus, Expr::Bool(false)).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::new_str("int: "), Token::Plus, Expr::Int(1)).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::new_str("float: "), Token::Plus, Expr::Float(1.1)).into(),
+		].into())),
 		None // "hello world,null: null,true: true,false: false,int: 1,float: 1.1"
 	),
 	(
@@ -735,7 +845,17 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Null, Token::Plus, Expr::new_str("null")).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::Bool(true), Token::Plus, Expr::new_str("true")).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::Bool(false), Token::Plus, Expr::new_str("false")).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::Int(1), Token::Plus, Expr::new_str("int")).into(),
+			Stmt::new_raw(","),
+			new_binary(Expr::Float(1.6), Token::Plus, Expr::new_str("float")).into(),
+		].into())),
 		None // "nullnull,truetrue,falsefalse,1int,1.6float"
 	),
 	(
@@ -863,7 +983,19 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Int(1), Token::Plus, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(1), Token::Plus, Expr::Bool(false)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(0), Token::Plus, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(0), Token::Plus, Expr::Bool(false)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Plus, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Plus, Expr::Bool(false)).into()
+		].into())),
 		None // "true true true false true true"
 	),
 	(
@@ -931,7 +1063,19 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_binary(Expr::Int(1), Token::Minus, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(1), Token::Minus, Expr::Bool(false)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(0), Token::Minus, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(0), Token::Minus, Expr::Bool(false)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Minus, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_binary(Expr::Int(3), Token::Minus, Expr::Bool(false)).into()
+		].into())),
 		None // "true false false true true false"
 	),
 	(
@@ -988,7 +1132,13 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			Grouping::new(
+				new_binary(Expr::Int(1), Token::Plus, Expr::Int(2)).into(),
+			).into(),
+			Token::Mult,
+			Expr::Int(3),
+		).into()),
 		None // "9"
 	),
 	(
@@ -1012,7 +1162,13 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			Expr::Int(1),
+			Token::Plus,
+			Grouping::new(
+				new_binary(Expr::Int(2), Token::Mult, Expr::Int(3)).into()
+			).into(),
+		).into()),
 		None // "7"
 	),
 	(
@@ -1042,7 +1198,15 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			Grouping::new(
+				new_binary(Expr::Int(1), Token::Plus, Expr::Int(2)).into(),
+			).into(),
+			Token::Mult,
+			Grouping::new(
+				new_binary(Expr::Int(3), Token::Plus, Expr::Int(4)).into()
+			).into(),
+		).into()),
 		None // "21"
 	),
 	(
@@ -1060,7 +1224,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Float(1.0), Token::Div, Expr::Float(0.0)).into()),
 		None // "inf"
 	),
 	(
@@ -1100,7 +1264,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("2 + 1 = "),
+			new_binary(Expr::Int(2), Token::Plus, Expr::Int(1)).into()
+		].into())),
 		None // "2 + 1 = 3"
 	),
 	(
@@ -1117,7 +1284,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("2 - 1 = "),
+			new_binary(Expr::Int(2), Token::Minus, Expr::Int(1)).into()
+		].into())),
 		None // "2 - 1 = 1"
 	),
 	(
@@ -1134,7 +1304,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("2 * 3 = "),
+			new_binary(Expr::Int(2), Token::Mult, Expr::Int(3)).into()
+		].into())),
 		None // "2 * 3 = 6"
 	),
 	(
@@ -1151,7 +1324,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("6 / 2 = "),
+			new_binary(Expr::Int(6), Token::Div, Expr::Int(2)).into()
+		].into())),
 		None // "6 / 2 = 3"
 	),
 	(
@@ -1168,7 +1344,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("6 % 4 = "),
+			new_binary(Expr::Int(6), Token::Mod, Expr::Int(4)).into()
+		].into())),
 		None // "6 % 4 = 2"
 	),
 	(
@@ -1189,7 +1368,14 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("2 + 3 * 4 = "),
+			new_binary(
+				Expr::Int(2),
+				Token::Plus,
+				new_binary(Expr::Int(3), Token::Mult, Expr::Int(4)),
+			).into()
+		].into())),
 		None // "2 + 3 * 4 = 14"
 	),
 	(
@@ -1212,7 +1398,16 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("(2 + 3) * 4 = "),
+			new_binary(
+				Grouping::new(
+					new_binary(Expr::Int(2), Token::Plus, Expr::Int(3)),
+				).into(),
+				Token::Mult,
+				Expr::Int(4),
+			).into()
+		].into())),
 		None // "(2 + 3) * 4 = 20"
 	),
 	(
@@ -1237,7 +1432,18 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("2 + 3 * 4 - 5 = "),
+			new_binary(
+				new_binary(
+					Expr::Int(2),
+					Token::Plus,
+					new_binary(Expr::Int(3), Token::Mult, Expr::Int(4)),
+				),
+				Token::Minus,
+				Expr::Int(5),
+			).into()
+		].into())),
 		None // "2 + 3 * 4 - 5 = 9"
 	),
 	(
@@ -1264,7 +1470,22 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("2 + 3 * (4 - 5) = "),
+			new_binary(
+				Expr::Int(2),
+				Token::Plus,
+				new_binary(
+					Expr::Int(3),
+					Token::Mult,
+					Grouping::new(new_binary(
+						Expr::Int(4),
+						Token::Minus,
+						Expr::Int(5)
+					)).into()
+				).into()
+			).into()
+		].into())),
 		None // "2 + 3 * (4 - 5) = -1"
 	),
 	(
@@ -1282,7 +1503,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(3), Token::BitAnd, Expr::Int(1)).into()),
 		None // r#"1"#
 	),
 	(
@@ -1300,7 +1521,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(3), Token::BitOr, Expr::Int(1)).into()),
 		None // r#"3"#
 	),
 	(
@@ -1318,7 +1539,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(3), Token::BitXor, Expr::Int(1)).into()),
 		None // r#"2"#
 	),
 	(
@@ -1336,7 +1557,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(1), Token::BitShiftLeft, Expr::Int(2)).into()),
 		None // r#"4"#
 	),
 	(
@@ -1354,7 +1575,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(4), Token::BitShiftRight, Expr::Int(2)).into()),
 		None // r#"1"#
 	),
 	// Decimals
@@ -1372,7 +1593,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("7 / 2 = "),
+			new_binary(Expr::Int(7), Token::Div, Expr::Int(2)).into()
+		].into())),
 		None // "7 / 2 = 3"
 	),
 	(
@@ -1389,7 +1613,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("7.0 / 2 = "),
+			new_binary(Expr::Float(7.0), Token::Div, Expr::Int(2)).into()
+		].into())),
 		None // "7 / 2 = 3.5"
 	),
 	(
@@ -1410,7 +1637,14 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("7 + 3.2 - 1.2 = "),
+			new_binary(
+				new_binary(Expr::Int(7), Token::Plus, Expr::Float(3.2)).into(),
+				Token::Minus,
+				Expr::Float(1.2)
+			).into()
+		].into())),
 		None // "7 + 3.2 - 1.2 = 9"
 	),
 	(
@@ -1427,7 +1661,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("7.0 / 2.0 = "),
+			new_binary(Expr::Float(7.0), Token::Div, Expr::Float(2.0)).into()
+		].into())),
 		None // "7.0 / 2.0 = 3.5"
 	),
 	// String
@@ -1446,7 +1683,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::Plus, Expr::new_str("def")).into()),
 		None // "abcdef"
 	),
 	(
@@ -1464,7 +1701,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::Equal, Expr::new_str("def")).into()),
 		None // r#"false"#
 	),
 	(
@@ -1482,7 +1719,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::NotEqual, Expr::new_str("def")).into()),
 		None // r#"true"#
 	),
 	(
@@ -1500,7 +1737,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::Less, Expr::new_str("def")).into()),
 		None // r#"true"#
 	),
 	(
@@ -1518,7 +1755,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::Greater, Expr::new_str("def")).into()),
 		None // r#"false"#
 	),
 	(
@@ -1536,7 +1773,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::LessEqual, Expr::new_str("def")).into()),
 		None // r#"true"#
 	),
 	(
@@ -1554,7 +1791,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::GreaterEqual, Expr::new_str("def")).into()),
 		None // r#"false"#
 	),
 	(
@@ -1572,7 +1809,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::Equal, Expr::new_str("abc")).into()),
 		None // r#"true"#
 	),
 	(
@@ -1590,7 +1827,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::NotEqual, Expr::new_str("abc")).into()),
 		None // r#"false"#
 	),
 	(
@@ -1608,7 +1845,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::Less, Expr::new_str("abc")).into()),
 		None // r#"false"#
 	),
 	(
@@ -1626,7 +1863,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::Greater, Expr::new_str("abc")).into()),
 		None // r#"false"#
 	),
 	(
@@ -1644,7 +1881,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::LessEqual, Expr::new_str("abc")).into()),
 		None // r#"true"#
 	),
 	(
@@ -1662,7 +1899,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::new_str("abc"), Token::GreaterEqual, Expr::new_str("abc")).into()),
 		None // r#"true"#
 	)
 );
@@ -1684,7 +1921,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(1), Token::Div, Expr::Int(0)).into()),
 		None // r#"{}"#
 	),
 	(
@@ -1721,7 +1958,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(Expr::Int(1), Token::Div, Expr::Int(0)).into()),
 		None // r#"{}"#
 	),
 	(
