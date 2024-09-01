@@ -264,7 +264,12 @@ impl OsmiaParserImpl {
 	}
 
 	fn unary(&mut self) -> Result<Expr, OsmiaError> {
-		self.method_call() // TODO
+		if self.match_and_advance(&[Token::Not, Token::Minus, Token::Plus]) {
+			let operator: Option<UnaryOp> = self.get_previous().into();
+			let right = self.unary()?;
+			return Ok(Unary::new(operator.unwrap(), right).into());
+		}
+		self.method_call()
 	}
 
 	fn method_call(&mut self) -> Result<Expr, OsmiaError> {

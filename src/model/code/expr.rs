@@ -4,6 +4,7 @@ use super::*;
 pub enum Expr {
 	Binary(Binary),
 	Grouping(Grouping),
+	Unary(Unary),
 
 	Variable(Variable),
 
@@ -29,6 +30,12 @@ impl From<Binary> for Expr {
 impl From<Grouping> for Expr {
 	fn from(g: Grouping) -> Self {
 		Self::Grouping(g)
+	}
+}
+
+impl From<Unary> for Expr {
+	fn from(u: Unary) -> Self {
+		Self::Unary(u)
 	}
 }
 

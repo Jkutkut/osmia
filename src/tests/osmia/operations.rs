@@ -893,7 +893,21 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_unary(Token::Not, Expr::Bool(true)).into(),
+			Stmt::new_raw(" "),
+			new_unary(Token::Not, Expr::Bool(false)).into(),
+			Stmt::new_raw(" "),
+			new_unary(
+				Token::Not,
+				new_unary(Token::Not, Expr::Bool(true)).into()
+			).into(),
+			Stmt::new_raw(" "),
+			new_unary(
+				Token::Not,
+				new_unary(Token::Not, Expr::Bool(false)).into()
+			).into(),
+		].into())),
 		None // "false true true false"
 	),
 	(
@@ -915,7 +929,11 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_unary(Token::Minus, new_unary(Token::Plus, new_unary(Token::Minus, Expr::Int(3)))).into(),
+			Stmt::new_raw(" "),
+			new_unary(Token::Minus, Expr::Int(2)).into(),
+		].into())),
 		None // "3 -2"
 	),
 	(
@@ -1108,7 +1126,25 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			new_unary(
+				Token::Not,
+				new_unary(Token::Not, Expr::Int(3))
+			).into(),
+			Stmt::new_raw(" "),
+			new_unary(
+				Token::Not,
+				new_unary(
+					Token::Not,
+					new_unary(Token::Minus, Expr::Int(3))
+				).into()
+			).into(),
+			Stmt::new_raw(" "),
+			new_unary(
+				Token::Not,
+				new_unary(Token::Not, Expr::Int(0))
+			).into()
+		].into())),
 		None // "true true false"
 	),
 	(
@@ -1243,7 +1279,11 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			new_unary(Token::Minus, Expr::Float(1.0)).into(),
+			Token::Div,
+			Expr::Float(0.0),
+		).into()),
 		None // "-inf"
 	)
 );
@@ -1940,7 +1980,11 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			new_unary(Token::Minus, Expr::Int(1)),
+			Token::Div,
+			Expr::Int(0)
+		).into()),
 		None // r#"{}"#
 	),
 	(
@@ -1995,7 +2039,11 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			new_unary(Token::Minus, Expr::Int(9223372036854775807)),
+			Token::Minus,
+			Expr::Int(2)
+		).into()),
 		None // r#"{}"#
 	),
 	(
@@ -2032,7 +2080,11 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			new_unary(Token::Minus, Expr::Int(9223372036854775807)),
+			Token::Mult,
+			Expr::Int(2)
+		).into()),
 		None // r#"{}"#
 	)
 );

@@ -404,7 +404,38 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			new_binary(
+				new_binary(
+					new_unary(
+						Token::Not,
+						new_unary(
+							Token::Not,
+							Expr::Bool(true).into()
+						).into()
+					).into(),
+					Token::Equal,
+					new_unary(
+						Token::Not,
+						Expr::Bool(false).into()
+					).into()
+				).into(),
+				Token::Equal,
+				Grouping::new(new_binary(
+					new_unary(
+						Token::Minus,
+						Grouping::new(new_unary(
+							Token::Minus,
+							Expr::Int(1).into()
+						)).into()
+					).into(),
+					Token::Equal,
+					Expr::Int(1).into()
+				).into()).into()
+			).into(),
+			Token::NotEqual,
+			Expr::Bool(false).into()
+		).into()),
 		None
 	),
 	(
@@ -439,7 +470,30 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(new_binary(
+			new_binary(
+				new_unary(
+					Token::Minus,
+					new_unary(
+						Token::Minus,
+						new_unary(Token::Minus, Expr::Int(1).into()).into()
+					).into()
+				).into(),
+				Token::Equal,
+				new_unary(
+					Token::Minus,
+					Grouping::new(new_unary(
+						Token::Minus,
+						Grouping::new(new_unary(
+							Token::Minus,
+							Grouping::new(Expr::Int(1).into()).into()
+						)).into()
+					)).into()
+				).into()
+			).into(),
+			Token::Equal,
+			new_unary(Token::Minus, Expr::Int(1).into()).into()
+		).into()),
 		None
 	),
 	(

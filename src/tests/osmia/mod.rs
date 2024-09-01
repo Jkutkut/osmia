@@ -22,3 +22,8 @@ fn new_binary(left: Expr, op: Token, right: Expr) -> Expr {
 	let op: Option<BinaryOp> = (&op).into();
 	Binary::new(left, op.unwrap(), right).into()
 }
+
+fn new_unary(op: Token, right: Expr) -> Expr {
+	let op: Option<UnaryOp> = (&op).into();
+	Unary::new(op.unwrap(), right).into()
+}
