@@ -9,4 +9,43 @@ impl Array {
 	pub fn new(arr: Vec<Expr>) -> Self {
 		Self { arr }
 	}
+
+	pub fn push(&mut self, expr: Expr) {
+		self.arr.push(expr)
+	}
+
+	pub fn len(&self) -> usize {
+		self.arr.len()
+	}
+}
+
+impl From<Vec<Expr>> for Array {
+	fn from(arr: Vec<Expr>) -> Self {
+		Self::new(arr)
+	}
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Object {
+	obj: Vec<(Expr, Expr)>,
+}
+
+impl Object {
+	pub fn new(obj: Vec<(Expr, Expr)>) -> Self {
+		Self { obj }
+	}
+
+	pub fn push(&mut self, e: (Expr, Expr)) {
+		self.obj.push(e)
+	}
+
+	pub fn len(&self) -> usize {
+		self.obj.len()
+	}
+}
+
+impl From<Vec<(Expr, Expr)>> for Object {
+	fn from(obj: Vec<(Expr, Expr)>) -> Self {
+		Self::new(obj)
+	}
 }

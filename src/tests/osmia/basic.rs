@@ -555,11 +555,11 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		Some(Expr::Array(Array::new(vec![
+		Some(Expr::Array(vec![
 			Expr::Int(1).into(),
 			Expr::Int(2).into(),
 			Expr::Int(3).into()
-		])).into()),
+		].into()).into()),
 		None // "[1, 2, 3]"
 	),
 	(
@@ -590,7 +590,11 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Object(vec![
+			(Expr::new_str("a"), Expr::Int(1)),
+			(Expr::new_str("b"), Expr::Int(2)),
+			(Expr::new_str("c"), Expr::Int(3)),
+		].into()).into()),
 		None // "{a: 1, b: 2, c: 3}"
 	),
 	(
@@ -624,7 +628,16 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Array(vec![
+			Expr::Int(1).into(),
+			Expr::Int(2).into(),
+			Expr::Object(vec![(
+				Expr::new_str("foo"),
+				Expr::Array(vec![
+					Expr::Int(3), Expr::Int(4)
+				].into())
+			)].into())
+		].into()).into()),
 		None // "[1, 2, {foo: [3, 4]}]"
 	),
 	(
@@ -665,7 +678,20 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Expr::Object(vec![
+			(
+				Expr::new_str("bar"),
+				Expr::Array(vec![
+					Expr::Int(4), Expr::Int(5), Expr::Int(6)
+				].into())
+			),
+			(
+				Expr::new_str("foo"),
+				Expr::Array(vec![
+					Expr::Int(1), Expr::Int(2), Expr::Int(3)
+				].into())
+			)
+		].into()).into()),
 		None // "{bar: [4, 5, 6], foo: [1, 2, 3]}"
 	),
 	(
@@ -687,7 +713,11 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Expr::Object(vec![].into()).into(),
+			Stmt::new_raw(" "),
+			Expr::Array(vec![].into()).into()
+		].into()).into()),
 		None // "{} []"
 	),
 	(
@@ -711,7 +741,11 @@ macro_tests! {
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Expr::Object(vec![].into()).into(),
+			Stmt::new_raw(" "),
+			Expr::Array(vec![].into()).into()
+		].into()).into()),
 		None // "{} []"
 	),
 }

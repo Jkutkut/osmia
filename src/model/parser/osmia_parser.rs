@@ -364,7 +364,7 @@ impl OsmiaParserImpl {
 			"Expected start of array, got: {:?}",
 			parser.get_current()
 		)))?;
-		let mut arr = vec![];
+		let mut arr: Array = Vec::new().into();
 		self.consume_whitespaces();
 		if !self.match_and_advance(&[Token::ArrayEnd]) {
 			arr.push(self.expr()?.into());
@@ -376,23 +376,45 @@ impl OsmiaParserImpl {
 				)))?;
 				self.consume_whitespaces();
 				arr.push(self.expr()?.into());
+				self.consume_whitespaces();
 			}
 		}
-		Ok(Array::new(arr).into())
+		Ok(arr.into())
 	}
 
 	fn object(&mut self) -> Result<Expr, OsmiaError> {
-		// { // TODO
-		// self.object_entry() // TODO
-		// *
-		// }
-		todo!() // TODO
+		self.consume(Token::ObjectStart, |parser| parser.error(&format!(
+			"Expected start of object, got: {:?}",
+			parser.get_current()
+		)))?;
+		let mut obj: Object = Vec::new().into();
+		self.consume_whitespaces();
+		if !self.match_and_advance(&[Token::ObjectEnd]) {
+			obj.push(self.object_entry()?);
+			self.consume_whitespaces();
+			while !self.match_and_advance(&[Token::ObjectEnd]) {
+				self.consume(Token::Comma, |parser| parser.error(&format!(
+					"Expected comma, got: {:?}",
+					parser.get_current()
+				)))?;
+				self.consume_whitespaces();
+				obj.push(self.object_entry()?);
+				self.consume_whitespaces();
+			}
+		}
+		Ok(obj.into())
 	}
 
-	fn object_entry(&mut self) -> Result<Expr, OsmiaError> {
-		self.expr() // TODO
-		// :
-		// self.expr() // TODO
+	fn object_entry(&mut self) -> Result<(Expr, Expr), OsmiaError> {
+		let key = self.expr()?;
+		self.consume_whitespaces();
+		self.consume(Token::Colon, |parser| parser.error(&format!(
+			"Expected colon, got: {:?}",
+			parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		let value = self.expr()?;
+		Ok((key, value))
 	}
 
 	fn grouping(&mut self) -> Result<Expr, OsmiaError> {
