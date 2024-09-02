@@ -218,10 +218,17 @@ impl<'a> LexerScanner<'a> {
 
 	fn consume_comment(&mut self) {
 		let start = self.current_index();
+		let mut depth: usize = 0;
 		while self.code_left() {
 			self.consume_new_line();
+			if self.consume(self.start_delimiter) {
+				depth += 1;
+			}
 			if self.is_match(self.end_delimiter) {
-				break;
+				if depth == 0 {
+					break;
+				}
+				depth -= 1;
 			}
 			self.advance();
 		}
