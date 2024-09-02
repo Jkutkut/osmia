@@ -182,7 +182,16 @@ impl OsmiaParserImpl {
 
 	fn stmt(&mut self, return_none_with: &Option<Vec<Token>>) -> Result<Option<Stmt>, OsmiaError> {
 		let stmt: Stmt = match self.get_current() {
+			Token::Print => self.print()?,
 			Token::Comment => self.comment()?,
+			Token::Assign => self.assign()?,
+			Token::If => self.if_stmt()?,
+			Token::While => self.while_stmt()?,
+			Token::For => self.for_stmt()?,
+			Token::Break => self.break_stmt()?,
+			Token::Continue => self.continue_stmt()?,
+			Token::Return => self.return_stmt()?,
+			Token::Function => self.function()?,
 			_ => self.expr_stmt()?,
 		};
 		self.consume(
@@ -193,6 +202,10 @@ impl OsmiaParserImpl {
 			))
 		)?;
 		Ok(Some(stmt))
+	}
+
+	fn print(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
 	}
 
 	fn comment(&mut self) -> Result<Stmt, OsmiaError> {
@@ -215,6 +228,38 @@ impl OsmiaParserImpl {
 			};
 		}
 		Ok(Stmt::Comment(comment))
+	}
+
+	fn assign(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
+	}
+
+	fn if_stmt(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
+	}
+
+	fn while_stmt(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
+	}
+
+	fn for_stmt(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
+	}
+
+	fn break_stmt(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
+	}
+
+	fn continue_stmt(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
+	}
+
+	fn return_stmt(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
+	}
+
+	fn function(&mut self) -> Result<Stmt, OsmiaError> {
+		todo!();
 	}
 
 	fn expr_stmt(&mut self) -> Result<Stmt, OsmiaError> {
