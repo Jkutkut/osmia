@@ -15,6 +15,10 @@ impl Variable {
 		self.var.push(key)
 	}
 
+	pub fn extend(&mut self, keys: Vec<JsonTreeKeyExpression>) {
+		self.var.extend(keys)
+	}
+
 	pub fn vec(&self) -> &Vec<JsonTreeKeyExpression> {
 		&self.var
 	}
@@ -41,5 +45,11 @@ impl From<JsonTreeKey<String>> for JsonTreeKeyExpression {
 impl From<Expr> for JsonTreeKeyExpression {
 	fn from(expr: Expr) -> Self {
 		JsonTreeKeyExpression::Expr(expr)
+	}
+}
+
+impl From<Variable> for Vec<JsonTreeKeyExpression> {
+	fn from(var: Variable) -> Self {
+		var.var
 	}
 }

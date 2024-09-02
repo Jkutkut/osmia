@@ -282,5 +282,42 @@ macro_tests!(
 			])).into(),
 		].into())),
 		None
+	),
+	(
+		mixed_variable_name01,
+		Some(r#"{{ foo[0].bar[1][2].baz.qux }}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::new_alpha("foo"),
+			Token::ArrayStart,
+			Token::new_number("0"),
+			Token::ArrayEnd,
+			Token::Dot,
+			Token::new_alpha("bar"),
+			Token::ArrayStart,
+			Token::new_number("1"),
+			Token::ArrayEnd,
+			Token::ArrayStart,
+			Token::new_number("2"),
+			Token::ArrayEnd,
+			Token::Dot,
+			Token::new_alpha("baz"),
+			Token::Dot,
+			Token::new_alpha("qux"),
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		Some(Expr::Variable(Variable::from_vec(vec![
+			JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+			JsonTreeKeyExpression::Expr(Expr::Int(0)),
+			JsonTreeKeyExpression::JsonTreeKey("bar".into()),
+			JsonTreeKeyExpression::Expr(Expr::Int(1)),
+			JsonTreeKeyExpression::Expr(Expr::Int(2)),
+			JsonTreeKeyExpression::JsonTreeKey("baz".into()),
+			JsonTreeKeyExpression::JsonTreeKey("qux".into()),
+		])).into()),
+		None
 	)
 );

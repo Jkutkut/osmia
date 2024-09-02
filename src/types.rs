@@ -51,7 +51,7 @@ pub type LexerCode = Vec<Token>;
 /// call           → variable ( "(" arguments? ")" )*
 /// arguments      → expression ( "," expression )*
 /// variable       → obj
-/// obj            → array ( "." identifier )*
+/// obj            → arr ( "." arr )*
 /// arr            → identifier ( "[" expression "]" )*
 /// array          → "[" ( expression? ( "," expression )* )? "]"
 /// object         → "{" ( object_entry ( "," object_entry )* )? "}"

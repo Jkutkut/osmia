@@ -458,7 +458,7 @@ impl OsmiaParserImpl {
 	fn obj(&mut self) -> Result<Variable, OsmiaError> {
 		let mut var = self.arr()?;
 		while self.match_and_advance(&[Token::Dot]) {
-			var.push(self.identifier()?.into())
+			var.extend(self.arr()?.into())
 		}
 		Ok(var)
 	}
