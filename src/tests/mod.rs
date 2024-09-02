@@ -20,6 +20,7 @@ fn test(
 	let mut lexed_code = None;
 	if let Some(code) = code {
 		println!("- Lexing code...");
+		println!("code: {:?}", code);
 		lexed_code = match Osmia::lex(code) {
 			Ok(lex) => Some(lex),
 			Err(err) => panic!("The code can not be lexed: {}", err)

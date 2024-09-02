@@ -217,10 +217,21 @@ impl<'a> LexerScanner<'a> {
 	}
 
 	fn consume_comment(&mut self) {
-		let start = self.current_index();
+		fn add_piece(lexer: &mut LexerScanner, start: usize, end: usize) {
+			if let Some(content) = lexer.pick_non_empty_string(start, end) {
+				lexer.tokens.push(Token::Raw(content));
+			}
+		}
+		self.tokens.push(Token::Comment);
+		let mut start = self.current_index();
 		let mut depth: usize = 0;
 		while self.code_left() {
-			self.consume_new_line();
+			if self.consume("\n") {
+				add_piece(self, start, self.current_index() - 1);
+				self.tokens.push(Token::NewLine);
+				start = self.current_index();
+				continue;
+			}
 			if self.consume(self.start_delimiter) {
 				depth += 1;
 			}
@@ -232,9 +243,7 @@ impl<'a> LexerScanner<'a> {
 			}
 			self.advance();
 		}
-		if let Some(content) = self.pick_non_empty_string(start, self.current_index()) {
-			self.tokens.push(Token::new_comment(&content));
-		}
+		add_piece(self, start, self.current_index());
 	}
 
 	fn consume_token(&mut self) -> Result<(), String> {

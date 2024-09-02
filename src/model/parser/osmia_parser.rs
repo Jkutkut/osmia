@@ -107,10 +107,6 @@ impl OsmiaParserImpl {
 		false
 	}
 
-	fn consume_while_match(&mut self, types: &[Token]) {
-		while self.match_and_advance(types) {}
-	}
-
 	fn binary(
 		&mut self,
 		ops: &[Token],
@@ -134,14 +130,20 @@ impl OsmiaParserImpl {
 
 impl OsmiaParserImpl {
 	fn consume_new_lines(&mut self) {
-		self.consume_while_match(&[Token::NewLine]);
+		while !self.done() {
+			match self.get_current() {
+				Token::NewLine => self.line += 1,
+				_ => return
+			}
+			self.advance();
+		}
 	}
 
 	fn consume_whitespaces(&mut self) {
 		while !self.done() {
+			self.consume_new_lines();
 			match self.get_current() {
 				Token::Whitespace => (),
-				Token::NewLine => self.line += 1,
 				_ => return
 			};
 			self.advance();
@@ -179,9 +181,8 @@ impl OsmiaParserImpl {
 	}
 
 	fn stmt(&mut self, return_none_with: &Option<Vec<Token>>) -> Result<Option<Stmt>, OsmiaError> {
-		self.consume_new_lines();
 		let stmt: Stmt = match self.get_current() {
-			Token::Comment(_) => self.comment()?,
+			Token::Comment => self.comment()?,
 			_ => self.expr_stmt()?,
 		};
 		self.consume(
@@ -195,12 +196,25 @@ impl OsmiaParserImpl {
 	}
 
 	fn comment(&mut self) -> Result<Stmt, OsmiaError> {
-		let comment = match self.get_current() {
-			Token::Comment(comment) => Stmt::new_comment(comment),
-			_ => unreachable!()
-		};
-		self.advance();
-		Ok(comment)
+		self.consume(Token::Comment, |parser| parser.error(&format!(
+			"Expected comment, got '{:?}'",
+			parser.get_current()
+		)))?;
+		let mut comment = String::new();
+		while !self.done() && !self.check_current(&Token::StmtEnd) {
+			match self.advance() {
+				Token::Raw(r) => comment.push_str(r),
+				Token::NewLine => {
+					comment.push('\n');
+					self.line += 1;
+				},
+				_ => return Err(self.error(&format!(
+					"Expected comment, got '{:?}'",
+					self.get_current()
+				)))
+			};
+		}
+		Ok(Stmt::Comment(comment))
 	}
 
 	fn expr_stmt(&mut self) -> Result<Stmt, OsmiaError> {
