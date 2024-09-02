@@ -1,6 +1,7 @@
 mod assign;
 mod basic;
 mod callable;
+mod comment;
 mod r#for;
 mod function;
 mod get_ctx;

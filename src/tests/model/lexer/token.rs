@@ -27,6 +27,7 @@ macro_tests! {
 	// Complex
 	(debug_token_raw, Token::Raw("This is raw".to_string()), "Raw(This is raw)"),
 	(debug_token_str, Token::Str("string".to_string()), r#"Str("string")"#),
+	(debug_token_comment, Token::Comment("Some comment".to_string()), "# Some comment"),
 	(debug_token_alpha, Token::Alpha("abcd".to_string()), "Alpha(abcd)"),
 	(debug_token_int, Token::Number("123".to_string()), "Number(123)"),
 	(debug_token_float, Token::Number("123.123".to_string()), "Number(123.123)"),
@@ -50,7 +51,6 @@ macro_tests! {
 	// Statements
 	(debug_token_print, Token::Print,"print"),
 	(debug_token_assign, Token::Assign,"assign"),
-	(debug_token_comment, Token::Comment,"#"),
 	(debug_token_function, Token::Function,"fn"),
 	(debug_token_return, Token::Return,"return"),
 

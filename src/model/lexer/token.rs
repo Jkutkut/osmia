@@ -20,7 +20,7 @@ pub enum Token {
 	// Statements
 	Print,
 	Assign,
-	Comment,
+	Comment(String),
 	Function,
 	Return,
 
@@ -92,6 +92,10 @@ impl Token {
 		Self::Raw(s.to_string())
 	}
 
+	pub fn new_comment(s: &str) -> Self {
+		Self::Comment(s.trim().to_string())
+	}
+
 	pub fn new_str(s: &str) -> Self {
 		Self::Str(s.to_string())
 	}
@@ -140,6 +144,7 @@ macro_rules! impl_token_traits {
 				// Complex values
 				Raw(s) <=> "Raw({s})",
 				Str(s) <=> "Str({s:?})",
+				Comment(s) <=> "# {s}",
 				Alpha(s) <=> "Alpha({s})",
 				Number(s) <=> "Number({s})",
 				Bool(b) <=> "Bool({b})",
@@ -159,7 +164,6 @@ impl_token_traits!(
 	// Statements
 	Print <=> "print",
 	Assign <=> "assign",
-	Comment <=> "#",
 	Function <=> "fn",
 	Return <=> "return",
 

@@ -27,8 +27,7 @@ macro_tests!(
 			Token::Not, Token::Whitespace, Token::And, Token::Whitespace, Token::Or,
 		]
 	),
-	(simple_tokens_special, "# . , : ; ... ? =>", vec![
-		Token::Comment, Token::Whitespace,
+	(simple_tokens_special, ". , : ; ... ? =>", vec![
 		Token::Dot, Token::Whitespace, Token::Comma, Token::Whitespace,
 		Token::Colon, Token::Whitespace, Token::Semicolon, Token::Whitespace,
 		Token::Spread, Token::Whitespace, Token::Question, Token::Whitespace, Token::Arrow,

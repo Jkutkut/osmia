@@ -55,6 +55,10 @@ impl<'a> LexerScanner<'a> {
 			if !self.in_stmt {
 				self.consume_raw();
 				self.consume_start_delimiter();
+				if self.consume("#") {
+					self.consume_comment();
+					self.consume_end_delimiter();
+				}
 			}
 			else {
 				let mut white_space = false;
@@ -212,6 +216,20 @@ impl<'a> LexerScanner<'a> {
 		}
 	}
 
+	fn consume_comment(&mut self) {
+		let start = self.current_index();
+		while self.code_left() {
+			self.consume_new_line();
+			if self.is_match(self.end_delimiter) {
+				break;
+			}
+			self.advance();
+		}
+		if let Some(content) = self.pick_non_empty_string(start, self.current_index()) {
+			self.tokens.push(Token::new_comment(&content));
+		}
+	}
+
 	fn consume_token(&mut self) -> Result<(), String> {
 		if !self.code_left() {
 			return Ok(());
@@ -228,7 +246,7 @@ impl<'a> LexerScanner<'a> {
 			("!=", Token::NotEqual), ("!", Token::Not),
 			("&&", Token::And), ("&", Token::BitAnd),
 			("||", Token::Or), ("|", Token::BitOr),
-			("#", Token::Comment), (",", Token::Comma), (":", Token::Colon),
+			(",", Token::Comma), (":", Token::Colon),
 			(";", Token::Semicolon), ("?", Token::Question),
 			("^", Token::BitXor),
 		]) {

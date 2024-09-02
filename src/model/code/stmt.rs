@@ -4,12 +4,17 @@ use super::*;
 pub enum Stmt {
 	Block(Block),
 	Raw(String),
+	Comment(String),
 	Expr(Expr),
 }
 
 impl Stmt {
 	pub fn new_raw(s: &str) -> Self {
 		Self::Raw(s.to_string())
+	}
+
+	pub fn new_comment(s: &str) -> Self {
+		Self::Comment(s.to_string())
 	}
 }
 

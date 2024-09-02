@@ -179,7 +179,9 @@ impl OsmiaParserImpl {
 	}
 
 	fn stmt(&mut self, return_none_with: &Option<Vec<Token>>) -> Result<Option<Stmt>, OsmiaError> {
+		self.consume_new_lines();
 		let stmt: Stmt = match self.get_current() {
+			Token::Comment(_) => self.comment()?,
 			_ => self.expr_stmt()?,
 		};
 		self.consume(
@@ -190,6 +192,15 @@ impl OsmiaParserImpl {
 			))
 		)?;
 		Ok(Some(stmt))
+	}
+
+	fn comment(&mut self) -> Result<Stmt, OsmiaError> {
+		let comment = match self.get_current() {
+			Token::Comment(comment) => Stmt::new_comment(comment),
+			_ => unreachable!()
+		};
+		self.advance();
+		Ok(comment)
 	}
 
 	fn expr_stmt(&mut self) -> Result<Stmt, OsmiaError> {
@@ -311,10 +322,7 @@ impl OsmiaParserImpl {
 					}
 				}
 			},
-			_ => return Err(self.error(&format!(
-				"Unexpected literal {:?}",
-				self.get_current()
-			)))
+			_ => unreachable!(),
 		};
 		self.advance();
 		Ok(expr)
