@@ -1,5 +1,6 @@
 mod assign;
 mod call;
+mod function;
 mod stmt;
 mod block;
 mod binary;
@@ -13,6 +14,7 @@ mod variable;
 
 pub use assign::Assign;
 pub use call::*;
+pub use function::*;
 pub use stmt::Stmt;
 pub use block::Block;
 pub use binary::*;
@@ -25,3 +27,4 @@ pub use r#return::Return;
 pub use variable::*;
 
 use crate::model::lexer::Token;
+use crate::model::ctx::JsonTreeKey;

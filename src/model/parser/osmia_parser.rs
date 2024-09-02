@@ -295,22 +295,45 @@ impl OsmiaParserImpl {
 		todo!(); // TODO
 	}
 
-	fn parameters(&mut self) -> Result<(), OsmiaError> { // TODO
-		todo!() // TODO
-		// self.parameter()
-		// ,
-		// self.parameter()
-		// *
-		// ...
-		// self.identifier()
-		// ?
+	fn parameters(&mut self) -> Result<Vec<FunctionParam>, OsmiaError> {
+		self.consume(Token::ParentStart, |parser| parser.error(&format!(
+			"Expected '{:?}', got '{:?}'",
+			Token::ParentStart, parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		let mut params: Vec<FunctionParam> = Vec::new();
+		while !self.check_current(&Token::ParentEnd) {
+			if params.len() > 0 {
+				self.consume(Token::Comma, |parser| parser.error(&format!(
+					"Expected comma, got: {:?}",
+					parser.get_current()
+				)))?;
+				self.consume_whitespaces();
+			}
+			if self.match_and_advance(&[Token::Spread]) {
+				params.push(FunctionParam::new_spread(self.identifier()?));
+				self.consume_whitespaces();
+				break;
+			}
+			params.push(self.parameter()?);
+			self.consume_whitespaces();
+		}
+		self.consume(Token::ParentEnd, |parser| parser.error(&format!(
+			"Expected '{:?}', got '{:?}'",
+			Token::ParentEnd, parser.get_current()
+		)))?;
+		Ok(params)
 	}
 
-	fn parameter(&mut self) -> Result<(), OsmiaError> { // TODO
-		todo!() // TODO
-		// self.identifier()
-		// :
-		// self.expr()
+	fn parameter(&mut self) -> Result<FunctionParam, OsmiaError> {
+		let name = self.identifier()?;
+		self.consume_whitespaces();
+		let mut expr: Option<Expr> = None;
+		if self.match_and_advance(&[Token::Assign]) {
+			self.consume_whitespaces();
+			expr = Some(self.expr()?);
+		}
+		Ok(FunctionParam::new(name, expr))
 	}
 
 	fn expr(&mut self) -> Result<Expr, OsmiaError> {
@@ -321,7 +344,20 @@ impl OsmiaParserImpl {
 	}
 
 	fn lambda(&mut self) -> Result<Expr, OsmiaError> {
-		todo!() // TODO
+		self.consume(Token::Function, |parser| parser.error(&format!(
+			"Expected lambda keyword '{:?}', got '{:?}'",
+			Token::Function, parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		let params = self.parameters()?;
+		self.consume_whitespaces();
+		self.consume(Token::Arrow, |parser| parser.error(&format!(
+			"Expected '{:?}', got '{:?}'",
+			Token::Arrow, parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		let body = self.expr()?;
+		Ok(Lambda::new(params, body).into())
 	}
 
 	fn logic_or(&mut self) -> Result<Expr, OsmiaError> {

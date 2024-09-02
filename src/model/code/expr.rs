@@ -6,6 +6,7 @@ pub enum Expr {
 	Grouping(Grouping),
 	Unary(Unary),
 
+	Lambda(Lambda),
 	Object(Object),
 	Array(Array),
 	Call(Call),
@@ -40,6 +41,12 @@ impl From<Grouping> for Expr {
 impl From<Unary> for Expr {
 	fn from(u: Unary) -> Self {
 		Self::Unary(u)
+	}
+}
+
+impl From<Lambda> for Expr {
+	fn from(l: Lambda) -> Self {
+		Self::Lambda(l)
 	}
 }
 
