@@ -15,7 +15,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("print: "),
+			Stmt::new_print(Expr::Int(1))
+		].into())),
 		None
 		// r#"{}"#,
 		// "print: "
@@ -37,7 +40,12 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::new_raw("print: "),
+			Stmt::new_print(Binary::new(
+				Expr::Int(1), BinaryOp::Plus, Expr::Float(1.2)
+			).into())
+		].into())),
 		None
 		// "{}",
 		// "print: "
@@ -62,7 +70,11 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::new_print(
+			Expr::Array(vec![
+				Expr::Int(1), Expr::Int(2), Expr::Int(3)
+			].into())
+		)),
 		None
 		// "{}",
 		// ""
@@ -90,7 +102,12 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::new_print(
+			Expr::Object(vec![
+				(Expr::Str("a".into()), Expr::Int(1)),
+				(Expr::Str("b".into()), Expr::Int(2))
+			].into())
+		)),
 		None
 		// "{}",
 		// ""

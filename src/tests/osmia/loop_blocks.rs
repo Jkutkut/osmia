@@ -11,7 +11,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Continue),
 		None
 	),
 	(
@@ -43,7 +43,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Break),
 		None
 	),
 	(
@@ -75,7 +75,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::new_return(None)),
 		None
 	),
 	(
@@ -109,7 +109,11 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::new_return(Some(
+			Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("v".into()),
+			]).into()
+		))),
 		None
 	)
 );

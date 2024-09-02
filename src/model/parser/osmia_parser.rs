@@ -205,7 +205,12 @@ impl OsmiaParserImpl {
 	}
 
 	fn print(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		self.consume(Token::Print, |parser| parser.error(&format!(
+			"Expected print, got '{:?}'",
+			parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		Ok(Stmt::new_print(self.expr()?))
 	}
 
 	fn comment(&mut self) -> Result<Stmt, OsmiaError> {
@@ -231,35 +236,52 @@ impl OsmiaParserImpl {
 	}
 
 	fn assign(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		todo!(); // TODO
 	}
 
 	fn if_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		todo!(); // TODO
 	}
 
 	fn while_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		todo!(); // TODO
 	}
 
 	fn for_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		todo!(); // TODO
 	}
 
 	fn break_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		self.consume(Token::Break, |parser| parser.error(&format!(
+			"Expected break, got '{:?}'",
+			parser.get_current()
+		)))?;
+		Ok(Stmt::Break)
 	}
 
 	fn continue_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		self.consume(Token::Continue, |parser| parser.error(&format!(
+			"Expected continue, got '{:?}'",
+			parser.get_current()
+		)))?;
+		Ok(Stmt::Continue)
 	}
 
 	fn return_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		self.consume(Token::Return, |parser| parser.error(&format!(
+			"Expected return, got '{:?}'",
+			parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		let expr: Option<Expr> = match self.check_current(&Token::StmtEnd) {
+			true => None,
+			false => Some(self.expr()?),
+		};
+		Ok(Stmt::new_return(expr))
 	}
 
 	fn function(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!();
+		todo!(); // TODO
 	}
 
 	fn expr_stmt(&mut self) -> Result<Stmt, OsmiaError> {

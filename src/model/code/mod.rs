@@ -5,6 +5,8 @@ mod grouping;
 mod unary;
 mod expr;
 mod json;
+mod print;
+mod r#return;
 mod variable;
 
 pub use stmt::Stmt;
@@ -14,6 +16,8 @@ pub use grouping::Grouping;
 pub use unary::*;
 pub use expr::Expr;
 pub use json::*;
+pub use print::Print;
+pub use r#return::Return;
 pub use variable::*;
 
 use crate::model::lexer::Token;
