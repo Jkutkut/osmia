@@ -49,7 +49,6 @@ macro_tests! {
 
 	// Statements
 	(debug_token_print, Token::Print,"print"),
-	(debug_token_assign, Token::Assign,"assign"),
 	(debug_token_comment, Token::Comment, "#"),
 	(debug_token_function, Token::Function,"fn"),
 	(debug_token_return, Token::Return,"return"),
@@ -69,7 +68,7 @@ macro_tests! {
 	(debug_token_done, Token::Done,"done"),
 
 	// Equality
-	(debug_token_assigneq, Token::AssignEq,"="),
+	(debug_token_assigneq, Token::Assign,"="),
 	(debug_token_equal, Token::Equal,"=="),
 	(debug_token_notequal, Token::NotEqual,"!="),
 

@@ -256,7 +256,7 @@ impl<'a> LexerScanner<'a> {
 			("+", Token::Plus), ("-", Token::Minus), ("*", Token::Mult), ("/", Token::Div), ("%", Token::Mod),
 			("...", Token::Spread), (".", Token::Dot),
 			("=>", Token::Arrow),
-			("==", Token::Equal), ("=", Token::AssignEq),
+			("==", Token::Equal), ("=", Token::Assign),
 			("<=", Token::LessEqual), ("<<", Token::BitShiftLeft), ("<", Token::Less),
 			(">=", Token::GreaterEqual), (">>", Token::BitShiftRight), (">", Token::Greater),
 			("!=", Token::NotEqual), ("!", Token::Not),
@@ -336,7 +336,6 @@ impl<'a> LexerScanner<'a> {
 		))?;
 		self.tokens.push(match content.as_str() {
 			"print" => Token::Print,
-			"assign" => Token::Assign,
 			"fn" => Token::Function,
 			"return" => Token::Return,
 			"if" => Token::If,

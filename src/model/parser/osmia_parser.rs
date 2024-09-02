@@ -184,7 +184,6 @@ impl OsmiaParserImpl {
 		let stmt: Stmt = match self.get_current() {
 			Token::Print => self.print()?,
 			Token::Comment => self.comment()?,
-			Token::Assign => self.assign()?,
 			Token::If => self.if_stmt()?,
 			Token::While => self.while_stmt()?,
 			Token::For => self.for_stmt()?,
@@ -192,7 +191,7 @@ impl OsmiaParserImpl {
 			Token::Continue => self.continue_stmt()?,
 			Token::Return => self.return_stmt()?,
 			Token::Function => self.function()?,
-			_ => self.expr_stmt()?,
+			_ => self.assign()?,
 		};
 		self.consume(
 			Token::StmtEnd,
@@ -236,7 +235,19 @@ impl OsmiaParserImpl {
 	}
 
 	fn assign(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!(); // TODO
+		self.consume_whitespaces();
+		let expr = self.expr()?;
+		self.consume_whitespaces();
+		if let Expr::Variable(var) = expr {
+			return match self.match_and_advance(&[Token::Assign]) {
+				true => {
+					self.consume_whitespaces();
+					Ok(Stmt::new_assign(var, self.expr()?))
+				},
+				false => Ok(Expr::Variable(var).into())
+			}
+		}
+		Ok(expr.into())
 	}
 
 	fn if_stmt(&mut self) -> Result<Stmt, OsmiaError> {
@@ -282,13 +293,6 @@ impl OsmiaParserImpl {
 
 	fn function(&mut self) -> Result<Stmt, OsmiaError> {
 		todo!(); // TODO
-	}
-
-	fn expr_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume_whitespaces();
-		let stmt = self.expr()?.into();
-		self.consume_whitespaces();
-		Ok(stmt)
 	}
 
 	fn parameters(&mut self) -> Result<(), OsmiaError> { // TODO

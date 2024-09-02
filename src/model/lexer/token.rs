@@ -19,7 +19,6 @@ pub enum Token {
 
 	// Statements
 	Print,
-	Assign,
 	Comment,
 	Function,
 	Return,
@@ -39,7 +38,7 @@ pub enum Token {
 	Done,
 
 	// Equality
-	AssignEq,
+	Assign,
 	Equal,
 	NotEqual,
 
@@ -158,7 +157,6 @@ impl_token_traits!(
 
 	// Statements
 	Print <=> "print",
-	Assign <=> "assign",
 	Comment <=> "#",
 	Function <=> "fn",
 	Return <=> "return",
@@ -178,7 +176,7 @@ impl_token_traits!(
 	Done <=> "done",
 
 	// Equality
-	AssignEq <=> "=",
+	Assign <=> "=",
 	Equal <=> "==",
 	NotEqual <=> "!=",
 

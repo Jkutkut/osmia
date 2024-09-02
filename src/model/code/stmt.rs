@@ -7,7 +7,7 @@ pub enum Stmt {
 	Expr(Expr),
 	Print(Print),
 	Comment(String),
-	// Assign(Assign),
+	Assign(Assign),
 	// If(If),
 	// While(While),
 	// For(For),
@@ -16,9 +16,6 @@ pub enum Stmt {
 	Return(Return),
 	// Function(Function),
 }
-
-// #[derive(Debug, PartialEq, Clone)]
-// struct Assign {}
 
 // #[derive(Debug, PartialEq, Clone)]
 // struct If {}
@@ -46,6 +43,10 @@ impl Stmt {
 
 	pub fn new_comment(s: &str) -> Self {
 		Self::Comment(s.to_string())
+	}
+
+	pub fn new_assign(var: Variable, expr: Expr) -> Self {
+		Self::Assign(Assign::new(var, expr))
 	}
 
 	pub fn new_return(expr: Option<Expr>) -> Self {

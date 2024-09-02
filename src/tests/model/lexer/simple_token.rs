@@ -11,7 +11,7 @@ macro_tests!(
 		"= == != & | ^ > >= < <= << >> + - * / % ! && ||",
 		vec![
 			// Equality
-			Token::AssignEq, Token::Whitespace, Token::Equal, Token::Whitespace, Token::NotEqual, Token::Whitespace,
+			Token::Assign, Token::Whitespace, Token::Equal, Token::Whitespace, Token::NotEqual, Token::Whitespace,
 			// Bitwise
 			Token::BitAnd, Token::Whitespace, Token::BitOr, Token::Whitespace, Token::BitXor, Token::Whitespace,
 			// Comparison
@@ -32,8 +32,8 @@ macro_tests!(
 		Token::Colon, Token::Whitespace, Token::Semicolon, Token::Whitespace,
 		Token::Spread, Token::Whitespace, Token::Question, Token::Whitespace, Token::Arrow,
 	]),
-	(keyword_tokens, "print assign fn return if elseif else fi while for in continue break done true false null", vec![
-		Token::Print, Token::Whitespace, Token::Assign, Token::Whitespace,
+	(keyword_tokens, "print fn return if elseif else fi while for in continue break done true false null", vec![
+		Token::Print, Token::Whitespace,
 		Token::Function, Token::Whitespace, Token::Return, Token::Whitespace,
 		Token::If, Token::Whitespace, Token::ElseIf, Token::Whitespace, Token::Else, Token::Whitespace, Token::Fi, Token::Whitespace,
 		Token::While, Token::Whitespace, Token::For, Token::Whitespace, Token::In, Token::Whitespace,

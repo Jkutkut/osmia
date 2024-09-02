@@ -1,3 +1,4 @@
+mod assign;
 mod call;
 mod stmt;
 mod block;
@@ -10,6 +11,7 @@ mod print;
 mod r#return;
 mod variable;
 
+pub use assign::Assign;
 pub use call::*;
 pub use stmt::Stmt;
 pub use block::Block;
