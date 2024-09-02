@@ -1,3 +1,4 @@
+mod call;
 mod stmt;
 mod block;
 mod binary;
@@ -9,6 +10,7 @@ mod print;
 mod r#return;
 mod variable;
 
+pub use call::*;
 pub use stmt::Stmt;
 pub use block::Block;
 pub use binary::*;

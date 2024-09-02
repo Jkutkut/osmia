@@ -365,9 +365,16 @@ impl OsmiaParserImpl {
 	}
 
 	fn method_call(&mut self) -> Result<Expr, OsmiaError> {
-		self.primary() // TODO
-		// if ?
-		// self.call() // TODO
+		let mut p: Expr = self.primary()?;
+		while self.match_and_advance(&[Token::Question]) {
+			match self.call()? {
+				Expr::Call(call) => p = MethodCall::new(p, call).into(),
+				t => return Err(self.error(&format!(
+					"Expected method call, got: {:?}", t
+				)))?
+			};
+		}
+		Ok(p)
 	}
 
 	fn primary(&mut self) -> Result<Expr, OsmiaError> {
@@ -410,22 +417,42 @@ impl OsmiaParserImpl {
 	}
 
 	fn call(&mut self) -> Result<Expr, OsmiaError> {
-		self.variable() // TODO
-		// if (
-		// self.arguments() // TODO
-		// )
+		let mut v: Expr = self.variable()?;
+		while self.check_current(&Token::ParentStart) {
+			v = Call::new(v, self.arguments()?).into();
+		}
+		Ok(v)
 	}
 
-	fn arguments(&mut self) -> Result<Expr, OsmiaError> {
-		// self.expr()
-		// ,
-		// self.expr()
-		// *
-		todo!() // TODO
+	fn arguments(&mut self) -> Result<Vec<Expr>, OsmiaError> {
+		self.consume(Token::ParentStart, |parser| parser.error(&format!(
+			"Expected start of arguments, got: {:?}",
+			parser.get_current()
+		)))?;
+		let mut arr = Vec::new();
+		self.consume_whitespaces();
+		if !self.check_current(&Token::ParentEnd) {
+			arr.push(self.expr()?.into());
+			self.consume_whitespaces();
+			while !self.check_current(&Token::ParentEnd) {
+				self.consume(Token::Comma, |parser| parser.error(&format!(
+					"Expected comma, got: {:?}",
+					parser.get_current()
+				)))?;
+				self.consume_whitespaces();
+				arr.push(self.expr()?.into());
+				self.consume_whitespaces();
+			}
+		}
+		self.consume(Token::ParentEnd, |parser| parser.error(&format!(
+			"Expected end of arguments, got: {:?}",
+			parser.get_current()
+		)))?;
+		Ok(arr)
 	}
 
 	fn variable(&mut self) -> Result<Expr, OsmiaError> {
-		Ok(self.obj()?.into()) // TODO
+		Ok(self.obj()?.into())
 	}
 
 	fn obj(&mut self) -> Result<Variable, OsmiaError> {

@@ -8,6 +8,8 @@ pub enum Expr {
 
 	Object(Object),
 	Array(Array),
+	Call(Call),
+	MethodCall(MethodCall),
 	Variable(Variable),
 
 	Float(f64),
@@ -50,6 +52,18 @@ impl From<Object> for Expr {
 impl From<Array> for Expr {
 	fn from(a: Array) -> Self {
 		Self::Array(a)
+	}
+}
+
+impl From<Call> for Expr {
+	fn from(c: Call) -> Self {
+		Self::Call(c)
+	}
+}
+
+impl From<MethodCall> for Expr {
+	fn from(m: MethodCall) -> Self {
+		Self::MethodCall(m)
 	}
 }
 
