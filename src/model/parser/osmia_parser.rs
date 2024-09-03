@@ -308,7 +308,26 @@ impl OsmiaParserImpl {
 	}
 
 	fn for_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!(); // TODO
+		self.consume(Token::For, |parser| parser.error(&format!(
+			"Expected '{:?}', got '{:?}'",
+			Token::For, parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		let var = Variable::from_vec(vec![self.identifier()?.into()]);
+		self.consume_whitespaces();
+		self.consume(Token::In, |parser| parser.error(&format!(
+			"Expected '{:?}' in for statement, got '{:?}'",
+			Token::In, parser.get_current()
+		)))?;
+		self.consume_whitespaces();
+		let iterable = self.expr()?;
+		self.consume_whitespaces();
+		self.consume(Token::StmtEnd, |parser| parser.error(&format!(
+			"Unclosed for statement. Expected '{:?}' but got '{:?}'",
+			Token::StmtEnd, parser.get_current()
+		)))?;
+		let block = self.breakable_block(Some(&vec![Token::Done]))?;
+		Ok(Stmt::For(For::new(var, iterable, block)))
 	}
 
 	fn conditional(&mut self, break_with: &Vec<Token>) -> Result<ConditionalStmt, OsmiaError> {

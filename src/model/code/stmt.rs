@@ -11,7 +11,7 @@ pub enum Stmt {
 	Assign(Assign),
 	If(If),
 	While(While),
-	// For(For),
+	For(For),
 	Break,
 	Continue,
 	Return(Return),

@@ -14,6 +14,7 @@ mod r#if;
 mod conditional_stmt;
 mod variable;
 mod r#while;
+mod r#for;
 
 pub use assign::Assign;
 pub use call::*;
@@ -31,6 +32,7 @@ pub use r#if::If;
 pub use conditional_stmt::ConditionalStmt;
 pub use variable::*;
 pub use r#while::While;
+pub use r#for::For;
 
 use crate::model::lexer::Token;
 use crate::model::ctx::JsonTreeKey;
