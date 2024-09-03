@@ -298,7 +298,13 @@ impl OsmiaParserImpl {
 	}
 
 	fn while_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!(); // TODO
+		self.consume(Token::While, |parser| parser.error(&format!(
+			"Expected while, got '{:?}'",
+			parser.get_current()
+		)))?;
+		Ok(self.conditional(&vec![
+			Token::While, Token::Done
+		])?.into())
 	}
 
 	fn for_stmt(&mut self) -> Result<Stmt, OsmiaError> {

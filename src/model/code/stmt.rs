@@ -10,22 +10,13 @@ pub enum Stmt {
 	Comment(String),
 	Assign(Assign),
 	If(If),
-	// While(While),
+	While(While),
 	// For(For),
 	Break,
 	Continue,
 	Return(Return),
 	// Function(Function),
 }
-
-// #[derive(Debug, PartialEq, Clone)]
-// struct While {}
-
-// #[derive(Debug, PartialEq, Clone)]
-// struct For {}
-
-// #[derive(Debug, PartialEq, Clone)]
-// struct Function {}
 
 impl Stmt {
 	pub fn new_raw(s: &str) -> Self {
@@ -58,5 +49,11 @@ impl From<Block> for Stmt {
 impl From<Expr> for Stmt {
 	fn from(expr: Expr) -> Self {
 		Self::Expr(expr)
+	}
+}
+
+impl From<While> for Stmt {
+	fn from(w: While) -> Self {
+		Self::While(w)
 	}
 }

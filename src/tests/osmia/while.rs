@@ -36,7 +36,32 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(While::new(
+			Binary::new(
+				Variable::from_vec(vec![
+					JsonTreeKeyExpression::JsonTreeKey("v".into())
+				]).into(),
+				BinaryOp::Less,
+				Expr::Int(3).into()
+			).into(),
+			Stmt::Block(vec![
+				Stmt::Expr(Variable::from_vec(vec![
+					JsonTreeKeyExpression::JsonTreeKey("v".into())
+				]).into()),
+				Stmt::new_assign(
+					Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("v".into())
+					]),
+					Binary::new(
+						Variable::from_vec(vec![
+							JsonTreeKeyExpression::JsonTreeKey("v".into())
+						]).into(),
+						BinaryOp::Plus,
+						Expr::Int(1).into()
+					).into()
+				)
+			].into()),
+		).into()),
 		None
 		// r#"{"v": 0}"#,
 		// "012"
@@ -78,7 +103,38 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(While::new(
+			Binary::new(
+				Variable::from_vec(vec![
+					JsonTreeKeyExpression::JsonTreeKey("v".into())
+				]).into(),
+				BinaryOp::NotEqual,
+				Expr::Int(0).into()
+			).into(),
+			Stmt::Block(vec![
+				Stmt::Expr(
+					Binary::new(
+						Variable::from_vec(vec![
+							JsonTreeKeyExpression::JsonTreeKey("v".into())
+						]).into(),
+						BinaryOp::Mod,
+						Expr::Int(2).into()
+					).into()
+				),
+				Stmt::new_assign(
+					Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("v".into())
+					]),
+					Binary::new(
+						Variable::from_vec(vec![
+							JsonTreeKeyExpression::JsonTreeKey("v".into())
+						]).into(),
+						BinaryOp::Minus,
+						Expr::Int(1).into()
+					).into()
+				)
+			].into()),
+		).into()),
 		None
 		// r#"{"v": 10}"#,
 		// "0101010101"
@@ -98,7 +154,10 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(While::new(
+			Expr::Bool(false).into(),
+			Stmt::new_raw("123".into()),
+		).into()),
 		None
 		// r#"{}"#,
 		// ""
@@ -136,7 +195,32 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::While(While::new(
+				Binary::new(
+					Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("v".into())
+					]).into(),
+					BinaryOp::NotEqual,
+					Expr::Int(10000).into()
+				).into(),
+				Stmt::new_assign(
+					Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("v".into())
+					]),
+					Binary::new(
+						Variable::from_vec(vec![
+							JsonTreeKeyExpression::JsonTreeKey("v".into())
+						]).into(),
+						BinaryOp::Plus,
+						Expr::Int(1)
+					).into()
+				)
+			)),
+			Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("v".into())
+			])).into()
+		].into())),
 		None
 		// r#"{"v": 0}"#,
 		// "10000"
