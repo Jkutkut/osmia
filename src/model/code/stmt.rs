@@ -15,7 +15,7 @@ pub enum Stmt {
 	Break,
 	Continue,
 	Return(Return),
-	// Function(Function),
+	Function(Function),
 }
 
 impl Stmt {

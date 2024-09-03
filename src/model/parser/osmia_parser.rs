@@ -372,17 +372,30 @@ impl OsmiaParserImpl {
 	}
 
 	fn function(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!(); // TODO
-	}
-
-	fn parameters(&mut self) -> Result<Vec<FunctionParam>, OsmiaError> {
-		self.consume(Token::ParentStart, |parser| parser.error(&format!(
+		self.consume(Token::Function, |parser| parser.error(&format!(
 			"Expected '{:?}', got '{:?}'",
-			Token::ParentStart, parser.get_current()
+			Token::Function, parser.get_current()
 		)))?;
 		self.consume_whitespaces();
+		let name = self.identifier()?;
+		self.consume_whitespaces();
+		let params = match self.match_and_advance(&[Token::Semicolon]) {
+			true => self.parameters(&Token::StmtEnd)?,
+			false => Vec::new(),
+		};
+		self.consume_whitespaces();
+		self.consume(Token::StmtEnd, |parser| parser.error(&format!(
+			"Unclosed function statement. Expected '{:?}' but got '{:?}'",
+			Token::StmtEnd, parser.get_current()
+		)))?;
+		let block = self.breakable_block(Some(&vec![Token::Done]))?;
+		Ok(Stmt::Function(Function::new(name, params, block)))
+	}
+
+	fn parameters(&mut self, exit_token: &Token) -> Result<Vec<FunctionParam>, OsmiaError> {
+		self.consume_whitespaces();
 		let mut params: Vec<FunctionParam> = Vec::new();
-		while !self.check_current(&Token::ParentEnd) {
+		while !self.check_current(exit_token) {
 			if params.len() > 0 {
 				self.consume(Token::Comma, |parser| parser.error(&format!(
 					"Expected comma, got: {:?}",
@@ -398,10 +411,6 @@ impl OsmiaParserImpl {
 			params.push(self.parameter()?);
 			self.consume_whitespaces();
 		}
-		self.consume(Token::ParentEnd, |parser| parser.error(&format!(
-			"Expected '{:?}', got '{:?}'",
-			Token::ParentEnd, parser.get_current()
-		)))?;
 		Ok(params)
 	}
 
@@ -429,7 +438,15 @@ impl OsmiaParserImpl {
 			Token::Function, parser.get_current()
 		)))?;
 		self.consume_whitespaces();
-		let params = self.parameters()?;
+		self.consume(Token::ParentStart, |parser| parser.error(&format!(
+			"Expected '{:?}', got '{:?}'",
+			Token::ParentStart, parser.get_current()
+		)))?;
+		let params = self.parameters(&Token::ParentEnd)?;
+		self.consume(Token::ParentEnd, |parser| parser.error(&format!(
+			"Expected '{:?}', got '{:?}'",
+			Token::ParentEnd, parser.get_current()
+		)))?;
 		self.consume_whitespaces();
 		self.consume(Token::Arrow, |parser| parser.error(&format!(
 			"Expected '{:?}', got '{:?}'",

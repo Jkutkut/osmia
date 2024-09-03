@@ -21,7 +21,11 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Function(Function::new(
+			"foo".into(),
+			Vec::new(),
+			Stmt::Print(Print::new(Expr::new_str("Hello, world!")))
+		))),
 		None
 	),
 	(
@@ -46,7 +50,15 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Function(Function::new(
+			"foo".into(),
+			vec![
+				FunctionParam::new("arg".into(), None)
+			],
+			Stmt::Print(Print::new(Expr::Variable(Variable::from_vec(vec![
+				JsonTreeKeyExpression::JsonTreeKey("arg".into())
+			]))))
+		))),
 		None
 	),
 	(
@@ -78,7 +90,24 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Function(Function::new(
+			"foo".into(),
+			vec![
+				FunctionParam::new("arg1".into(), None),
+				FunctionParam::new("arg2".into(), None)
+			],
+			Stmt::Print(Print::new(
+				Binary::new(
+					Expr::Variable(Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("arg1".into())
+					])),
+					BinaryOp::Plus,
+					Expr::Variable(Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("arg2".into())
+					]))
+				).into()
+			))
+		))),
 		None
 	),
 	(
@@ -116,7 +145,24 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Function(Function::new(
+			"foo".into(),
+			vec![
+				FunctionParam::new("arg1".into(), Some(Expr::Bool(true))),
+				FunctionParam::new("arg2".into(), Some(Expr::Bool(false)))
+			],
+			Stmt::Print(Print::new(
+				Binary::new(
+					Expr::Variable(Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("arg1".into())
+					])),
+					BinaryOp::Plus,
+					Expr::Variable(Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("arg2".into())
+					]))
+				).into()
+			))
+		))),
 		None
 	),
 	(
@@ -142,7 +188,18 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Function(Function::new(
+			"foo".into(),
+			vec![
+				FunctionParam::new_spread("args".into()),
+			],
+			Stmt::Print(Print::new(
+				Expr::Variable(Variable::from_vec(vec![
+					JsonTreeKeyExpression::JsonTreeKey("args".into())
+				]),
+				).into()
+			))
+		))),
 		None
 	)
 );
