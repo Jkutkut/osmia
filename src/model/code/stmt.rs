@@ -4,11 +4,12 @@ use super::*;
 pub enum Stmt {
 	Block(Block),
 	Raw(String),
+	NewLine,
 	Expr(Expr),
 	Print(Print),
 	Comment(String),
 	Assign(Assign),
-	// If(If),
+	If(If),
 	// While(While),
 	// For(For),
 	Break,
@@ -18,16 +19,10 @@ pub enum Stmt {
 }
 
 // #[derive(Debug, PartialEq, Clone)]
-// struct If {}
-
-// #[derive(Debug, PartialEq, Clone)]
 // struct While {}
 
 // #[derive(Debug, PartialEq, Clone)]
 // struct For {}
-
-// #[derive(Debug, PartialEq, Clone)]
-// struct Return {}
 
 // #[derive(Debug, PartialEq, Clone)]
 // struct Function {}

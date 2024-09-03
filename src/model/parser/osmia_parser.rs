@@ -54,10 +54,20 @@ impl OsmiaParserImpl {
 }
 
 impl OsmiaParserImpl {
+	#[cfg(not(debug_assertions))]
 	fn error(&self, msg: &str) -> String {
 		format!(
 			"Parser error: Line {}: {}",
 			self.line, msg
+		)
+	}
+
+	#[cfg(debug_assertions)]
+	fn error(&self, msg: &str) -> String {
+		let tokens_until_now = &self.code[0..self.current];
+		format!(
+			"Parser error: Line {}: {}\nTokens until now: {:?} -> {:?}",
+			self.line, msg, tokens_until_now, self.get_current()
 		)
 	}
 
@@ -151,17 +161,14 @@ impl OsmiaParserImpl {
 	}
 
 	fn block(&mut self) -> Result<Stmt, OsmiaError> {
-		self.breakable_block(&None)
+		self.breakable_block(None)
 	}
 
-	fn breakable_block(&mut self, break_with: &Option<Vec<Token>>) -> Result<Stmt, OsmiaError> {
+	fn breakable_block(&mut self, break_with: Option<&Vec<Token>>) -> Result<Stmt, OsmiaError> {
 		let mut statements: Block = Block::new();
-		loop {
-			self.consume_new_lines();
-			if self.done() {
-				break;
-			}
+		while !self.done() {
 			match self.advance() {
+				Token::NewLine => statements.push(Stmt::NewLine),
 				Token::Raw(r) => statements.push(Stmt::Raw(r.to_string())),
 				Token::StmtStart => match self.stmt(break_with)? {
 					None => break,
@@ -180,7 +187,18 @@ impl OsmiaParserImpl {
 		Ok(statements.into())
 	}
 
-	fn stmt(&mut self, return_none_with: &Option<Vec<Token>>) -> Result<Option<Stmt>, OsmiaError> {
+	fn stmt(&mut self, return_none_with: Option<&Vec<Token>>) -> Result<Option<Stmt>, OsmiaError> {
+		if let Some(break_blocks) = return_none_with {
+			let is_end_token = self.check_current(&Token::Fi) || self.check_current(&Token::Done);
+			for token in break_blocks {
+				if self.check_current(token) {
+					if is_end_token {
+						self.advance();
+					}
+					return Ok(None)
+				}
+			}
+		}
 		let stmt: Stmt = match self.get_current() {
 			Token::Print => self.print()?,
 			Token::Comment => self.comment()?,
@@ -251,7 +269,32 @@ impl OsmiaParserImpl {
 	}
 
 	fn if_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		todo!(); // TODO
+		self.consume(Token::If, |parser| parser.error(&format!(
+			"Expected if, got '{:?}'",
+			parser.get_current()
+		)))?;
+		let conditional = self.conditional(&vec![
+			Token::ElseIf, Token::Else, Token::Fi
+		])?;
+		let mut else_if_blocks = Vec::new();
+		while self.match_and_advance(&[Token::ElseIf]) {
+			else_if_blocks.push(self.conditional(&vec![
+				Token::ElseIf, Token::Else, Token::Fi
+			])?);
+		}
+		let else_if_blocks = match else_if_blocks.len() {
+			0 => None,
+			_ => Some(else_if_blocks),
+		};
+		let mut else_block = None;
+		if self.match_and_advance(&[Token::Else]) {
+			self.consume(Token::StmtEnd, |parser| parser.error(&format!(
+				"Unclosed '{:?}' statement. Expected '{:?}' but got '{:?}'",
+				Token::Else, Token::StmtEnd, parser.get_current()
+			)))?;
+			else_block = Some(self.breakable_block(Some(&vec![Token::Fi]))?);
+		}
+		Ok(Stmt::If(If::new(conditional, else_if_blocks, else_block)))
 	}
 
 	fn while_stmt(&mut self) -> Result<Stmt, OsmiaError> {
@@ -260,6 +303,18 @@ impl OsmiaParserImpl {
 
 	fn for_stmt(&mut self) -> Result<Stmt, OsmiaError> {
 		todo!(); // TODO
+	}
+
+	fn conditional(&mut self, break_with: &Vec<Token>) -> Result<ConditionalStmt, OsmiaError> {
+		self.consume_whitespaces();
+		let expr = self.expr()?;
+		self.consume_whitespaces();
+		self.consume(Token::StmtEnd, |parser| parser.error(&format!(
+			"Unclosed conditional statement. Expected '{:?}' but got '{:?}'",
+			Token::StmtEnd, parser.get_current()
+		)))?;
+		let block = self.breakable_block(Some(break_with))?;
+		Ok(ConditionalStmt::new(expr, block))
 	}
 
 	fn break_stmt(&mut self) -> Result<Stmt, OsmiaError> {

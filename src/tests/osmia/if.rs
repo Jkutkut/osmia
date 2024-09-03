@@ -25,7 +25,20 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::If(If::new(
+			ConditionalStmt::new(
+				Binary::new(
+					Variable::from_vec(vec![
+						JsonTreeKeyExpression::JsonTreeKey("condition".into())
+					]).into(),
+					BinaryOp::Equal,
+					Expr::new_str("if")
+				).into(),
+				Stmt::Print(Print::new(Expr::new_str("condition is if"))),
+			),
+			None,
+			None
+		))),
 		None
 	),
 	(
@@ -71,7 +84,33 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::NewLine,
+			Stmt::If(If::new(
+				ConditionalStmt::new(
+					Binary::new(
+						Variable::from_vec(vec![
+							JsonTreeKeyExpression::JsonTreeKey("condition".into())
+						]).into(),
+						BinaryOp::Equal,
+						Expr::new_str("if")
+					).into(),
+					Stmt::Block(vec![
+						Stmt::NewLine,
+						Stmt::new_raw("\t"),
+						Stmt::Print(Print::new(Expr::new_str("condition is if"))),
+						Stmt::NewLine,
+					].into()).into()
+				),
+				None,
+				Some(Stmt::Block(vec![
+					Stmt::NewLine,
+					Stmt::new_raw("\t"),
+					Stmt::Print(Print::new(Expr::new_str("condition is else"))),
+					Stmt::NewLine,
+				].into()).into())
+			))
+		].into())),
 		None
 	),
 	(
@@ -155,7 +194,64 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::Block(vec![
+			Stmt::NewLine,
+			Stmt::If(If::new(
+				ConditionalStmt::new(
+					Binary::new(
+						Variable::from_vec(vec![
+							JsonTreeKeyExpression::JsonTreeKey("condition".into())
+						]).into(),
+						BinaryOp::Equal,
+						Expr::new_str("if")
+					).into(),
+					Stmt::Block(vec![
+						Stmt::NewLine,
+						Stmt::new_raw("\t"),
+						Stmt::Print(Print::new(Expr::new_str("condition is if"))),
+						Stmt::NewLine,
+					].into()).into()
+				),
+				Some(vec![
+					ConditionalStmt::new(
+						Binary::new(
+							Variable::from_vec(vec![
+								JsonTreeKeyExpression::JsonTreeKey("condition".into())
+							]).into(),
+							BinaryOp::Equal,
+							Expr::new_str("elseif01")
+						).into(),
+						Stmt::Block(vec![
+							Stmt::NewLine,
+							Stmt::new_raw("\t"),
+							Stmt::Print(Print::new(Expr::new_str("condition is elseif01"))),
+							Stmt::NewLine,
+						].into()).into()
+					),
+					ConditionalStmt::new(
+						Binary::new(
+							Variable::from_vec(vec![
+								JsonTreeKeyExpression::JsonTreeKey("condition".into())
+							]).into(),
+							BinaryOp::Equal,
+							Expr::new_str("elseif02")
+						).into(),
+						Stmt::Block(vec![
+							Stmt::NewLine,
+							Stmt::new_raw("\t"),
+							Stmt::Print(Print::new(Expr::new_str("condition is elseif02"))),
+							Stmt::NewLine,
+						].into()).into()
+					),
+				]),
+				Some(Stmt::Block(vec![
+					Stmt::NewLine,
+					Stmt::new_raw("\t"),
+					Stmt::Print(Print::new(Expr::new_str("condition is else"))),
+					Stmt::NewLine,
+				].into()).into())
+			))
+		].into())),
 		None
 	),
 	(
@@ -190,7 +286,28 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		None,
+		Some(Stmt::If(If::new(
+			ConditionalStmt::new(
+				Variable::from_vec(vec![
+					JsonTreeKeyExpression::JsonTreeKey("v1".into())
+				]).into(),
+				Stmt::Block(vec![
+					Stmt::new_raw("if"),
+					Stmt::If(If::new(
+						ConditionalStmt::new(
+							Variable::from_vec(vec![
+								JsonTreeKeyExpression::JsonTreeKey("v2".into())
+							]).into(),
+							Stmt::new_raw("if01"),
+						),
+						None,
+						Some(Stmt::new_raw("else01"))
+					))
+				].into()).into()
+			),
+			None,
+			Some(Stmt::new_raw("else02")),
+		))),
 		None
-	)
+	),
 );

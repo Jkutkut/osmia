@@ -10,6 +10,8 @@ mod expr;
 mod json;
 mod print;
 mod r#return;
+mod r#if;
+mod conditional_stmt;
 mod variable;
 
 pub use assign::Assign;
@@ -24,6 +26,8 @@ pub use expr::Expr;
 pub use json::*;
 pub use print::Print;
 pub use r#return::Return;
+pub use r#if::If;
+pub use conditional_stmt::ConditionalStmt;
 pub use variable::*;
 
 use crate::model::lexer::Token;
