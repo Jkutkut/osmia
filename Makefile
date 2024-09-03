@@ -31,6 +31,9 @@ test:
 test_backtrace:
 	${DOCKER_RUN} ${RUN_ATTRS} -e RUST_BACKTRACE=1 --entrypoint cargo jkutkut/docker4rust test
 
+test_watch:
+	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear test
+
 doc:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust doc --lib --examples --document-private-items
 
@@ -58,6 +61,8 @@ doc_release:
 	@git push
 	@git checkout main
 
+stop:
+	docker rm -f ${REPO}
 
 clean:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust clean
