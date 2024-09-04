@@ -18,6 +18,7 @@ fn parser_test_fail(
 		Ok(expr) => panic!("The code should not be parsed: {:?}", expr),
 		Err(err) => {
 			println!("Error: {}", err);
+			let err = err.to_lowercase();
 			for error_piece in error_pieces {
 				println!("Looking for: {}", error_piece);
 				assert!(err.contains(error_piece));

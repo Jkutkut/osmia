@@ -10,7 +10,7 @@ macro_tests!(
 	(
 		invalid_grouping_02,
 		"{{ ( 12 }}",
-		&["end", "grouping"]
+		&["unclosed", "grouping", ")"]
 	),
 	(
 		invalid_grouping_03,

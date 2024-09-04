@@ -1,4 +1,7 @@
-use super::Parser;
+use super::{
+	Parser,
+	ParserErrorMsg,
+};
 use crate::types::{
 	LexerCode,
 	ParserCode,
@@ -23,7 +26,7 @@ impl Parser<LexerCode, ParserCode, OsmiaError> for OsmiaParser {
 
 use crate::model::lexer::Token;
 
-struct OsmiaParserImpl {
+pub struct OsmiaParserImpl {
 	line: usize,
 	code: LexerCode,
 	current: usize,
@@ -40,10 +43,9 @@ impl OsmiaParserImpl {
 	pub fn parse(&mut self) -> Result<ParserCode, OsmiaError> {
 		let code = self.code()?;
 		if !self.done() {
-			return Err(self.error(&format!(
-				"Unexpected token {:?}",
-				self.get_current()
-			)));
+			return Err(self.error_msg(
+				ParserErrorMsg::Custom("Unexpected token".to_string())
+			));
 		}
 		Ok(code)
 	}
@@ -54,20 +56,20 @@ impl OsmiaParserImpl {
 }
 
 impl OsmiaParserImpl {
-	#[cfg(not(debug_assertions))]
-	fn error(&self, msg: &str) -> String {
-		format!(
-			"Parser error: Line {}: {}",
-			self.line, msg
-		)
-	}
-
 	#[cfg(debug_assertions)]
-	fn error(&self, msg: &str) -> String {
+	fn error_msg(&self, msg: ParserErrorMsg) -> String {
 		let tokens_until_now = &self.code[0..self.current];
 		format!(
 			"Parser error: Line {}: {}\nTokens until now: {:?} -> {:?}",
-			self.line, msg, tokens_until_now, self.get_current()
+			self.line, msg.report(self), tokens_until_now, self.get_current()
+		)
+	}
+
+	#[cfg(not(debug_assertions))]
+	fn error_msg(&self, msg: ParserErrorMsg) -> String {
+		format!(
+			"Parser error: Line {}: {}",
+			self.line, msg.report(self),
 		)
 	}
 
@@ -79,7 +81,7 @@ impl OsmiaParserImpl {
 		self.get_current() == token
 	}
 
-	fn get_current(&self) -> &Token {
+	pub fn get_current(&self) -> &Token {
 		&self.code[self.current]
 	}
 
@@ -174,10 +176,9 @@ impl OsmiaParserImpl {
 					None => break,
 					Some(stmt) => statements.push(stmt),
 				},
-				_ => return Err(self.error(&format!(
-					"Unexpected token {:?}",
-					self.get_current()
-				)))
+				_ => return Err(self.error_msg(
+					ParserErrorMsg::Custom("Unexpected in block:".to_string())
+				))
 			}
 		}
 		if statements.len() == 1 {
@@ -211,30 +212,24 @@ impl OsmiaParserImpl {
 			Token::Function => self.function()?,
 			_ => self.assign()?,
 		};
-		self.consume(
-			Token::StmtEnd,
-			|parser| parser.error(&format!(
-				"Expected '{:?}', got '{:?}'",
-				Token::StmtEnd, parser.get_current()
-			))
-		)?;
+		self.consume(Token::StmtEnd, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::StmtEnd)
+		))?;
 		Ok(Some(stmt))
 	}
 
 	fn print(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::Print, |parser| parser.error(&format!(
-			"Expected print, got '{:?}'",
-			parser.get_current()
-		)))?;
+		self.consume(Token::Print, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::Print)
+		))?;
 		self.consume_whitespaces();
 		Ok(Stmt::new_print(self.expr()?))
 	}
 
 	fn comment(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::Comment, |parser| parser.error(&format!(
-			"Expected comment, got '{:?}'",
-			parser.get_current()
-		)))?;
+		self.consume(Token::Comment, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::Comment)
+		))?;
 		let mut comment = String::new();
 		while !self.done() && !self.check_current(&Token::StmtEnd) {
 			match self.advance() {
@@ -243,10 +238,9 @@ impl OsmiaParserImpl {
 					comment.push('\n');
 					self.line += 1;
 				},
-				_ => return Err(self.error(&format!(
-					"Expected comment, got '{:?}'",
-					self.get_current()
-				)))
+				_ => return Err(self.error_msg(
+					ParserErrorMsg::ParseValue("comment".into())
+				))
 			};
 		}
 		Ok(Stmt::Comment(comment))
@@ -269,10 +263,9 @@ impl OsmiaParserImpl {
 	}
 
 	fn if_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::If, |parser| parser.error(&format!(
-			"Expected if, got '{:?}'",
-			parser.get_current()
-		)))?;
+		self.consume(Token::If, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::If)
+		))?;
 		let conditional = self.conditional(&vec![
 			Token::ElseIf, Token::Else, Token::Fi
 		])?;
@@ -288,44 +281,39 @@ impl OsmiaParserImpl {
 		};
 		let mut else_block = None;
 		if self.match_and_advance(&[Token::Else]) {
-			self.consume(Token::StmtEnd, |parser| parser.error(&format!(
-				"Unclosed '{:?}' statement. Expected '{:?}' but got '{:?}'",
-				Token::Else, Token::StmtEnd, parser.get_current()
-			)))?;
+			self.consume(Token::StmtEnd, |parser| parser.error_msg(
+				ParserErrorMsg::Unclosed("else statement".to_string(), Token::StmtEnd)
+			))?;
 			else_block = Some(self.breakable_block(Some(&vec![Token::Fi]))?);
 		}
 		Ok(Stmt::If(If::new(conditional, else_if_blocks, else_block)))
 	}
 
 	fn while_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::While, |parser| parser.error(&format!(
-			"Expected while, got '{:?}'",
-			parser.get_current()
-		)))?;
+		self.consume(Token::While, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::While)
+		))?;
 		Ok(self.conditional(&vec![
 			Token::While, Token::Done
 		])?.into())
 	}
 
 	fn for_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::For, |parser| parser.error(&format!(
-			"Expected '{:?}', got '{:?}'",
-			Token::For, parser.get_current()
-		)))?;
+		self.consume(Token::For, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::For)
+		))?;
 		self.consume_whitespaces();
 		let var = Variable::from_vec(vec![self.identifier()?.into()]);
 		self.consume_whitespaces();
-		self.consume(Token::In, |parser| parser.error(&format!(
-			"Expected '{:?}' in for statement, got '{:?}'",
-			Token::In, parser.get_current()
-		)))?;
+		self.consume(Token::In, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::In)
+		))?;
 		self.consume_whitespaces();
 		let iterable = self.expr()?;
 		self.consume_whitespaces();
-		self.consume(Token::StmtEnd, |parser| parser.error(&format!(
-			"Unclosed for statement. Expected '{:?}' but got '{:?}'",
-			Token::StmtEnd, parser.get_current()
-		)))?;
+		self.consume(Token::StmtEnd, |parser| parser.error_msg(
+			ParserErrorMsg::Unclosed("for statement".to_string(), Token::StmtEnd)
+		))?;
 		let block = self.breakable_block(Some(&vec![Token::Done]))?;
 		Ok(Stmt::For(For::new(var, iterable, block)))
 	}
@@ -334,35 +322,31 @@ impl OsmiaParserImpl {
 		self.consume_whitespaces();
 		let expr = self.expr()?;
 		self.consume_whitespaces();
-		self.consume(Token::StmtEnd, |parser| parser.error(&format!(
-			"Unclosed conditional statement. Expected '{:?}' but got '{:?}'",
-			Token::StmtEnd, parser.get_current()
-		)))?;
+		self.consume(Token::StmtEnd, |parser| parser.error_msg(
+			ParserErrorMsg::Unclosed("conditional statement".to_string(), Token::StmtEnd)
+		))?;
 		let block = self.breakable_block(Some(break_with))?;
 		Ok(ConditionalStmt::new(expr, block))
 	}
 
 	fn break_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::Break, |parser| parser.error(&format!(
-			"Expected break, got '{:?}'",
-			parser.get_current()
-		)))?;
+		self.consume(Token::Break, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::Break)
+		))?;
 		Ok(Stmt::Break)
 	}
 
 	fn continue_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::Continue, |parser| parser.error(&format!(
-			"Expected continue, got '{:?}'",
-			parser.get_current()
-		)))?;
+		self.consume(Token::Continue, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::Continue)
+		))?;
 		Ok(Stmt::Continue)
 	}
 
 	fn return_stmt(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::Return, |parser| parser.error(&format!(
-			"Expected return, got '{:?}'",
-			parser.get_current()
-		)))?;
+		self.consume(Token::Return, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::Return)
+		))?;
 		self.consume_whitespaces();
 		let expr: Option<Expr> = match self.check_current(&Token::StmtEnd) {
 			true => None,
@@ -372,10 +356,9 @@ impl OsmiaParserImpl {
 	}
 
 	fn function(&mut self) -> Result<Stmt, OsmiaError> {
-		self.consume(Token::Function, |parser| parser.error(&format!(
-			"Expected '{:?}', got '{:?}'",
-			Token::Function, parser.get_current()
-		)))?;
+		self.consume(Token::Function, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::Function)
+		))?;
 		self.consume_whitespaces();
 		let name = self.identifier()?;
 		self.consume_whitespaces();
@@ -384,10 +367,9 @@ impl OsmiaParserImpl {
 			false => Vec::new(),
 		};
 		self.consume_whitespaces();
-		self.consume(Token::StmtEnd, |parser| parser.error(&format!(
-			"Unclosed function statement. Expected '{:?}' but got '{:?}'",
-			Token::StmtEnd, parser.get_current()
-		)))?;
+		self.consume(Token::StmtEnd, |parser| parser.error_msg(
+			ParserErrorMsg::Unclosed("function statement".to_string(), Token::Arrow)
+		))?;
 		let block = self.breakable_block(Some(&vec![Token::Done]))?;
 		Ok(Stmt::Function(Function::new(name, params, block)))
 	}
@@ -397,10 +379,9 @@ impl OsmiaParserImpl {
 		let mut params: Vec<FunctionParam> = Vec::new();
 		while !self.check_current(exit_token) {
 			if params.len() > 0 {
-				self.consume(Token::Comma, |parser| parser.error(&format!(
-					"Expected comma, got: {:?}",
-					parser.get_current()
-				)))?;
+				self.consume(Token::Comma, |parser| parser.error_msg(
+					ParserErrorMsg::Expected(Token::Comma)
+				))?;
 				self.consume_whitespaces();
 			}
 			if self.match_and_advance(&[Token::Spread]) {
@@ -433,25 +414,21 @@ impl OsmiaParserImpl {
 	}
 
 	fn lambda(&mut self) -> Result<Expr, OsmiaError> {
-		self.consume(Token::Function, |parser| parser.error(&format!(
-			"Expected lambda keyword '{:?}', got '{:?}'",
-			Token::Function, parser.get_current()
-		)))?;
+		self.consume(Token::Function, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::Function)
+		))?;
 		self.consume_whitespaces();
-		self.consume(Token::ParentStart, |parser| parser.error(&format!(
-			"Expected '{:?}', got '{:?}'",
-			Token::ParentStart, parser.get_current()
-		)))?;
+		self.consume(Token::ParentStart, |parser| parser.error_msg(
+			ParserErrorMsg::Expected(Token::ParentStart)
+		))?;
 		let params = self.parameters(&Token::ParentEnd)?;
-		self.consume(Token::ParentEnd, |parser| parser.error(&format!(
-			"Expected '{:?}', got '{:?}'",
-			Token::ParentEnd, parser.get_current()
-		)))?;
+		self.consume(Token::ParentEnd, |parser| parser.error_msg(
+			ParserErrorMsg::Unclosed("lambda".to_string(), Token::ParentEnd)
+		))?;
 		self.consume_whitespaces();
-		self.consume(Token::Arrow, |parser| parser.error(&format!(
-			"Expected '{:?}', got '{:?}'",
-			Token::Arrow, parser.get_current()
-		)))?;
+		self.consume(Token::Arrow, |parser| parser.error_msg(
+			ParserErrorMsg::MissingKeyword(Token::Arrow)
+		))?;
 		self.consume_whitespaces();
 		let body = self.expr()?;
 		Ok(Lambda::new(params, body).into())
@@ -506,9 +483,11 @@ impl OsmiaParserImpl {
 		while self.match_and_advance(&[Token::Question]) {
 			match self.call()? {
 				Expr::Call(call) => p = MethodCall::new(p, call).into(),
-				t => return Err(self.error(&format!(
-					"Expected method call, got: {:?}", t
-				)))?
+				_ => return Err(self.error_msg(
+					ParserErrorMsg::Custom(
+						"Expected method call. Maybe you forgot to call it?".to_string()
+					)
+				))
 			};
 		}
 		Ok(p)
@@ -533,17 +512,15 @@ impl OsmiaParserImpl {
 				match n.contains('.') {
 					true => match n.parse::<f64>() {
 						Ok(f) => Expr::Float(f),
-						Err(_) => return Err(self.error(&format!(
-							"Could not parse float: {}",
-							n
-						)))
+						Err(_) => return Err(self.error_msg(
+							ParserErrorMsg::ParseValue("float".into())
+						))
 					},
 					false => match n.parse::<i64>() {
 						Ok(i) => Expr::Int(i),
-						Err(_) => return Err(self.error(&format!(
-							"Could not parse int: {}",
-							n
-						)))
+						Err(_) => return Err(self.error_msg(
+							ParserErrorMsg::ParseValue("int".into())
+						))
 					}
 				}
 			},
@@ -562,29 +539,26 @@ impl OsmiaParserImpl {
 	}
 
 	fn arguments(&mut self) -> Result<Vec<Expr>, OsmiaError> {
-		self.consume(Token::ParentStart, |parser| parser.error(&format!(
-			"Expected start of arguments, got: {:?}",
-			parser.get_current()
-		)))?;
+		self.consume(Token::ParentStart, |parser| parser.error_msg(
+			ParserErrorMsg::Expected(Token::ParentStart)
+		))?;
 		let mut arr = Vec::new();
 		self.consume_whitespaces();
 		if !self.check_current(&Token::ParentEnd) {
 			arr.push(self.expr()?.into());
 			self.consume_whitespaces();
 			while !self.check_current(&Token::ParentEnd) {
-				self.consume(Token::Comma, |parser| parser.error(&format!(
-					"Expected comma, got: {:?}",
-					parser.get_current()
-				)))?;
+				self.consume(Token::Comma, |parser| parser.error_msg(
+					ParserErrorMsg::Expected(Token::Comma)
+				))?;
 				self.consume_whitespaces();
 				arr.push(self.expr()?.into());
 				self.consume_whitespaces();
 			}
 		}
-		self.consume(Token::ParentEnd, |parser| parser.error(&format!(
-			"Expected end of arguments, got: {:?}",
-			parser.get_current()
-		)))?;
+		self.consume(Token::ParentEnd, |parser| parser.error_msg(
+			ParserErrorMsg::Unclosed("arguments".to_string(), Token::ParentEnd)
+		))?;
 		Ok(arr)
 	}
 
@@ -604,29 +578,26 @@ impl OsmiaParserImpl {
 		let mut arr = vec![self.identifier()?.into()];
 		while self.match_and_advance(&[Token::ArrayStart]) {
 			arr.push(self.expr()?.into());
-			self.consume(Token::ArrayEnd, |parser| parser.error(&format!(
-				"Expected end of array, got: {:?}",
-				parser.get_current()
-			)))?;
+			self.consume(Token::ArrayEnd, |parser| parser.error_msg(
+				ParserErrorMsg::Unclosed("array selector".to_string(), Token::ArrayEnd)
+			))?;
 		}
 		Ok(Variable::from_vec(arr))
 	}
 
 	fn array(&mut self) -> Result<Expr, OsmiaError> {
-		self.consume(Token::ArrayStart, |parser| parser.error(&format!(
-			"Expected start of array, got: {:?}",
-			parser.get_current()
-		)))?;
+		self.consume(Token::ArrayStart, |parser| parser.error_msg(
+			ParserErrorMsg::Expected(Token::ArrayStart)
+		))?;
 		let mut arr: Array = Vec::new().into();
 		self.consume_whitespaces();
 		if !self.match_and_advance(&[Token::ArrayEnd]) {
 			arr.push(self.expr()?.into());
 			self.consume_whitespaces();
 			while !self.match_and_advance(&[Token::ArrayEnd]) {
-				self.consume(Token::Comma, |parser| parser.error(&format!(
-					"Expected comma, got: {:?}",
-					parser.get_current()
-				)))?;
+				self.consume(Token::Comma, |parser| parser.error_msg(
+					ParserErrorMsg::Expected(Token::Comma)
+				))?;
 				self.consume_whitespaces();
 				arr.push(self.expr()?.into());
 				self.consume_whitespaces();
@@ -636,20 +607,18 @@ impl OsmiaParserImpl {
 	}
 
 	fn object(&mut self) -> Result<Expr, OsmiaError> {
-		self.consume(Token::ObjectStart, |parser| parser.error(&format!(
-			"Expected start of object, got: {:?}",
-			parser.get_current()
-		)))?;
+		self.consume(Token::ObjectStart, |parser| parser.error_msg(
+			ParserErrorMsg::Expected(Token::ObjectStart)
+		))?;
 		let mut obj: Object = Vec::new().into();
 		self.consume_whitespaces();
 		if !self.match_and_advance(&[Token::ObjectEnd]) {
 			obj.push(self.object_entry()?);
 			self.consume_whitespaces();
 			while !self.match_and_advance(&[Token::ObjectEnd]) {
-				self.consume(Token::Comma, |parser| parser.error(&format!(
-					"Expected comma, got: {:?}",
-					parser.get_current()
-				)))?;
+				self.consume(Token::Comma, |parser| parser.error_msg(
+					ParserErrorMsg::Expected(Token::Comma)
+				))?;
 				self.consume_whitespaces();
 				obj.push(self.object_entry()?);
 				self.consume_whitespaces();
@@ -661,37 +630,33 @@ impl OsmiaParserImpl {
 	fn object_entry(&mut self) -> Result<(Expr, Expr), OsmiaError> {
 		let key = self.expr()?;
 		self.consume_whitespaces();
-		self.consume(Token::Colon, |parser| parser.error(&format!(
-			"Expected colon, got: {:?}",
-			parser.get_current()
-		)))?;
+		self.consume(Token::Colon, |parser| parser.error_msg(
+			ParserErrorMsg::Expected(Token::Colon)
+		))?;
 		self.consume_whitespaces();
 		let value = self.expr()?;
 		Ok((key, value))
 	}
 
 	fn grouping(&mut self) -> Result<Expr, OsmiaError> {
-		self.consume(Token::ParentStart, |parser| parser.error(&format!(
-			"Expected start of grouping, got: {:?}",
-			parser.get_current()
-		)))?;
+		self.consume(Token::ParentStart, |parser| parser.error_msg(
+			ParserErrorMsg::Expected(Token::ParentStart)
+		))?;
 		self.consume_whitespaces();
 		let expr = self.expr()?;
 		self.consume_whitespaces();
-		self.consume(Token::ParentEnd, |parser| parser.error(&format!(
-			"Expected end of grouping, got: {:?}",
-			parser.get_current()
-		)))?;
+		self.consume(Token::ParentEnd, |parser| parser.error_msg(
+			ParserErrorMsg::Unclosed("grouping".to_string(), Token::ParentEnd)
+		))?;
 		Ok(Grouping::new(expr).into())
 	}
 
 	fn identifier(&mut self) -> Result<JsonTreeKey<String>, OsmiaError> {
 		let key = match self.advance() {
 			Token::Alpha(s) => s.as_str().into(),
-			_ => return Err(self.error(&format!(
-				"Invalid identifier: {:?}",
-				self.get_previous()
-			)))
+			_ => return Err(self.error_msg(
+				ParserErrorMsg::Custom("Invalid identifier:".to_string())
+			)),
 		};
 		Ok(key)
 	}
