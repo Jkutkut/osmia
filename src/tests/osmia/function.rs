@@ -56,7 +56,7 @@ macro_tests!(
 				FunctionParam::new("arg".into(), None)
 			],
 			Stmt::Print(Print::new(Expr::Variable(Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("arg".into())
+				JsonTreeKeyExpr::JsonTreeKey("arg".into())
 			]))))
 		))),
 		None
@@ -99,11 +99,11 @@ macro_tests!(
 			Stmt::Print(Print::new(
 				Binary::new(
 					Expr::Variable(Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("arg1".into())
+						JsonTreeKeyExpr::JsonTreeKey("arg1".into())
 					])),
 					BinaryOp::Plus,
 					Expr::Variable(Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("arg2".into())
+						JsonTreeKeyExpr::JsonTreeKey("arg2".into())
 					]))
 				).into()
 			))
@@ -154,11 +154,11 @@ macro_tests!(
 			Stmt::Print(Print::new(
 				Binary::new(
 					Expr::Variable(Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("arg1".into())
+						JsonTreeKeyExpr::JsonTreeKey("arg1".into())
 					])),
 					BinaryOp::Plus,
 					Expr::Variable(Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("arg2".into())
+						JsonTreeKeyExpr::JsonTreeKey("arg2".into())
 					]))
 				).into()
 			))
@@ -195,7 +195,7 @@ macro_tests!(
 			],
 			Stmt::Print(Print::new(
 				Expr::Variable(Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("args".into())
+					JsonTreeKeyExpr::JsonTreeKey("args".into())
 				]),
 				).into()
 			))

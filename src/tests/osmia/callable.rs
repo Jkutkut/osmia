@@ -17,7 +17,7 @@ macro_tests!(
 		]),
 		Some(Expr::Call(Call::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+				JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 			]).into(),
 			Vec::new(),
 		)).into()),
@@ -39,11 +39,11 @@ macro_tests!(
 		]),
 		Some(Expr::Call(Call::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+				JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 			]).into(),
 			vec![
 				Expr::Variable(Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("bar".into()),
+					JsonTreeKeyExpr::JsonTreeKey("bar".into()),
 				]))
 			],
 		)).into()),
@@ -68,7 +68,7 @@ macro_tests!(
 		]),
 		Some(Expr::Call(Call::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+				JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 			]).into(),
 			vec![
 				Expr::Int(12),
@@ -95,7 +95,7 @@ macro_tests!(
 		Some(Expr::Call(Call::new(
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			).into(),
@@ -123,7 +123,7 @@ macro_tests!(
 		Some(Expr::Call(Call::new(
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				vec![
 					Expr::Int(1),
@@ -161,7 +161,7 @@ macro_tests!(
 		]),
 		Some(Expr::Call(Call::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+				JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 			]).into(),
 			vec![
 				Binary::new(
@@ -169,11 +169,11 @@ macro_tests!(
 					BinaryOp::Plus,
 					Expr::Call(Call::new(
 						Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("bar".into()),
+							JsonTreeKeyExpr::JsonTreeKey("bar".into()),
 						]).into(),
 						vec![
 							Expr::Variable(Variable::from_vec(vec![
-								JsonTreeKeyExpression::JsonTreeKey("v".into()),
+								JsonTreeKeyExpr::JsonTreeKey("v".into()),
 							]))
 						],
 					)),
@@ -207,22 +207,22 @@ macro_tests!(
 		]),
 		Some(Expr::Call(Call::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+				JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 			]).into(),
 			vec![
 				Expr::Call(Call::new(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("bar".into()),
+						JsonTreeKeyExpr::JsonTreeKey("bar".into()),
 					]).into(),
 					vec![
 						Expr::Call(Call::new(
 							Variable::from_vec(vec![
-								JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+								JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 							]).into(),
 							vec![
 								Expr::Call(Call::new(
 									Variable::from_vec(vec![
-										JsonTreeKeyExpression::JsonTreeKey("bar".into()),
+										JsonTreeKeyExpr::JsonTreeKey("bar".into()),
 									]).into(),
 									Vec::new(),
 								))
@@ -256,7 +256,7 @@ macro_tests!(
 		]),
 		Some(Expr::Call(Call::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+				JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 			]).into(),
 			vec![
 				Grouping::new(Binary::new(
@@ -286,7 +286,7 @@ macro_tests!(
 		]),
 		Some(Expr::Call(Call::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+				JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 			]).into(),
 			vec![
 				Grouping::new(Expr::Int(1).into()).into()
@@ -311,11 +311,11 @@ macro_tests!(
 		]),
 		Some(Stmt::Expr(MethodCall::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("var".into()),
+				JsonTreeKeyExpr::JsonTreeKey("var".into()),
 			]).into(),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -342,12 +342,12 @@ macro_tests!(
 		]),
 		Some(Stmt::Expr(MethodCall::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("var".into()),
-				JsonTreeKeyExpression::Expr(Expr::Int(2)),
+				JsonTreeKeyExpr::JsonTreeKey("var".into()),
+				JsonTreeKeyExpr::Expr(Expr::Int(2)),
 			]).into(),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -373,12 +373,12 @@ macro_tests!(
 		]),
 		Some(Stmt::Expr(MethodCall::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("usr".into()),
-				JsonTreeKeyExpression::JsonTreeKey("name".into()),
+				JsonTreeKeyExpr::JsonTreeKey("usr".into()),
+				JsonTreeKeyExpr::JsonTreeKey("name".into()),
 			]).into(),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -404,7 +404,7 @@ macro_tests!(
 			Expr::Int(1),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -430,7 +430,7 @@ macro_tests!(
 			Expr::Str("str".into()),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -456,7 +456,7 @@ macro_tests!(
 			Expr::Null,
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -482,7 +482,7 @@ macro_tests!(
 			Expr::Bool(true),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -508,7 +508,7 @@ macro_tests!(
 			Expr::Bool(false),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -536,7 +536,7 @@ macro_tests!(
 			Grouping::new(Expr::Int(1)).into(),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				Vec::new(),
 			)
@@ -569,7 +569,7 @@ macro_tests!(
 				Expr::Int(1),
 				Call::new(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+						JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 					]).into(),
 					Vec::new(),
 				)
@@ -603,7 +603,7 @@ macro_tests!(
 				Expr::Int(1),
 				Call::new(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+						JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 					]).into(),
 					Vec::new(),
 				)
@@ -636,20 +636,20 @@ macro_tests!(
 			MethodCall::new(
 				Call::new(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+						JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 					]).into(),
 					Vec::new(),
 				).into(),
 				Call::new(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("bar".into()),
+						JsonTreeKeyExpr::JsonTreeKey("bar".into()),
 					]).into(),
 					Vec::new(),
 				).into(),
 			).into(),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("baz".into()),
+					JsonTreeKeyExpr::JsonTreeKey("baz".into()),
 				]).into(),
 				Vec::new(),
 			).into()
@@ -693,7 +693,7 @@ macro_tests!(
 		Some(Stmt::Expr(MethodCall::new(
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into()),
+					JsonTreeKeyExpr::JsonTreeKey("foo".into()),
 				]).into(),
 				vec![
 					Expr::Int(1), Expr::Int(2), Expr::Int(3)
@@ -701,12 +701,12 @@ macro_tests!(
 			).into(),
 			Call::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("add".into()),
+					JsonTreeKeyExpr::JsonTreeKey("add".into()),
 				]).into(),
 				vec![
 					Call::new(
 						Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("add".into()),
+							JsonTreeKeyExpr::JsonTreeKey("add".into()),
 						]).into(),
 						vec![
 							Expr::Int(1), Expr::Int(2)

@@ -39,22 +39,22 @@ macro_tests!(
 		Some(While::new(
 			Binary::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("v".into())
+					JsonTreeKeyExpr::JsonTreeKey("v".into())
 				]).into(),
 				BinaryOp::Less,
 				Expr::Int(3).into()
 			).into(),
 			Stmt::Block(vec![
 				Stmt::Expr(Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("v".into())
+					JsonTreeKeyExpr::JsonTreeKey("v".into())
 				]).into()),
 				Stmt::new_assign(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("v".into())
+						JsonTreeKeyExpr::JsonTreeKey("v".into())
 					]),
 					Binary::new(
 						Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("v".into())
+							JsonTreeKeyExpr::JsonTreeKey("v".into())
 						]).into(),
 						BinaryOp::Plus,
 						Expr::Int(1).into()
@@ -106,7 +106,7 @@ macro_tests!(
 		Some(While::new(
 			Binary::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("v".into())
+					JsonTreeKeyExpr::JsonTreeKey("v".into())
 				]).into(),
 				BinaryOp::NotEqual,
 				Expr::Int(0).into()
@@ -115,7 +115,7 @@ macro_tests!(
 				Stmt::Expr(
 					Binary::new(
 						Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("v".into())
+							JsonTreeKeyExpr::JsonTreeKey("v".into())
 						]).into(),
 						BinaryOp::Mod,
 						Expr::Int(2).into()
@@ -123,11 +123,11 @@ macro_tests!(
 				),
 				Stmt::new_assign(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("v".into())
+						JsonTreeKeyExpr::JsonTreeKey("v".into())
 					]),
 					Binary::new(
 						Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("v".into())
+							JsonTreeKeyExpr::JsonTreeKey("v".into())
 						]).into(),
 						BinaryOp::Minus,
 						Expr::Int(1).into()
@@ -199,18 +199,18 @@ macro_tests!(
 			Stmt::While(While::new(
 				Binary::new(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("v".into())
+						JsonTreeKeyExpr::JsonTreeKey("v".into())
 					]).into(),
 					BinaryOp::NotEqual,
 					Expr::Int(10000).into()
 				).into(),
 				Stmt::new_assign(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("v".into())
+						JsonTreeKeyExpr::JsonTreeKey("v".into())
 					]),
 					Binary::new(
 						Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("v".into())
+							JsonTreeKeyExpr::JsonTreeKey("v".into())
 						]).into(),
 						BinaryOp::Plus,
 						Expr::Int(1)
@@ -218,7 +218,7 @@ macro_tests!(
 				)
 			)),
 			Expr::Variable(Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			])).into()
 		].into())),
 		None

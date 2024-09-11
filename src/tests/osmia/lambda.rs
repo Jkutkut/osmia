@@ -45,7 +45,7 @@ macro_tests!(
 		Some(Expr::Lambda(Lambda::new(
 			vec![FunctionParam::new("foo".into(), None)],
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("foo".into())
+				JsonTreeKeyExpr::JsonTreeKey("foo".into())
 			]).into()
 		)).into()),
 		None
@@ -83,11 +83,11 @@ macro_tests!(
 			],
 			Binary::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("op1".into())
+					JsonTreeKeyExpr::JsonTreeKey("op1".into())
 				]).into(),
 				BinaryOp::Plus,
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("op2".into())
+					JsonTreeKeyExpr::JsonTreeKey("op2".into())
 				]).into()
 			).into()
 		)).into()),
@@ -138,11 +138,11 @@ macro_tests!(
 			],
 			Binary::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("op1".into())
+					JsonTreeKeyExpr::JsonTreeKey("op1".into())
 				]).into(),
 				BinaryOp::Plus,
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("op2".into())
+					JsonTreeKeyExpr::JsonTreeKey("op2".into())
 				]).into()
 			).into()
 		)).into()),
@@ -171,7 +171,7 @@ macro_tests!(
 		Some(Expr::Lambda(Lambda::new(
 			vec![FunctionParam::new_spread("ops".into())],
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("ops".into())
+				JsonTreeKeyExpr::JsonTreeKey("ops".into())
 			]).into()
 		)).into()),
 		None
@@ -213,12 +213,12 @@ macro_tests!(
 			],
 			Binary::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("foo".into())
+					JsonTreeKeyExpr::JsonTreeKey("foo".into())
 				]).into(),
 				BinaryOp::Plus,
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("ops".into()),
-					JsonTreeKeyExpression::Expr(Expr::Int(0))
+					JsonTreeKeyExpr::JsonTreeKey("ops".into()),
+					JsonTreeKeyExpr::Expr(Expr::Int(0))
 				]).into()
 			).into()
 		)).into()),

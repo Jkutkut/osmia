@@ -7,7 +7,8 @@ use crate::types::{
 	ParserCode,
 	OsmiaError,
 };
-use crate::model::code::*;
+use crate::model::expr::*;
+use crate::model::stmt::*;
 use crate::model::ctx::JsonTreeKey;
 
 pub struct OsmiaParser;

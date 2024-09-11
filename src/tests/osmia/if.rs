@@ -29,7 +29,7 @@ macro_tests!(
 			ConditionalStmt::new(
 				Binary::new(
 					Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("condition".into())
+						JsonTreeKeyExpr::JsonTreeKey("condition".into())
 					]).into(),
 					BinaryOp::Equal,
 					Expr::new_str("if")
@@ -90,7 +90,7 @@ macro_tests!(
 				ConditionalStmt::new(
 					Binary::new(
 						Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("condition".into())
+							JsonTreeKeyExpr::JsonTreeKey("condition".into())
 						]).into(),
 						BinaryOp::Equal,
 						Expr::new_str("if")
@@ -200,7 +200,7 @@ macro_tests!(
 				ConditionalStmt::new(
 					Binary::new(
 						Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("condition".into())
+							JsonTreeKeyExpr::JsonTreeKey("condition".into())
 						]).into(),
 						BinaryOp::Equal,
 						Expr::new_str("if")
@@ -216,7 +216,7 @@ macro_tests!(
 					ConditionalStmt::new(
 						Binary::new(
 							Variable::from_vec(vec![
-								JsonTreeKeyExpression::JsonTreeKey("condition".into())
+								JsonTreeKeyExpr::JsonTreeKey("condition".into())
 							]).into(),
 							BinaryOp::Equal,
 							Expr::new_str("elseif01")
@@ -231,7 +231,7 @@ macro_tests!(
 					ConditionalStmt::new(
 						Binary::new(
 							Variable::from_vec(vec![
-								JsonTreeKeyExpression::JsonTreeKey("condition".into())
+								JsonTreeKeyExpr::JsonTreeKey("condition".into())
 							]).into(),
 							BinaryOp::Equal,
 							Expr::new_str("elseif02")
@@ -289,14 +289,14 @@ macro_tests!(
 		Some(Stmt::If(If::new(
 			ConditionalStmt::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("v1".into())
+					JsonTreeKeyExpr::JsonTreeKey("v1".into())
 				]).into(),
 				Stmt::Block(vec![
 					Stmt::new_raw("if"),
 					Stmt::If(If::new(
 						ConditionalStmt::new(
 							Variable::from_vec(vec![
-								JsonTreeKeyExpression::JsonTreeKey("v2".into())
+								JsonTreeKeyExpr::JsonTreeKey("v2".into())
 							]).into(),
 							Stmt::new_raw("if01"),
 						),

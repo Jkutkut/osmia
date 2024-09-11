@@ -35,13 +35,13 @@ macro_tests!(
 		]),
 		Some(Stmt::For(For::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			]),
 			Expr::Array(vec![
 				Expr::Int(1), Expr::Int(2), Expr::Int(3)
 			].into()),
 			Expr::Variable(Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			])).into(),
 		))),
 		None
@@ -86,13 +86,13 @@ macro_tests!(
 		]),
 		Some(Stmt::For(For::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			]),
 			Expr::Array(vec![
 				Expr::Bool(true), Expr::Bool(false), Expr::Null, Expr::new_str("hello world")
 			].into()),
 			Expr::Variable(Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			])).into(),
 		))),
 		None
@@ -125,11 +125,11 @@ macro_tests!(
 		]),
 		Some(Stmt::For(For::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			]),
 			Expr::Array(vec![].into()),
 			Expr::Variable(Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			])).into(),
 		))),
 		None
@@ -173,21 +173,21 @@ macro_tests!(
 		]),
 		Some(Stmt::For(For::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			]),
 			Expr::Array(vec![
 				Binary::new(
 					Expr::Int(1),
 					BinaryOp::Plus,
 					Expr::Variable(Variable::from_vec(vec![
-						JsonTreeKeyExpression::JsonTreeKey("v".into())
+						JsonTreeKeyExpr::JsonTreeKey("v".into())
 					]))
 				).into(),
 				Expr::Int(2),
 				Expr::Int(3),
 			].into()),
 			Expr::Variable(Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			])).into(),
 		))),
 		None
@@ -219,13 +219,13 @@ macro_tests!(
 		]),
 		Some(Stmt::For(For::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			]),
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("arr".into())
+				JsonTreeKeyExpr::JsonTreeKey("arr".into())
 			]).into(),
 			Stmt::Expr(Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			]).into()),
 		))),
 		None
@@ -291,7 +291,7 @@ macro_tests!(
 		]),
 		Some(Stmt::For(For::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into())
+				JsonTreeKeyExpr::JsonTreeKey("v".into())
 			]),
 			Expr::Array(vec![
 				Expr::Array(vec![
@@ -305,13 +305,13 @@ macro_tests!(
 			].into()),
 			Stmt::Block(vec![
 				Expr::Variable(Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("v".into()),
-					JsonTreeKeyExpression::Expr(Expr::Int(0)),
+					JsonTreeKeyExpr::JsonTreeKey("v".into()),
+					JsonTreeKeyExpr::Expr(Expr::Int(0)),
 				])).into(),
 				Stmt::new_raw(" -- "),
 				Expr::Variable(Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("v".into()),
-					JsonTreeKeyExpression::Expr(Expr::Int(1)),
+					JsonTreeKeyExpr::JsonTreeKey("v".into()),
+					JsonTreeKeyExpr::Expr(Expr::Int(1)),
 				])).into(),
 				Stmt::new_raw(","),
 			].into()),
@@ -367,7 +367,7 @@ macro_tests!(
 		]),
 		Some(Stmt::For(For::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into()),
+				JsonTreeKeyExpr::JsonTreeKey("v".into()),
 			]),
 			Expr::Array(vec![
 				Expr::Object(vec![
@@ -378,15 +378,15 @@ macro_tests!(
 						Expr::Str("bar".into()),
 						BinaryOp::Plus,
 						Expr::Variable(Variable::from_vec(vec![
-							JsonTreeKeyExpression::JsonTreeKey("extra".into()),
+							JsonTreeKeyExpr::JsonTreeKey("extra".into()),
 						]))
 					).into()),
 				].into()),
 			].into()),
 			Stmt::Block(vec![
 				Expr::Variable(Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("v".into()),
-					JsonTreeKeyExpression::JsonTreeKey("name".into()),
+					JsonTreeKeyExpr::JsonTreeKey("v".into()),
+					JsonTreeKeyExpr::JsonTreeKey("name".into()),
 				])).into(),
 				Stmt::new_raw(","),
 			].into()),
@@ -432,20 +432,20 @@ macro_tests!(
 		]),
 		Some(Stmt::For(For::new(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("arr".into()),
+				JsonTreeKeyExpr::JsonTreeKey("arr".into()),
 			]),
 			Expr::Variable(Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("matrix".into()),
+				JsonTreeKeyExpr::JsonTreeKey("matrix".into()),
 			])),
 			Stmt::For(For::new(
 				Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("cell".into()),
+					JsonTreeKeyExpr::JsonTreeKey("cell".into()),
 				]),
 				Expr::Variable(Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("arr".into()),
+					JsonTreeKeyExpr::JsonTreeKey("arr".into()),
 				])),
 				Stmt::Print(Print::new(Expr::Variable(Variable::from_vec(vec![
-					JsonTreeKeyExpression::JsonTreeKey("cell".into())
+					JsonTreeKeyExpr::JsonTreeKey("cell".into())
 				])))),
 			)),
 		))),

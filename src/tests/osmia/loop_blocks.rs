@@ -111,7 +111,7 @@ macro_tests!(
 		]),
 		Some(Stmt::new_return(Some(
 			Variable::from_vec(vec![
-				JsonTreeKeyExpression::JsonTreeKey("v".into()),
+				JsonTreeKeyExpr::JsonTreeKey("v".into()),
 			]).into()
 		))),
 		None
