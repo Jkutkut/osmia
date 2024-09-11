@@ -1,20 +1,20 @@
 mod literal;
 mod grouping;
+mod number;
+mod white_box_tests;
 
 use crate::{
 	Osmia, CodeInterpreter,
 	macro_tests,
+	model::lexer::Token,
 };
 
 #[cfg(test)]
-fn parser_test_fail(
-	code: &str,
+fn parser_test_fail_tokens(
+	code: Vec<Token>,
 	error_pieces: &[&str],
 ) {
-	let lexed = Osmia::lex(code).unwrap_or_else(|err| {
-		panic!("The code can not be lexed: {}", err)
-	});
-	match Osmia::parse(lexed) {
+	match Osmia::parse(code) {
 		Ok(expr) => panic!("The code should not be parsed: {:?}", expr),
 		Err(err) => {
 			println!("Error: {}", err);
@@ -26,3 +26,15 @@ fn parser_test_fail(
 		}
 	};
 }
+
+#[cfg(test)]
+fn parser_test_fail(
+	code: &str,
+	error_pieces: &[&str],
+) {
+	let lexed = Osmia::lex(code).unwrap_or_else(|err| {
+		panic!("The code can not be lexed: {}", err)
+	});
+	parser_test_fail_tokens(lexed, error_pieces);
+}
+
