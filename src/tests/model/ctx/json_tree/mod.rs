@@ -1,12 +1,20 @@
 mod get;
 mod set;
 
-use crate::types::{
-	Ctx,
-};
-use crate::model::ctx::{
-	JsonValue
-};
+use serde::Deserialize;
+use crate::ctx::JsonTree;
+
+#[derive(Deserialize, Debug, PartialEq, Clone)]
+#[serde(untagged)]
+pub enum JsonValue {
+	Int(i64),
+	Float(f64),
+	String(String),
+	Bool(bool),
+	Null,
+}
+
+type Ctx = JsonTree<String, JsonValue>;
 
 #[cfg(test)]
 fn valid_json() -> Ctx {

@@ -68,7 +68,7 @@ impl Osmia {
 
 impl Default for Osmia {
 	fn default() -> Self {
-		Self::new(types::Ctx::Object(std::collections::HashMap::new())) // TODO
+		Self::new(types::Ctx::new())
 	}
 }
 

@@ -75,10 +75,4 @@ pub type OsmiaOutput = String;
 /// TODO
 pub type OsmiaError = String;
 
-use crate::ctx::{
-	JsonTree,
-	JsonValue,
-};
-
-/// TODO
-pub type Ctx = JsonTree<String, JsonValue>;
+pub use crate::ctx::Ctx;
