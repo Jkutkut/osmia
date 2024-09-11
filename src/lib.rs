@@ -20,6 +20,9 @@ use model::lexer::{
 use model::parser::{
 	Parser, OsmiaParser,
 };
+use model::interpreter::{
+	Interpreter, OsmiaInterpreter,
+};
 
 pub trait CodeInterpreter: for<'a> From<&'a str> {
 	type Output;
@@ -100,34 +103,5 @@ impl From<&str> for Osmia {
 	fn from(_: &str) -> Self {
 		todo!() // TODO
 		// Parse json str as ctx
-	}
-}
-
-// Interpreter
-use std::cell::RefCell;
-
-pub trait Interpreter<I, T, E> {
-	fn interpret(&self, code: I) -> Result<T, E>;
-}
-
-struct OsmiaInterpreter<'ctx> {
-	#[allow(dead_code)]
-	ctx: RefCell<&'ctx mut types::Ctx>,
-}
-
-
-impl<'ctx> OsmiaInterpreter<'ctx> {
-	pub fn new(ctx: &'ctx mut types::Ctx) -> Self {
-		Self {
-			ctx: std::cell::RefCell::new(ctx),
-		}
-	}
-}
-
-impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter<'_> {
-	#[allow(unused_variables)]
-	fn interpret(&self, code: ParserCode) -> Result<OsmiaOutput, OsmiaError> {
-		todo!() // TODO
-		// Interpret code
 	}
 }
