@@ -4,7 +4,7 @@ use crate::model::stmt::Stmt;
 /// The type of the lexer's output.
 pub type LexerCode = Vec<Token>;
 
-/// Parsing documentation: // TODO
+/// Parsing documentation:
 ///
 /// ## Structure:
 /// ```text

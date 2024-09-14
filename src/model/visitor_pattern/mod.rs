@@ -1,15 +1,8 @@
-#[allow(dead_code)]
-pub trait StmtVisitable {
-	fn accept<S, E>(&self, visitor: &dyn Visitor<S, E>) -> S;
-}
+mod visitor;
+mod stmt_visitable;
+mod expr_visitable;
+mod visitable_impl;
 
-#[allow(dead_code)]
-pub trait ExprVisitable {
-	fn accept<S, E>(&self, visitor: &dyn Visitor<S, E>) -> E;
-}
-
-#[allow(dead_code)]
-pub trait Visitor<S, E> {
-	fn visit_stmt(&mut self, stmt: &String) -> S;
-	fn visit_expr(&mut self, expr: &String) -> E;
-}
+pub use visitor::Visitor;
+pub use stmt_visitable::StmtVisitable;
+pub use expr_visitable::ExprVisitable;
