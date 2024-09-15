@@ -21,7 +21,7 @@ macro_tests!(
 			Stmt::new_raw(" "),
 			Stmt::new_comment(" "),
 		].into())),
-		None,
+		Some(vec![(Ctx::new(), " ")])
 	),
 	(
 		comment_01,
@@ -34,7 +34,7 @@ macro_tests!(
 			Token::Eof
 		]),
 		Some(Stmt::new_comment(" Hey there! ")),
-		None
+		Some(vec![(Ctx::new(), "")])
 	),
 	(
 		comment_02,
@@ -47,7 +47,7 @@ macro_tests!(
 			Token::Eof
 		]),
 		Some(Stmt::new_comment("Hey there!")),
-		None
+		Some(vec![(Ctx::new(), "")])
 	),
 	(
 		comment_03,
@@ -68,7 +68,7 @@ macro_tests!(
 			Token::Eof
 		]),
 		Some(Stmt::new_comment(" \n\n Hey\nthere!\n\n ")),
-		None
+		Some(vec![(Ctx::new(), "")])
 	),
 	(
 		comment_04,
@@ -81,7 +81,7 @@ macro_tests!(
 			Token::Eof
 		]),
 		Some(Stmt::new_comment(" {{ this should not be parsed }} this should not be parsed ")),
-		None
+		Some(vec![(Ctx::new(), "")])
 	),
 	(
 		comment_05,
@@ -94,6 +94,6 @@ macro_tests!(
 			Token::Eof
 		]),
 		Some(Stmt::new_comment(" this {{ is a comment {{ }} }} ")),
-		None
+		Some(vec![(Ctx::new(), "")])
 	)
 );

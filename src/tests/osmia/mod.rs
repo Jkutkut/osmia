@@ -19,6 +19,7 @@ use super::test;
 use crate::model::lexer::Token;
 use crate::model::stmt::*;
 use crate::model::expr::*;
+use crate::model::ctx::Ctx;
 
 fn new_binary(left: Expr, op: Token, right: Expr) -> Expr {
 	let op: Option<BinaryOp> = (&op).into();

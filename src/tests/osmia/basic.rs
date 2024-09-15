@@ -9,7 +9,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Stmt::Block(Block::new())),
-		None // ""
+		Some(vec![(Ctx::new(), "")])
 	),
 	(
 		just_text,
@@ -19,7 +19,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Stmt::Raw("Hello, world!".to_string())),
-		None // "Hello, world!"
+		Some(vec![(Ctx::new(), "Hello, world!")])
 	),
 	(
 		basic01,
@@ -31,7 +31,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Bool(true).into()),
-		None // "true"
+		Some(vec![(Ctx::new(), "true")])
 	),
 	(
 		basic02,
@@ -43,7 +43,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Bool(false).into()),
-		None // "false"
+		Some(vec![(Ctx::new(), "false")])
 	),
 	(
 		basic03,
@@ -55,7 +55,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Null.into()),
-		None // "null"
+		Some(vec![(Ctx::new(), "null")])
 	),
 	(
 		basic04,
@@ -67,7 +67,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Int(42).into()),
-		None // "42"
+		Some(vec![(Ctx::new(), "42")])
 	),
 	(
 		basic05,
@@ -79,7 +79,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Float(3.14).into()),
-		None // "3.14"
+		Some(vec![(Ctx::new(), "3.14")])
 	),
 	(
 		basic06,
@@ -91,7 +91,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::new_str("Hello, world!").into()),
-		None // "Hello, world!"
+		Some(vec![(Ctx::new(), "Hello, world!")])
 	),
 	(
 		basic07,
@@ -103,7 +103,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::new_str("").into()),
-		None // ""
+		Some(vec![(Ctx::new(), "")])
 	),
 	(
 		basic08,
@@ -122,7 +122,7 @@ macro_tests! {
 			Expr::new_str("\\n").into(),
 			Expr::new_str("\n").into(),
 		].into())),
-		None // "\\n\n"
+		Some(vec![(Ctx::new(), "\\n\n")])
 	),
 	(
 		basic09,
@@ -140,7 +140,7 @@ macro_tests! {
 			Expr::new_str("\\r").into(),
 			Expr::new_str("\r").into(),
 		].into())),
-		None // "\\r\r"
+		Some(vec![(Ctx::new(), "\\r\r")])
 	),
 	(
 		basic10,
@@ -158,7 +158,7 @@ macro_tests! {
 			Expr::new_str("\\t").into(),
 			Expr::new_str("\t").into(),
 		].into())),
-		None // "\\t\t"
+		Some(vec![(Ctx::new(), "\\t\t")])
 	),
 	(
 		basic11,
@@ -178,7 +178,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Bool(false).into(),
 		].into())),
-		None // "true false"
+		Some(vec![(Ctx::new(), "true false")])
 	),
 	(
 		basic12,
@@ -204,7 +204,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Null.into(),
 		].into())),
-		None // "true false null"
+		Some(vec![(Ctx::new(), "true false null")])
 	),
 	(
 		basic13,
@@ -230,7 +230,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Int(42).into(),
 		].into())),
-		None // "true false 42"
+		Some(vec![(Ctx::new(), "true false 42")])
 	),
 	(
 		basic14,
@@ -256,7 +256,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Float(3.14).into(),
 		].into())),
-		None // "true false 3.14"
+		Some(vec![(Ctx::new(), "true false 3.14")])
 	),
 	(
 		basic15,
@@ -276,7 +276,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Int(42).into(),
 		].into())),
-		None // "Hello, world! 42"
+		Some(vec![(Ctx::new(), "Hello, world! 42")])
 	),
 	(
 		precedence,
@@ -748,4 +748,62 @@ macro_tests! {
 		].into()).into()),
 		None // "{} []"
 	),
+	(
+		json07,
+		Some(r#"{{ [ 1 + 2, !true, {"foo": ["hey", 4]} ] }}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::Whitespace,
+			Token::new_number("1"),
+			Token::Whitespace,
+			Token::Plus,
+			Token::Whitespace,
+			Token::new_number("2"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::Not,
+			Token::Bool(true),
+			Token::Comma,
+			Token::Whitespace,
+			Token::ObjectStart,
+			Token::new_str("foo"),
+			Token::Colon,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::new_str("hey"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("4"),
+			Token::ArrayEnd,
+			Token::ObjectEnd,
+			Token::Whitespace,
+			Token::ArrayEnd,
+			Token::Whitespace,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		Some(Expr::Array(vec![
+			Expr::Binary(Binary::new(
+				Expr::Int(1),
+				BinaryOp::Plus,
+				Expr::Int(2)
+			)),
+			Expr::Unary(Unary::new(
+				UnaryOp::Not,
+				Expr::Bool(true),
+			)),
+			Expr::Object(vec![
+				(
+					Expr::new_str("foo"),
+					Expr::Array(vec![
+						Expr::new_str("hey"),
+						Expr::Int(4)
+					].into())
+				)
+			].into())
+		].into()).into()),
+		None
+	)
 }
