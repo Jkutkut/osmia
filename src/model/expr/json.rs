@@ -17,11 +17,33 @@ impl Array {
 	pub fn len(&self) -> usize {
 		self.arr.len()
 	}
+
+	pub fn iter(&self) -> std::slice::Iter<'_, Expr> {
+		self.arr.iter()
+	}
 }
 
 impl From<Vec<Expr>> for Array {
 	fn from(arr: Vec<Expr>) -> Self {
 		Self::new(arr)
+	}
+}
+
+impl Into<Vec<Expr>> for &Array {
+	fn into(self) -> Vec<Expr> {
+		self.arr.clone()
+	}
+}
+
+impl Display for Array {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		write!(
+			f, "[{}]",
+			self.arr.iter()
+				.map(|e| e.to_string())
+				.collect::<Vec<_>>()
+				.join(", ")
+		)
 	}
 }
 

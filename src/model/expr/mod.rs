@@ -1,6 +1,7 @@
 mod binary_op;
 mod binary;
 mod call;
+mod expr_operations;
 mod expr_utils;
 mod expr;
 mod function_param;
@@ -29,3 +30,5 @@ pub use variable::Variable;
 
 use crate::model::lexer::Token;
 use crate::model::ctx::JsonTreeKey;
+
+use std::fmt::Display;

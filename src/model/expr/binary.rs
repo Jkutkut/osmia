@@ -2,9 +2,9 @@ use super::*;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Binary {
-	pub left: Box<Expr>,
-	pub operator: BinaryOp,
-	pub right: Box<Expr>
+	left: Box<Expr>,
+	operator: BinaryOp,
+	right: Box<Expr>
 }
 
 impl Binary {
@@ -18,5 +18,17 @@ impl Binary {
 			operator: operator,
 			right: Box::new(right)
 		}
+	}
+
+	pub fn left(&self) -> &Expr {
+		&self.left
+	}
+
+	pub fn operator(&self) -> &BinaryOp {
+		&self.operator
+	}
+
+	pub fn right(&self) -> &Expr {
+		&self.right
 	}
 }

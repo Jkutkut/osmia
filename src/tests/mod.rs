@@ -76,7 +76,9 @@ fn test(
 					},
 					Err(error_pieces) => match result {
 						Err(err) => {
+							println!("The code can not be executed:\n{}", err);
 							for piece in error_pieces {
+								println!("  - {}", piece);
 								assert!(err.contains(piece));
 							}
 						},

@@ -64,6 +64,10 @@ impl Osmia {
 			ctx,
 		}
 	}
+
+	pub fn run_code(&mut self, code: &str) -> Result<OsmiaOutput, OsmiaError> {
+		self.run(code)
+	}
 }
 
 impl Default for Osmia {

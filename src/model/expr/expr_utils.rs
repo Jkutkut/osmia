@@ -13,7 +13,37 @@ impl Display for Expr {
 			Expr::Str(s) => Ok(write!(f, "{s}")?),
 			Expr::Bool(b) => Ok(write!(f, "{b}")?),
 			Expr::Null => Ok(write!(f, "null")?),
+			Expr::Array(arr) => Ok(write!(f, "{arr}")?),
 			e => unimplemented!("Display for: {:?}", e), // TODO
+		}
+	}
+}
+
+impl Expr {
+	pub fn to_bool(&self) -> bool {
+		match self {
+			Expr::Bool(b) => *b,
+			Expr::Float(f) => *f != 0.0,
+			Expr::Int(i) => *i != 0,
+			Expr::Str(s) => !s.is_empty(),
+			Expr::Null => false,
+			_ => true
+		}
+	}
+
+	pub fn to_float(&self) -> Result<f64, OsmiaError> {
+		match self {
+			Expr::Float(f) => Ok(*f),
+			Expr::Int(i) => Ok(*i as f64),
+			_ => Err(format!("Cannot convert {} to float", self))
+		}
+	}
+
+	pub fn to_int(&self) -> Result<i64, OsmiaError> {
+		match self {
+			Expr::Float(f) => Ok(*f as i64),
+			Expr::Int(i) => Ok(*i),
+			_ => Err(format!("Cannot convert {} to int", self))
 		}
 	}
 }

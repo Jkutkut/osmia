@@ -28,12 +28,13 @@ use crate::model::visitor_pattern::{
 	ExprVisitable,
 	StmtVisitable
 };
-use crate::model::stmt::*;
-use crate::model::expr::*;
+use crate::model::{
+	stmt::*,
+	expr::*,
+};
 
 impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for OsmiaInterpreter<'_> {
 	fn visit_stmt(&self, stmt: &Stmt) -> Result<OsmiaOutput, OsmiaError> {
-		println!("{:?}", stmt);
 		match stmt {
 			Stmt::Raw(s) => Ok(s.clone()),
 			Stmt::Block(b) => self.visit_block(b),
@@ -46,6 +47,8 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 	fn visit_expr(&self, expr: &Expr) -> Result<Expr, OsmiaError> {
 		match expr {
 			Expr::Float(_) | Expr::Int(_) | Expr::Str(_) | Expr::Bool(_) | Expr::Null => Ok(expr.clone()),
+			Expr::Binary(b) => Ok(self.visit_binary(b)?),
+			Expr::Array(arr) => Ok(self.visit_array(arr)?),
 			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
 		}
 	}
@@ -60,5 +63,22 @@ impl OsmiaInterpreter<'_> {
 			.collect::<Result<Vec<String>, OsmiaError>>()?
 			.join("")
 		)
+	}
+
+	fn visit_binary(&self, binary: &Binary) -> Result<Expr, OsmiaError> {
+		let left = binary.left().accept(self)?;
+		let right = binary.right().accept(self)?;
+		match binary.operator() {
+			BinaryOp::Plus => left + right,
+			_ => unimplemented!("Interpreter for binary: {:?}", binary), // TODO
+		}
+	}
+
+	fn visit_array(&self, arr: &Array) -> Result<Expr, OsmiaError> {
+		let mut new_arr = Vec::new();
+		for e in arr.iter() {
+			new_arr.push(e.accept(self)?);
+		}
+		Ok(Expr::Array(new_arr.into()))
 	}
 }
