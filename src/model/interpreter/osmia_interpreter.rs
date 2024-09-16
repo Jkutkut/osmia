@@ -37,16 +37,7 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 		match stmt {
 			Stmt::Raw(s) => Ok(s.clone()),
 			Stmt::Block(b) => self.visit_block(b),
-			Stmt::Expr(e) => Ok(match e.accept(self)? {
-				Expr::Float(f) => f.to_string(),
-				Expr::Int(i) => i.to_string(),
-				Expr::Str(s) => s.to_string(),
-				Expr::Bool(b) => b.to_string(),
-				Expr::Null => "null".to_string(),
-				Expr::Binary(_) | Expr::Grouping(_) | Expr::Unary(_) => unreachable!(),
-				Expr::Call(_) | Expr::MethodCall(_) => unreachable!(),
-				e => unimplemented!("Interpreter for expr: {:?}", e), // TODO
-			}),
+			Stmt::Expr(e) => Ok(e.accept(self)?.to_string()),
 			Stmt::Comment(_) => Ok("".to_string()),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}

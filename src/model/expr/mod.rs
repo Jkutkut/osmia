@@ -1,6 +1,7 @@
 mod binary_op;
 mod binary;
 mod call;
+mod expr_utils;
 mod expr;
 mod function_param;
 mod grouping;
