@@ -73,6 +73,7 @@ impl OsmiaInterpreter<'_> {
 			BinaryOp::Minus => left - right,
 			BinaryOp::Mult => left * right,
 			BinaryOp::Div => left / right,
+			BinaryOp::Mod => left % right,
 			_ => unimplemented!("Interpreter for binary: {:?}", binary), // TODO
 		}
 	}

@@ -1,6 +1,7 @@
 use std::ops::{
 	Add, Sub,
 	Mul, Div,
+	Rem,
 };
 
 use super::*;
@@ -147,6 +148,37 @@ impl Div for Expr {
 				))?
 			)),
 			(s, rhs) => Err(format!("Don't know how to divide {} and {}", s, rhs))
+		}
+	}
+}
+
+/// Modulo
+impl Rem for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 % 2 }}").unwrap(), "1");
+	/// assert_eq!(osmia.run_code("{{ 1.2 % 2 }}").unwrap(), "1.2");
+	/// assert_eq!(osmia.run_code("{{ 1 % 2.1 }}").unwrap(), "1");
+	/// assert_eq!(osmia.run_code("{{ 1.2 % 2.1 }}").unwrap(), "1.2");
+	/// assert!(osmia.run_code("{{ 1 % 0 }}").unwrap_err().contains("modulo"));
+	/// assert!(osmia.run_code("{{ 0 % 0 }}").unwrap_err().contains("modulo"));
+	/// ```
+	fn rem(self, rhs: Self) -> Self::Output {
+		match (self, &rhs) {
+			(Expr::Float(n1), n2) => Ok(Expr::Float(n1 % n2.to_float()?)),
+			(n1, Expr::Float(n2)) => Ok(Expr::Float(n1.to_float()? % n2)),
+			(Expr::Int(n1), n2) => Ok(Expr::Int(
+				n1.checked_rem(n2.to_int()?)
+				.ok_or(format!(
+					"Cannot modulo {} and {}",
+					n1, n2
+				))?
+			)),
+			(s, rhs) => Err(format!("Don't know how to modulo {} and {}", s, rhs))
 		}
 	}
 }

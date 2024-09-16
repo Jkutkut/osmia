@@ -246,3 +246,63 @@ macro_tests!(
 		]
 	)
 );
+
+macro_tests!(
+	interpreter_test,
+	(
+		rem_int_01,
+		"{{ 1 % 2 }}",
+		vec![
+			(Ctx::new(), Ok("1")),
+		]
+	),
+	(
+		rem_int_02,
+		"{{ 1 % 2.0 }}",
+		vec![
+			(Ctx::new(), Ok("1")),
+		]
+	),
+	(
+		rem_int_03,
+		"{{ 1 % 2.0 }}",
+		vec![
+			(Ctx::new(), Ok("1")),
+		]
+	),
+	(
+		rem_int_04,
+		"{{ 9223372036854775807 % 2 }}",
+		vec![
+			(Ctx::new(), Ok("1")),
+		]
+	),
+	(
+		rem_invalid_01,
+		"{{ 1 % null }}",
+		vec![
+			(Ctx::new(), Err(vec!["null"])),
+		]
+	),
+	(
+		rem_invalid_02,
+		"{{ null % 2 }}",
+		vec![
+			(Ctx::new(), Err(vec!["2", "null", "modulo"])),
+		]
+	),
+	(
+		rem_float_01,
+		"{{ 1.2 % 2.4 }}",
+		vec![
+			(Ctx::new(), Ok("1.2")),
+		]
+	),
+	(
+		rem_float_02,
+		"{{ 1.2 % 2 }}",
+		vec![
+			(Ctx::new(), Ok("1.2")),
+		]
+	)
+);
