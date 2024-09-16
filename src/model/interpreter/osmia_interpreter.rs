@@ -70,6 +70,7 @@ impl OsmiaInterpreter<'_> {
 		let right = binary.right().accept(self)?;
 		match binary.operator() {
 			BinaryOp::Plus => left + right,
+			BinaryOp::Minus => left - right,
 			_ => unimplemented!("Interpreter for binary: {:?}", binary), // TODO
 		}
 	}

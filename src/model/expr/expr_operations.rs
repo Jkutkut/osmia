@@ -1,5 +1,5 @@
 use std::ops::{
-	Add,
+	Add, Sub,
 };
 
 use super::*;
@@ -53,5 +53,43 @@ impl Add for &Array {
 		let mut arr: Vec<_> = self.into();
 		arr.append(&mut rhs.into());
 		Array::new(arr)
+	}
+}
+
+impl Add for &Object {
+	type Output = Object;
+
+	fn add(self, rhs: Self) -> Self::Output {
+		let mut obj: Vec<_> = self.into();
+		obj.append(&mut rhs.into());
+		Object::new(obj)
+	}
+}
+
+/// Subtraction
+impl Sub for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 - 2 }}").unwrap(), "-1");
+	/// assert_eq!(osmia.run_code("{{ 1.2 - 2 }}").unwrap(), "-0.8");
+	/// assert_eq!(osmia.run_code("{{ 1 - 2.1 }}").unwrap(), "-1");
+	/// ```
+	fn sub(self, rhs: Self) -> Self::Output {
+		match (self, &rhs) {
+			(Expr::Float(n1), n2) => Ok(Expr::Float(n1 - n2.to_float()?)),
+			(Expr::Int(n1), n2) => Ok(Expr::Int(
+				n1.checked_sub(n2.to_int()?)
+				.ok_or(format!(
+					"Cannot subtract {} and {}: It will overflow",
+					n1, n2
+				))?
+			)),
+			(Expr::Null, Expr::Null) => Ok(Expr::Null),
+			(s, rhs) => Err(format!("Don't know how to subtract {} and {}", s, rhs))
+		}
 	}
 }
