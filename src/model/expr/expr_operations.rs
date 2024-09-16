@@ -1,7 +1,12 @@
+use std::cmp::{
+	PartialOrd,
+	Ordering
+};
 use std::ops::{
 	Add, Sub,
 	Mul, Div,
 	Rem,
+	Neg, Not,
 };
 
 use super::*;
@@ -179,6 +184,131 @@ impl Rem for Expr {
 				))?
 			)),
 			(s, rhs) => Err(format!("Don't know how to modulo {} and {}", s, rhs))
+		}
+	}
+}
+
+/// Comparison
+impl PartialOrd for Expr {
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 < 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1 < 2.1 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1.2 < 2.1 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1.2 < 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"a\" < \"b\" }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"1\" < 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"2\" < true }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"2\" < null }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true < true }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true < false }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true < null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ null < null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ null < false }}").unwrap(), "false");
+	/// ```
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 > 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1 > 2.1 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1.2 > 2.1 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1.2 > 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"a\" > \"b\" }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"1\" > 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"2\" > true }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"2\" > null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true > true }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true > false }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true > null }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ null > null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ null > false }}").unwrap(), "false");
+	/// ```
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 <= 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1 <= 2.1 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1.2 <= 2.1 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1.2 <= 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"a\" <= \"b\" }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"1\" <= 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"2\" <= true }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"2\" <= null }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true <= true }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true <= false }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true <= null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ null <= null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ null <= false }}").unwrap(), "false");
+	/// ```
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 >= 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1 >= 2.1 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1.2 >= 2.1 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1.2 >= 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"a\" >= \"b\" }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"1\" >= 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"2\" >= true }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"2\" >= null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true >= true }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true >= false }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true >= null }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ null >= null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ null >= false }}").unwrap(), "false");
+	/// ```
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 == 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1 == 2.1 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1.2 == 2.1 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ 1.2 == 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"a\" == \"b\" }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"1\" == 2 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"1\" == 1 }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"2\" == true }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ \"2\" == null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true == true }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true == false }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true == null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ null == null }}").unwrap(), "true");
+	/// ```
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 != 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1 != 2.1 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1.2 != 2.1 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ 1.2 != 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"a\" != \"b\" }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"1\" != 2 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"1\" != 1 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"2\" != true }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ \"2\" != null }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true != true }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ true != false }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ true != null }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ null != null }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ null != false }}").unwrap(), "true");
+	/// ```
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		match (self, other) {
+			(Expr::Int(n1), Expr::Int(n2)) => n1.partial_cmp(n2),
+			(Expr::Int(n1), Expr::Float(_)) => n1.partial_cmp(&other.to_int().unwrap()),
+			(Expr::Float(n1), Expr::Float(n2)) => n1.partial_cmp(n2),
+			(Expr::Float(n1), Expr::Int(_)) => n1.partial_cmp(&other.to_float().unwrap()),
+			(Expr::Str(s1), s2) => s1.partial_cmp(&s2.to_string()),
+			(Expr::Bool(b1), b2) => b1.partial_cmp(&b2.to_bool()),
+			_ => None
 		}
 	}
 }
