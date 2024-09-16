@@ -1,5 +1,6 @@
 use std::ops::{
 	Add, Sub,
+	Mul, Div,
 };
 
 use super::*;
@@ -88,8 +89,64 @@ impl Sub for Expr {
 					n1, n2
 				))?
 			)),
-			(Expr::Null, Expr::Null) => Ok(Expr::Null),
 			(s, rhs) => Err(format!("Don't know how to subtract {} and {}", s, rhs))
+		}
+	}
+}
+
+/// Multiplication
+impl Mul for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 * 2 }}").unwrap(), "2");
+	/// assert_eq!(osmia.run_code("{{ 1.2 * 2 }}").unwrap(), "2.4");
+	/// assert_eq!(osmia.run_code("{{ 1 * 2.1 }}").unwrap(), "2");
+	/// ```
+	fn mul(self, rhs: Self) -> Self::Output {
+		match (self, &rhs) {
+			(Expr::Float(n1), n2) => Ok(Expr::Float(n1 * n2.to_float()?)),
+			(Expr::Int(n1), n2) => Ok(Expr::Int(
+				n1.checked_mul(n2.to_int()?)
+				.ok_or(format!(
+					"Cannot multiply {} and {}: It will overflow",
+					n1, n2
+				))?
+			)),
+			(s, rhs) => Err(format!("Don't know how to multiply {} and {}", s, rhs))
+		}
+	}
+}
+
+/// Division
+impl Div for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 / 2 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1.2 / 2 }}").unwrap(), "0.6");
+	/// assert_eq!(osmia.run_code("{{ 1 / 2.0 }}").unwrap(), "0.5");
+	/// assert!(osmia.run_code("{{ 1 / 0 }}").unwrap_err().contains("divide"));
+	/// assert!(osmia.run_code("{{ 0 / 0 }}").unwrap_err().contains("divide"));
+	/// ```
+	fn div(self, rhs: Self) -> Self::Output {
+		match (self, &rhs) {
+			(Expr::Float(n1), n2) => Ok(Expr::Float(n1 / n2.to_float()?)),
+			(n1, Expr::Float(n2)) => Ok(Expr::Float(n1.to_float()? / n2)),
+			(Expr::Int(n1), n2) => Ok(Expr::Int(
+				n1.checked_div(n2.to_int()?)
+				.ok_or(format!(
+					"Cannot divide {} and {}",
+					n1, n2
+				))?
+			)),
+			(s, rhs) => Err(format!("Don't know how to divide {} and {}", s, rhs))
 		}
 	}
 }

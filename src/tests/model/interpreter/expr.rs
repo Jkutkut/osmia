@@ -126,3 +126,123 @@ macro_tests!(
 		]
 	)
 );
+
+macro_tests!(
+	interpreter_test,
+	(
+		mul_int_01,
+		"{{ 1 * 2 }}",
+		vec![
+			(Ctx::new(), Ok("2")),
+		]
+	),
+	(
+		mul_int_02,
+		"{{ 1 * 2.0 }}",
+		vec![
+			(Ctx::new(), Ok("2")),
+		]
+	),
+	(
+		mul_int_03,
+		"{{ 1 * 2.2 }}",
+		vec![
+			(Ctx::new(), Ok("2")),
+		]
+	),
+	(
+		mul_int_overflow_01,
+		"{{ 9223372036854775807 * 2 }}",
+		vec![
+			(Ctx::new(), Err(vec!["overflow"])),
+		]
+	),
+	(
+		mul_invalid_01,
+		"{{ 1 * null }}",
+		vec![
+			(Ctx::new(), Err(vec!["null"])),
+		]
+	),
+	(
+		mul_invalid_02,
+		"{{ null * 2 }}",
+		vec![
+			(Ctx::new(), Err(vec!["2", "null", "multiply"])),
+		]
+	),
+	(
+		mul_float_01,
+		"{{ 1.2 * 2.4 }}",
+		vec![
+			(Ctx::new(), Ok("2.88")),
+		]
+	),
+	(
+		mul_float_02,
+		"{{ 1.2 * 2 }}",
+		vec![
+			(Ctx::new(), Ok("2.4")),
+		]
+	)
+);
+
+macro_tests!(
+	interpreter_test,
+	(
+		div_int_01,
+		"{{ 1 / 2 }}",
+		vec![
+			(Ctx::new(), Ok("0")),
+		]
+	),
+	(
+		div_int_02,
+		"{{ 1 / 2.0 }}",
+		vec![
+			(Ctx::new(), Ok("0.5")),
+		]
+	),
+	(
+		div_int_03,
+		"{{ 1 / 2.0 }}",
+		vec![
+			(Ctx::new(), Ok("0.5")),
+		]
+	),
+	(
+		div_int_04,
+		"{{ 9223372036854775807 / 2 }}",
+		vec![
+			(Ctx::new(), Ok("4611686018427387903")),
+		]
+	),
+	(
+		div_invalid_01,
+		"{{ 1 / null }}",
+		vec![
+			(Ctx::new(), Err(vec!["null"])),
+		]
+	),
+	(
+		div_invalid_02,
+		"{{ null / 2 }}",
+		vec![
+			(Ctx::new(), Err(vec!["2", "null", "divide"])),
+		]
+	),
+	(
+		div_float_01,
+		"{{ 1.2 / 2.4 }}",
+		vec![
+			(Ctx::new(), Ok("0.5")),
+		]
+	),
+	(
+		div_float_02,
+		"{{ 1.2 / 2 }}",
+		vec![
+			(Ctx::new(), Ok("0.6")),
+		]
+	)
+);
