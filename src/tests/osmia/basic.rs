@@ -9,7 +9,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Stmt::Block(Block::new())),
-		Some(vec![(Ctx::new(), "")])
+		Some(vec![(Ctx::new(), Ok(""))])
 	),
 	(
 		just_text,
@@ -19,7 +19,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Stmt::Raw("Hello, world!".to_string())),
-		Some(vec![(Ctx::new(), "Hello, world!")])
+		Some(vec![(Ctx::new(), Ok("Hello, world!"))])
 	),
 	(
 		basic01,
@@ -31,7 +31,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Bool(true).into()),
-		Some(vec![(Ctx::new(), "true")])
+		Some(vec![(Ctx::new(), Ok("true"))])
 	),
 	(
 		basic02,
@@ -43,7 +43,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Bool(false).into()),
-		Some(vec![(Ctx::new(), "false")])
+		Some(vec![(Ctx::new(), Ok("false"))])
 	),
 	(
 		basic03,
@@ -55,7 +55,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Null.into()),
-		Some(vec![(Ctx::new(), "null")])
+		Some(vec![(Ctx::new(), Ok("null"))])
 	),
 	(
 		basic04,
@@ -67,7 +67,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Int(42).into()),
-		Some(vec![(Ctx::new(), "42")])
+		Some(vec![(Ctx::new(), Ok("42"))])
 	),
 	(
 		basic05,
@@ -79,7 +79,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::Float(3.14).into()),
-		Some(vec![(Ctx::new(), "3.14")])
+		Some(vec![(Ctx::new(), Ok("3.14"))])
 	),
 	(
 		basic06,
@@ -91,7 +91,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::new_str("Hello, world!").into()),
-		Some(vec![(Ctx::new(), "Hello, world!")])
+		Some(vec![(Ctx::new(), Ok("Hello, world!"))])
 	),
 	(
 		basic07,
@@ -103,7 +103,7 @@ macro_tests! {
 			Token::Eof
 		]),
 		Some(Expr::new_str("").into()),
-		Some(vec![(Ctx::new(), "")])
+		Some(vec![(Ctx::new(), Ok(""))])
 	),
 	(
 		basic08,
@@ -122,7 +122,7 @@ macro_tests! {
 			Expr::new_str("\\n").into(),
 			Expr::new_str("\n").into(),
 		].into())),
-		Some(vec![(Ctx::new(), "\\n\n")])
+		Some(vec![(Ctx::new(), Ok("\\n\n"))])
 	),
 	(
 		basic09,
@@ -140,7 +140,7 @@ macro_tests! {
 			Expr::new_str("\\r").into(),
 			Expr::new_str("\r").into(),
 		].into())),
-		Some(vec![(Ctx::new(), "\\r\r")])
+		Some(vec![(Ctx::new(), Ok("\\r\r"))])
 	),
 	(
 		basic10,
@@ -158,7 +158,7 @@ macro_tests! {
 			Expr::new_str("\\t").into(),
 			Expr::new_str("\t").into(),
 		].into())),
-		Some(vec![(Ctx::new(), "\\t\t")])
+		Some(vec![(Ctx::new(), Ok("\\t\t"))])
 	),
 	(
 		basic11,
@@ -178,7 +178,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Bool(false).into(),
 		].into())),
-		Some(vec![(Ctx::new(), "true false")])
+		Some(vec![(Ctx::new(), Ok("true false"))])
 	),
 	(
 		basic12,
@@ -204,7 +204,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Null.into(),
 		].into())),
-		Some(vec![(Ctx::new(), "true false null")])
+		Some(vec![(Ctx::new(), Ok("true false null"))])
 	),
 	(
 		basic13,
@@ -230,7 +230,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Int(42).into(),
 		].into())),
-		Some(vec![(Ctx::new(), "true false 42")])
+		Some(vec![(Ctx::new(), Ok("true false 42"))])
 	),
 	(
 		basic14,
@@ -256,7 +256,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Float(3.14).into(),
 		].into())),
-		Some(vec![(Ctx::new(), "true false 3.14")])
+		Some(vec![(Ctx::new(), Ok("true false 3.14"))])
 	),
 	(
 		basic15,
@@ -276,7 +276,7 @@ macro_tests! {
 			Stmt::new_raw(" "),
 			Expr::Int(42).into(),
 		].into())),
-		Some(vec![(Ctx::new(), "Hello, world! 42")])
+		Some(vec![(Ctx::new(), Ok("Hello, world! 42"))])
 	),
 	(
 		precedence,

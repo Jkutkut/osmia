@@ -14,7 +14,7 @@ fn test(
 	code: Option<&str>,
 	tokens: Option<<Osmia as CodeInterpreter>::LexerCode>,
 	parsed: Option<<Osmia as CodeInterpreter>::ParserCode>,
-	execution: Option<Vec<(Ctx, &str)>>
+	execution: Option<Vec<(Ctx, Result<&str, Vec<&str>>)>>
 ) {
 	// Lexing
 	let mut lexed_code = None;
@@ -67,10 +67,21 @@ fn test(
 	match (parsed_code, execution) {
 		(Some(parsed_code), Some(execution_tests)) => {
 			println!("- Executing code...");
-			for (mut ctx, expected_output) in execution_tests {
-				match Osmia::interpret(&mut ctx, parsed_code.clone()) {
-					Ok(output) => assert_eq!(output, expected_output),
-					Err(err) => panic!("The code can not be executed:\n{}", err)
+			for (mut ctx, output) in execution_tests {
+				let result = Osmia::interpret(&mut ctx, parsed_code.clone());
+				match output {
+					Ok(expected_output) => match result {
+						Ok(output) => assert_eq!(output, expected_output),
+						Err(err) => panic!("The code can not be executed:\n{}", err)
+					},
+					Err(error_pieces) => match result {
+						Err(err) => {
+							for piece in error_pieces {
+								assert!(err.contains(piece));
+							}
+						},
+						Ok(r) => panic!("The code can not be executed but the output is:\n{}", r)
+					}
 				}
 			}
 		},
