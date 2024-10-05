@@ -7,11 +7,13 @@ use std::ops::{
 	Mul, Div,
 	Rem,
 	BitAnd, BitOr, BitXor,
-	Shl, Shr
+	Shl, Shr,
+	Not, Neg
 };
 
 use super::*;
 use crate::types::OsmiaError;
+use crate::utils::Affirm;
 
 /// Addition
 impl Add for Expr {
@@ -513,5 +515,71 @@ impl Shr for Expr {
 			cast_int_for_operation(self, OPERATION)? >>
 			cast_int_for_operation(rhs, OPERATION)?
 		))
+	}
+}
+
+/// Not
+impl Not for Expr {
+	type Output = Expr;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ !true }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ !false }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ !!1 }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ !!\"Some\" }}").unwrap(), "true");
+	/// assert_eq!(osmia.run_code("{{ !!\"\" }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ !!false }}").unwrap(), "false");
+	/// assert_eq!(osmia.run_code("{{ !!null }}").unwrap(), "false");
+	/// ```
+	fn not(self) -> Self::Output {
+		Expr::Bool(!self.to_bool())
+	}
+}
+
+/// Neg
+impl Neg for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ -1 }}").unwrap(), "-1");
+	/// assert_eq!(osmia.run_code("{{ -1.2 }}").unwrap(), "-1.2");
+	/// ```
+	fn neg(self) -> Self::Output {
+		match self {
+			Expr::Int(i) => Ok(Expr::Int(-i)),
+			Expr::Float(f) => Ok(Expr::Float(-f)),
+			_ => Err(format!("Cannot negate {}", self)),
+		}
+	}
+}
+
+/// Affirm
+impl Affirm for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ +1.2 }}").unwrap(), "1.2");
+	/// assert_eq!(osmia.run_code("{{ +-1.2 }}").unwrap(), "-1.2");
+	/// assert_eq!(osmia.run_code("{{ -+1.2 }}").unwrap(), "-1.2");
+	/// assert_eq!(osmia.run_code("{{ -+-1.2 }}").unwrap(), "1.2");
+	/// assert_eq!(osmia.run_code("{{ +1 }}").unwrap(), "1");
+	/// assert_eq!(osmia.run_code("{{ +-1 }}").unwrap(), "-1");
+	/// assert_eq!(osmia.run_code("{{ -+1 }}").unwrap(), "-1");
+	/// assert_eq!(osmia.run_code("{{ -+-1 }}").unwrap(), "1");
+	/// ```
+	fn affirm(self) -> Self::Output {
+		match self {
+			Expr::Int(_) | Expr::Float(_) => Ok(self),
+			_ => Err(format!("Cannot affirm {}", self)),
+		}
 	}
 }

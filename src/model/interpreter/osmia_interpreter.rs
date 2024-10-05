@@ -2,6 +2,7 @@ use std::cell::RefCell;
 
 use crate::types::*;
 use super::Interpreter;
+use crate::utils::Affirm;
 
 pub struct OsmiaInterpreter<'ctx> {
 	#[allow(dead_code)]
@@ -48,6 +49,8 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 		match expr {
 			Expr::Float(_) | Expr::Int(_) | Expr::Str(_) | Expr::Bool(_) | Expr::Null => Ok(expr.clone()),
 			Expr::Binary(b) => Ok(self.visit_binary(b)?),
+			Expr::Grouping(g) => Ok(self.visit_grouping(g)?),
+			Expr::Unary(u) => Ok(self.visit_unary(u)?),
 			Expr::Array(arr) => Ok(self.visit_array(arr)?),
 			Expr::Object(obj) => Ok(self.visit_object(obj)?),
 			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
@@ -88,6 +91,18 @@ impl OsmiaInterpreter<'_> {
 			BinaryOp::BitShiftRight => left >> right,
 			BinaryOp::And => Ok(Expr::Bool(left.to_bool() && right.to_bool())),
 			BinaryOp::Or => Ok(Expr::Bool(left.to_bool() || right.to_bool())),
+		}
+	}
+
+	fn visit_grouping(&self, grouping: &Grouping) -> Result<Expr, OsmiaError> {
+		grouping.expr().accept(self)
+	}
+
+	fn visit_unary(&self, unary: &Unary) -> Result<Expr, OsmiaError> {
+		match unary.operator() {
+			UnaryOp::Plus => Ok(unary.expr().accept(self)?.affirm()?),
+			UnaryOp::Minus => Ok((-unary.expr().accept(self)?)?),
+			UnaryOp::Not => Ok(!unary.expr().accept(self)?),
 		}
 	}
 
