@@ -85,7 +85,8 @@ impl OsmiaInterpreter<'_> {
 			BinaryOp::BitXor => left ^ right,
 			BinaryOp::BitShiftLeft => left << right,
 			BinaryOp::BitShiftRight => left >> right,
-			_ => unimplemented!("Interpreter for binary: {:?}", binary), // TODO
+			BinaryOp::And => Ok(Expr::Bool(left.to_bool() && right.to_bool())),
+			BinaryOp::Or => Ok(Expr::Bool(left.to_bool() || right.to_bool())),
 		}
 	}
 
