@@ -35,6 +35,7 @@ impl Expr {
 		match self {
 			Expr::Float(f) => Ok(*f),
 			Expr::Int(i) => Ok(*i as f64),
+			Expr::Str(s) => Err(format!("Cannot convert {:?} to float", s)),
 			_ => Err(format!("Cannot convert {} to float", self))
 		}
 	}
@@ -43,6 +44,7 @@ impl Expr {
 		match self {
 			Expr::Float(f) => Ok(*f as i64),
 			Expr::Int(i) => Ok(*i),
+			Expr::Str(s) => Err(format!("Cannot convert {:?} to int", s)),
 			_ => Err(format!("Cannot convert {} to int", self))
 		}
 	}
