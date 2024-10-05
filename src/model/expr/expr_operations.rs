@@ -6,7 +6,8 @@ use std::ops::{
 	Add, Sub,
 	Mul, Div,
 	Rem,
-	Neg, Not,
+	BitAnd, BitOr, BitXor,
+	Shl, Shr
 };
 
 use super::*;
@@ -310,5 +311,139 @@ impl PartialOrd for Expr {
 			(Expr::Bool(b1), b2) => b1.partial_cmp(&b2.to_bool()),
 			_ => None
 		}
+	}
+}
+
+fn cast_int_for_operation(e: Expr, operation: &str) -> Result<i64, OsmiaError> {
+	match e.to_int() {
+		Ok(i) => Ok(i),
+		Err(e) => Err(format!(
+			"Cannot execute operation {} on non-integer value: {}",
+			operation, e
+		))
+	}
+}
+
+/// BitAnd
+impl BitAnd for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 1 & 2 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1.2 & 2.1 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1.2 & 2 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1 & 2.1 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1.2 & 2.1 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1 & 2 }}").unwrap(), "0");
+	/// ```
+	fn bitand(self, rhs: Expr) -> Self::Output {
+		const OPERATION: &str = "bitand (&)";
+		Ok(Expr::Int(
+			cast_int_for_operation(self, OPERATION)? &
+			cast_int_for_operation(rhs, OPERATION)?
+		))
+	}
+}
+
+/// BitOr
+impl BitOr for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 7 | 4 }}").unwrap(), "7");
+	/// assert_eq!(osmia.run_code("{{ 1.2 | 2.1 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1.2 | 2 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1 | 2.1 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1.2 | 2.1 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1 | 2 }}").unwrap(), "3");
+	/// ```
+	fn bitor(self, rhs: Expr) -> Self::Output {
+		const OPERATION: &str = "bitor (|)";
+		Ok(Expr::Int(
+			cast_int_for_operation(self, OPERATION)? |
+			cast_int_for_operation(rhs, OPERATION)?
+		))
+	}
+}
+
+/// BitXor
+impl BitXor for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 7 ^ 4 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1.2 ^ 2.1 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1.2 ^ 2 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1 ^ 2.1 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1.2 ^ 2.1 }}").unwrap(), "3");
+	/// assert_eq!(osmia.run_code("{{ 1 ^ 2 }}").unwrap(), "3");
+	/// ```
+	fn bitxor(self, rhs: Expr) -> Self::Output {
+		const OPERATION: &str = "bitxor (^)";
+		Ok(Expr::Int(
+			cast_int_for_operation(self, OPERATION)? ^
+			cast_int_for_operation(rhs, OPERATION)?
+		))
+	}
+}
+
+/// Shl
+impl Shl for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 7 << 4 }}").unwrap(), "112");
+	/// assert_eq!(osmia.run_code("{{ 1.2 << 2.1 }}").unwrap(), "4");
+	/// assert_eq!(osmia.run_code("{{ 1.2 << 2 }}").unwrap(), "4");
+	/// assert_eq!(osmia.run_code("{{ 1 << 2.1 }}").unwrap(), "4");
+	/// assert_eq!(osmia.run_code("{{ 1.2 << 2.1 }}").unwrap(), "4");
+	/// assert_eq!(osmia.run_code("{{ 1 << 2 }}").unwrap(), "4");
+	/// assert_eq!(osmia.run_code("{{ 1 << 7 }}").unwrap(), "128");
+	/// assert_eq!(osmia.run_code("{{ 1 << 63 }}").unwrap(), "-9223372036854775808");
+	/// ```
+	fn shl(self, rhs: Expr) -> Self::Output {
+		const OPERATION: &str = "shl (<<)";
+		Ok(Expr::Int(
+			cast_int_for_operation(self, OPERATION)? <<
+			cast_int_for_operation(rhs, OPERATION)?
+		))
+	}
+}
+
+/// Shr
+impl Shr for Expr {
+	type Output = Result<Expr, OsmiaError>;
+
+	/// ```rust
+	/// use osmia::Osmia;
+	///
+	/// let mut osmia = Osmia::default();
+	/// assert_eq!(osmia.run_code("{{ 7 >> 4 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1.2 >> 2.1 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1.2 >> 2 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1 >> 2.1 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1.2 >> 2.1 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 1 >> 2 }}").unwrap(), "0");
+	/// assert_eq!(osmia.run_code("{{ 128 >> 7 }}").unwrap(), "1");
+	/// assert_eq!(osmia.run_code("{{ 1024 >> 10 }}").unwrap(), "1");
+	/// ```
+	fn shr(self, rhs: Expr) -> Self::Output {
+		const OPERATION: &str = "shr (>>)";
+		Ok(Expr::Int(
+			cast_int_for_operation(self, OPERATION)? >>
+			cast_int_for_operation(rhs, OPERATION)?
+		))
 	}
 }

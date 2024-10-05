@@ -80,6 +80,11 @@ impl OsmiaInterpreter<'_> {
 			BinaryOp::GreaterEqual => Ok(Expr::Bool(left >= right)),
 			BinaryOp::Less => Ok(Expr::Bool(left < right)),
 			BinaryOp::LessEqual => Ok(Expr::Bool(left <= right)),
+			BinaryOp::BitAnd => left & right,
+			BinaryOp::BitOr => left | right,
+			BinaryOp::BitXor => left ^ right,
+			BinaryOp::BitShiftLeft => left << right,
+			BinaryOp::BitShiftRight => left >> right,
 			_ => unimplemented!("Interpreter for binary: {:?}", binary), // TODO
 		}
 	}
