@@ -49,6 +49,7 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 			Expr::Float(_) | Expr::Int(_) | Expr::Str(_) | Expr::Bool(_) | Expr::Null => Ok(expr.clone()),
 			Expr::Binary(b) => Ok(self.visit_binary(b)?),
 			Expr::Array(arr) => Ok(self.visit_array(arr)?),
+			Expr::Object(obj) => Ok(self.visit_object(obj)?),
 			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
 		}
 	}
@@ -96,5 +97,19 @@ impl OsmiaInterpreter<'_> {
 			new_arr.push(e.accept(self)?);
 		}
 		Ok(Expr::Array(new_arr.into()))
+	}
+
+	fn visit_object(&self, obj: &Object) -> Result<Expr, OsmiaError> {
+		match obj {
+			Object::Code(_) => {
+				let items: Vec<(Expr, Expr)> = obj.into();
+				let mut new_obj = Vec::new();
+				for (e, v) in items {
+					new_obj.push((self.visit_expr(&e)?, self.visit_expr(&v)?));
+				}
+				Ok(Expr::Object(Object::new_hash(new_obj)?))
+			},
+			Object::Hash(h) => unreachable!("Interpreter for hash object: {:?}", h),
+		}
 	}
 }

@@ -1,4 +1,5 @@
 use super::*;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Array {
@@ -48,11 +49,84 @@ impl Display for Array {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Object {
-	obj: Vec<(Expr, Expr)>,
+pub enum Object {
+	Code(CodeObject),
+	Hash(HashObject),
 }
 
 impl Object {
+	pub fn new(obj: Vec<(Expr, Expr)>) -> Self {
+		Self::new_code(obj)
+	}
+
+	pub fn new_code(obj: Vec<(Expr, Expr)>) -> Self {
+		Self::Code(CodeObject::new(obj))
+	}
+
+	pub fn new_hash(obj: Vec<(Expr, Expr)>) -> Result<Self, String> {
+		Ok(Self::Hash(HashObject::new(obj)?))
+	}
+
+	pub fn push(&mut self, e: (Expr, Expr)) -> Result<(), String> {
+		match self {
+			Object::Code(c) => c.push(e),
+			Object::Hash(h) => h.push(e)?,
+		}
+		Ok(())
+	}
+
+	pub fn contains_key(&self, key: &Expr) -> bool {
+		match self {
+			Object::Code(c) => c.contains_key(key),
+			Object::Hash(h) => h.contains_key(key),
+		}
+	}
+
+	pub fn len(&self) -> usize {
+		match self {
+			Object::Code(c) => c.len(),
+			Object::Hash(h) => h.len(),
+		}
+	}
+
+	pub fn entries(&self) -> Vec<(Expr, Expr)> {
+		match self {
+			Object::Code(c) => c.entries(),
+			Object::Hash(h) => h.entries(),
+		}
+	}
+}
+
+impl From<Vec<(Expr, Expr)>> for Object {
+	fn from(obj: Vec<(Expr, Expr)>) -> Self {
+		Self::new_code(obj)
+	}
+}
+
+impl Into<Vec<(Expr, Expr)>> for &Object {
+	fn into(self) -> Vec<(Expr, Expr)> {
+		match self {
+			Object::Code(c) => c.entries(),
+			Object::Hash(h) => h.entries(),
+		}
+	}
+}
+
+impl Display for Object {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		match self {
+			Object::Code(c) => write!(f, "{}", c),
+			Object::Hash(h) => write!(f, "{}", h),
+		}
+	}
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct CodeObject {
+	obj: Vec<(Expr, Expr)>,
+}
+
+impl CodeObject {
 	pub fn new(obj: Vec<(Expr, Expr)>) -> Self {
 		Self { obj }
 	}
@@ -61,13 +135,85 @@ impl Object {
 		self.obj.push(e)
 	}
 
+	pub fn contains_key(&self, key: &Expr) -> bool {
+		self.obj.iter().any(|(k, _)| k == key)
+	}
+
 	pub fn len(&self) -> usize {
 		self.obj.len()
 	}
+
+	pub fn entries(&self) -> Vec<(Expr, Expr)> {
+		self.obj.clone()
+	}
 }
 
-impl From<Vec<(Expr, Expr)>> for Object {
-	fn from(obj: Vec<(Expr, Expr)>) -> Self {
-		Self::new(obj)
+impl Display for CodeObject {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		write!(
+			f, "{{{}}}",
+			self.obj.iter()
+				.map(|(k, v)| format!("\"{}\": {}", k.to_string(), v.to_string()))
+				.collect::<Vec<String>>().join(", ")
+		)
+	}
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct HashObject {
+	obj: HashMap<String, Expr>,
+}
+
+impl HashObject {
+	pub fn empty() -> Self {
+		Self { obj: HashMap::new() }
+	}
+
+	pub fn new(obj: Vec<(Expr, Expr)>) -> Result<Self, String> {
+		let mut new_obj = Self::empty();
+		for entry in obj {
+			new_obj.push(entry)?;
+		}
+		Ok(new_obj)
+	}
+
+	pub fn push(&mut self, e: (Expr, Expr)) -> Result<(), String> {
+		let (key, value) = e;
+		let key_string: String = match key {
+			Expr::Str(s) => s,
+			_ => return Err("Object key must be a string".to_string()),
+		};
+		self.obj.insert(key_string, value);
+		Ok(())
+	}
+
+	pub fn contains_key(&self, key: &Expr) -> bool {
+		match key {
+			Expr::Str(k) => self.obj.contains_key(k),
+			_ => false,
+		}
+	}
+
+	pub fn len(&self) -> usize {
+		self.obj.len()
+	}
+
+	pub fn entries(&self) -> Vec<(Expr, Expr)> {
+		let mut entries = self.obj.iter()
+			.map(|(k, v)| (Expr::Str(k.clone()), v.clone()))
+			.collect::<Vec<_>>();
+		entries.sort_by(|a, b| a.0.to_string().cmp(&b.0.to_string()));
+		entries
+	}
+}
+
+impl Display for HashObject {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		write!(
+			f, "{{{}}}",
+			self.entries().iter()
+				.map(|(k, v)| format!("\"{}\": {}", k, v.to_string()))
+				.collect::<Vec<String>>().join(", ")
+		)
 	}
 }

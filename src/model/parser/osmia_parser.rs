@@ -614,14 +614,14 @@ impl OsmiaParserImpl {
 		let mut obj: Object = Vec::new().into();
 		self.consume_whitespaces();
 		if !self.match_and_advance(&[Token::ObjectEnd]) {
-			obj.push(self.object_entry()?);
+			obj.push(self.object_entry()?).unwrap();
 			self.consume_whitespaces();
 			while !self.match_and_advance(&[Token::ObjectEnd]) {
 				self.consume(Token::Comma, |parser| parser.error_msg(
 					ParserErrorMsg::Expected(Token::Comma)
 				))?;
 				self.consume_whitespaces();
-				obj.push(self.object_entry()?);
+				obj.push(self.object_entry()?).unwrap();
 				self.consume_whitespaces();
 			}
 		}

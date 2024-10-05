@@ -14,6 +14,7 @@ impl Display for Expr {
 			Expr::Bool(b) => Ok(write!(f, "{b}")?),
 			Expr::Null => Ok(write!(f, "null")?),
 			Expr::Array(arr) => Ok(write!(f, "{arr}")?),
+			Expr::Object(obj) => Ok(write!(f, "{obj}")?),
 			Expr::Binary(b) => Ok(write!(f, "{b}")?),
 			Expr::Grouping(g) => Ok(write!(f, "{g}")?),
 			Expr::Unary(u) => Ok(write!(f, "{u}")?),
