@@ -32,3 +32,9 @@ impl Binary {
 		&self.right
 	}
 }
+
+impl Display for Binary {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		write!(f, "{} {} {}", self.left, self.operator, self.right)
+	}
+}

@@ -47,3 +47,28 @@ impl From<&Token> for Option<BinaryOp> {
 		})
 	}
 }
+
+impl Display for BinaryOp {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		match self {
+			BinaryOp::Equal => write!(f, "=="),
+			BinaryOp::NotEqual => write!(f, "!="),
+			BinaryOp::BitAnd => write!(f, "&"),
+			BinaryOp::BitOr => write!(f, "|"),
+			BinaryOp::BitXor => write!(f, "^"),
+			BinaryOp::Greater => write!(f, ">"),
+			BinaryOp::GreaterEqual => write!(f, ">="),
+			BinaryOp::Less => write!(f, "<"),
+			BinaryOp::LessEqual => write!(f, "<="),
+			BinaryOp::BitShiftLeft => write!(f, "<<"),
+			BinaryOp::BitShiftRight => write!(f, ">>"),
+			BinaryOp::Plus => write!(f, "+"),
+			BinaryOp::Minus => write!(f, "-"),
+			BinaryOp::Mult => write!(f, "*"),
+			BinaryOp::Div => write!(f, "/"),
+			BinaryOp::Mod => write!(f, "%"),
+			BinaryOp::And => write!(f, "&&"),
+			BinaryOp::Or => write!(f, "||"),
+		}
+	}
+}

@@ -10,3 +10,9 @@ impl Grouping {
 		Self { expr: Box::new(expr) }
 	}
 }
+
+impl Display for Grouping {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		write!(f, "({})", self.expr)
+	}
+}
