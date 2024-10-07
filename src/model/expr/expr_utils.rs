@@ -4,6 +4,10 @@ use std::fmt::{
 
 use super::*;
 use crate::types::OsmiaError;
+use crate::ctx::{
+	JsonTree,
+	CtxValue,
+};
 
 impl Display for Expr {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), Error> {
@@ -50,6 +54,46 @@ impl Expr {
 			Expr::Int(i) => Ok(*i),
 			Expr::Str(s) => Err(format!("Cannot convert {:?} to int", s)),
 			_ => Err(format!("Cannot convert {} to int", self))
+		}
+	}
+
+	pub fn print_as_json(&self) -> String {
+		match self {
+			Expr::Str(_) => format!(r#""{}""#, self.to_string()),
+			_ => self.to_string(),
+		}
+	}
+}
+
+impl TryFrom<&JsonTree<String, CtxValue>> for Expr {
+	type Error = OsmiaError;
+
+	fn try_from(tree: &JsonTree<String, CtxValue>) -> Result<Self, Self::Error> {
+		match tree {
+			JsonTree::Value(v) => match v {
+				CtxValue::Int(i) => Ok(Expr::Int(*i)),
+				CtxValue::Float(f) => Ok(Expr::Float(*f)),
+				CtxValue::Str(s) => Ok(Expr::Str(s.clone())),
+				CtxValue::Bool(b) => Ok(Expr::Bool(*b)),
+				CtxValue::Null => Ok(Expr::Null),
+			},
+			JsonTree::Object(o) => {
+				let mut items: Vec<(Expr, Expr)> = Vec::new();
+				for (k, v) in o {
+					items.push((
+						Expr::Str(k.into()),
+						Expr::try_from(v.as_ref())?,
+					));
+				}
+				Ok(Expr::Object(Object::new_hash(items)?))
+			},
+			JsonTree::Array(a) => {
+				let mut arr: Vec<Expr> = Vec::new();
+				for v in a {
+					arr.push(Expr::try_from(v)?);
+				}
+				Ok(Expr::Array(arr.into()))
+			}
 		}
 	}
 }

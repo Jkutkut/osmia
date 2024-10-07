@@ -41,7 +41,7 @@ impl Display for Array {
 		write!(
 			f, "[{}]",
 			self.arr.iter()
-				.map(|e| e.to_string())
+				.map(|e| e.print_as_json())
 				.collect::<Vec<_>>()
 				.join(", ")
 		)
@@ -153,7 +153,7 @@ impl Display for CodeObject {
 		write!(
 			f, "{{{}}}",
 			self.obj.iter()
-				.map(|(k, v)| format!("\"{}\": {}", k.to_string(), v.to_string()))
+				.map(|(k, v)| format!("\"{}\": {}", k.to_string(), v.print_as_json()))
 				.collect::<Vec<String>>().join(", ")
 		)
 	}
@@ -212,7 +212,7 @@ impl Display for HashObject {
 		write!(
 			f, "{{{}}}",
 			self.entries().iter()
-				.map(|(k, v)| format!("\"{}\": {}", k, v.to_string()))
+				.map(|(k, v)| format!("\"{}\": {}", k, v.print_as_json()))
 				.collect::<Vec<String>>().join(", ")
 		)
 	}

@@ -3,6 +3,10 @@ use std::cell::RefCell;
 use crate::types::*;
 use super::Interpreter;
 use crate::utils::Affirm;
+use crate::ctx::{
+	JsonTreeKey,
+	JsonTreeError,
+};
 
 pub struct OsmiaInterpreter<'ctx> {
 	#[allow(dead_code)]
@@ -53,6 +57,7 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 			Expr::Unary(u) => Ok(self.visit_unary(u)?),
 			Expr::Array(arr) => Ok(self.visit_array(arr)?),
 			Expr::Object(obj) => Ok(self.visit_object(obj)?),
+			Expr::Variable(v) => Ok(self.visit_variable(v)?),
 			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
 		}
 	}
@@ -125,6 +130,43 @@ impl OsmiaInterpreter<'_> {
 				Ok(Expr::Object(Object::new_hash(new_obj)?))
 			},
 			Object::Hash(h) => unreachable!("Interpreter for hash object: {:?}", h),
+		}
+	}
+
+	fn visit_variable(&self, variable: &Variable) -> Result<Expr, OsmiaError> {
+		let mut variable_keys: Vec<JsonTreeKey<String>> = Vec::new();
+		for v in variable.vec() {
+			match v {
+				JsonTreeKeyExpr::JsonTreeKey(k) => variable_keys.push(k.clone()),
+				JsonTreeKeyExpr::Expr(e) => {
+					let key = match self.visit_expr(e)? {
+						Expr::Str(s) => JsonTreeKey::Key(s),
+						Expr::Int(i) => {
+							if i < 0 {
+								return Err(format!("Invalid variable index: {:?}", e));
+							}
+							JsonTreeKey::Index(i as usize)
+						},
+						_ => return Err(format!("Invalid variable key: {:?}", e)),
+					};
+					variable_keys.push(key);
+				},
+			}
+		}
+		self.get_variable(&mut variable_keys.iter())
+	}
+
+	fn get_variable<'a>(&self, variable: &mut impl Iterator<Item = &'a JsonTreeKey<String>>) -> Result<Expr, OsmiaError> {
+		match self.ctx.borrow().get(variable) {
+			Ok(r) => Ok(r.try_into()?),
+			Err(e) => return Err(match e {
+				JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
+				JsonTreeError::ArrayOutOfBounds((idx, len)) => format!("Array index out of bounds. Attempted to access index {} in an array of length {}", idx, len),
+				JsonTreeError::IndexInObject => format!("Cannot get by index from an object"),
+				JsonTreeError::KeyInArray => format!("Cannot get by key from an array"),
+				JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
+				JsonTreeError::NoKey => unreachable!(),
+			})
 		}
 	}
 }
