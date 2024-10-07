@@ -6,6 +6,7 @@ use crate::{
 
 mod expr;
 mod ctx_get;
+mod r#if;
 
 fn interpreter_test(
 	code: &str,

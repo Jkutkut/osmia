@@ -45,6 +45,7 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 			Stmt::Block(b) => self.visit_block(b),
 			Stmt::Expr(e) => Ok(e.accept(self)?.to_string()),
 			Stmt::Comment(_) => Ok("".to_string()),
+			Stmt::If(i) => self.visit_if(i),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
@@ -74,6 +75,33 @@ impl OsmiaInterpreter<'_> {
 		)
 	}
 
+	fn visit_if(&self, if_stmt: &If) -> Result<OsmiaOutput, OsmiaError> {
+		if let Some(content) = self.visit_conditional(if_stmt.conditional())? {
+			return Ok(content);
+		}
+		if let Some(else_ifs) = if_stmt.elseifs() {
+			for e in else_ifs {
+				if let Some(content) = self.visit_conditional(e)? {
+					return Ok(content);
+				}
+			}
+		}
+		if let Some(e) = if_stmt.else_block() {
+			let e: &Stmt = &*e;
+			return Ok(e.accept(self)?);
+		}
+		Ok("".to_string())
+	}
+
+	fn visit_conditional(&self, conditional: &ConditionalStmt) -> Result<Option<OsmiaOutput>, OsmiaError> {
+		match conditional.condition().accept(self)?.to_bool() {
+			false => Ok(None),
+			true => Ok(Some(conditional.body().accept(self)?)),
+		}
+	}
+}
+
+impl OsmiaInterpreter<'_> {
 	fn visit_binary(&self, binary: &Binary) -> Result<Expr, OsmiaError> {
 		let left = binary.left().accept(self)?;
 		let right = binary.right().accept(self)?;

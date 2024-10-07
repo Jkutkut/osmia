@@ -20,4 +20,16 @@ impl If {
 			_else: else_block,
 		}
 	}
+
+	pub fn conditional(&self) -> &ConditionalStmt {
+		&self._if
+	}
+
+	pub fn elseifs(&self) -> &Option<Vec<ConditionalStmt>> {
+		&self._elseifs
+	}
+
+	pub fn else_block(&self) -> &Option<Box<Stmt>> {
+		&self._else
+	}
 }
