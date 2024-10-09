@@ -28,7 +28,8 @@ struct LexerScanner<'a> {
 	index: usize,
 	current_line: usize,
 	tokens: LexerCode,
-	in_stmt: bool
+	in_stmt: bool,
+	obj_depth: usize
 }
 
 impl<'a> LexerScanner<'a> {
@@ -38,7 +39,8 @@ impl<'a> LexerScanner<'a> {
 			index: 0,
 			current_line: 0,
 			tokens: Vec::new(),
-			in_stmt: false
+			in_stmt: false,
+			obj_depth: 0
 		}
 	}
 
@@ -202,7 +204,7 @@ impl<'a> LexerScanner<'a> {
 	}
 
 	fn consume_end_delimiter(&mut self) {
-		if self.consume(END_DELIMITER) {
+		if self.obj_depth == 0 && self.consume(END_DELIMITER) {
 			self.in_stmt = false;
 			self.tokens.push(Token::StmtEnd);
 		}
@@ -242,9 +244,19 @@ impl<'a> LexerScanner<'a> {
 		if !self.code_left() {
 			return Ok(());
 		}
+		if self.consume("{") {
+			self.tokens.push(Token::ObjectStart);
+			self.obj_depth += 1;
+			return Ok(());
+		}
+		if self.obj_depth > 0 && self.consume("}") {
+			self.tokens.push(Token::ObjectEnd);
+			self.obj_depth -= 1;
+			return Ok(());
+		}
 		if self.consume_in_order(vec![
-			("(", Token::ParentStart), (")", Token::ParentEnd), ("{", Token::ObjectStart),
-			("}", Token::ObjectEnd), ("[", Token::ArrayStart), ("]", Token::ArrayEnd),
+			("(", Token::ParentStart), (")", Token::ParentEnd),
+			("[", Token::ArrayStart), ("]", Token::ArrayEnd),
 			("+", Token::Plus), ("-", Token::Minus), ("*", Token::Mult), ("/", Token::Div), ("%", Token::Mod),
 			("...", Token::Spread), (".", Token::Dot),
 			("=>", Token::Arrow),

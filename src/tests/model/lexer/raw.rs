@@ -37,5 +37,5 @@ macro_tests!(
 	lexer_test_fail,
 	(invalid_stmt_start_01,"{{\n\n\t      \n  ", "}}"),
 	(invalid_stmt_start_02,"{{ {", "}}"),
-	(invalid_stmt_start_03,"{{ }", "}}"),
+	(invalid_stmt_start_03,"{{ }", "}"),
 );
