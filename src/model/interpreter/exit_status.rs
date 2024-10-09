@@ -3,4 +3,6 @@
 pub enum ExitStatus {
 	/// The execution was successful and the code executed fully.
 	Okay,
+	/// The execution ended with a break statement.
+	Break,
 }

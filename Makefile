@@ -34,6 +34,9 @@ test_backtrace:
 test_watch:
 	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear test
 
+test_watch_debug:
+	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo -e RUST_BACKTRACE=1 jkutkut/docker4rust watch --clear test
+
 doc:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust doc --lib --examples --document-private-items
 

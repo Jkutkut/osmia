@@ -35,6 +35,7 @@ impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter<'_> {
 	fn interpret(&self, code: ParserCode) -> Result<OsmiaOutput, OsmiaError> {
 		match (&code).accept(self)? {
 			(ExitStatus::Okay, r) => Ok(r.unwrap_or("".into())),
+			(ExitStatus::Break, _) => Err("Cannot break out of the program".into()),
 		}
 	}
 }
@@ -64,6 +65,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Stmt::If(i) => self.visit_if(i),
 			Stmt::While(w) => self.visit_while(w),
 			Stmt::For(f) => self.visit_for(f),
+			Stmt::Break => Ok((ExitStatus::Break, None)),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
@@ -84,13 +86,18 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 
 impl OsmiaInterpreter<'_> {
 	fn visit_block(&self, block: &Block) -> StmtResult {
+		let mut state = ExitStatus::Okay;
 		let mut content = String::new();
 		for s in block.stmts() {
 			match self.visit_stmt(s)? {
 				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
+				(ExitStatus::Break, _) => {
+					state = ExitStatus::Break;
+					break;
+				},
 			}
 		}
-		Ok((ExitStatus::Okay, string_or_none(content)))
+		Ok((state, string_or_none(content)))
 	}
 
 	fn visit_if(&self, if_stmt: &If) -> StmtResult {
@@ -116,6 +123,10 @@ impl OsmiaInterpreter<'_> {
 		while let Some(c) = self.visit_conditional(while_stmt)? {
 			match c {
 				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
+				(ExitStatus::Break, r) => {
+					push_op_string(&mut content, r);
+					break;
+				},
 			}
 		}
 		Ok((ExitStatus::Okay, string_or_none(content)))
@@ -137,6 +148,10 @@ impl OsmiaInterpreter<'_> {
 			self.set_variable(&mut var.iter(), (&e).try_into()?)?;
 			match body.accept(self)? {
 				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
+				(ExitStatus::Break, r) => {
+					push_op_string(&mut content, r);
+					break;
+				}
 			}
 		}
 		Ok((ExitStatus::Okay, string_or_none(content)))

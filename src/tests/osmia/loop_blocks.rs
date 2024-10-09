@@ -67,6 +67,87 @@ macro_tests!(
 		None
 	),
 	(
+		break_03,
+		Some("{{for i in [1, 2, 3, 4]}}{{i}}{{if i == 3}}{{break}}{{fi}}-{{done}}"),
+		Some(vec![
+			Token::StmtStart,
+			Token::For,
+			Token::Whitespace,
+			Token::new_alpha("i"),
+			Token::Whitespace,
+			Token::In,
+			Token::Whitespace,
+			Token::ArrayStart,
+			Token::new_number("1"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("2"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("3"),
+			Token::Comma,
+			Token::Whitespace,
+			Token::new_number("4"),
+			Token::ArrayEnd,
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::new_alpha("i"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::If,
+			Token::Whitespace,
+			Token::new_alpha("i"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_number("3"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::Break,
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::Fi,
+			Token::StmtEnd,
+			Token::new_raw("-"),
+			Token::StmtStart,
+			Token::Done,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		Some(Stmt::For(For::new(
+			Variable::from_vec(vec![
+				JsonTreeKeyExpr::JsonTreeKey("i".into())
+			]),
+			Array::new(vec![
+				Expr::Int(1),
+				Expr::Int(2),
+				Expr::Int(3),
+				Expr::Int(4),
+			]).into(),
+			Stmt::Block(vec![
+				Stmt::Expr(Variable::from_vec(vec![
+					JsonTreeKeyExpr::JsonTreeKey("i".into())
+				]).into()),
+				Stmt::If(If::new(
+					ConditionalStmt::new(
+						Binary::new(
+							Variable::from_vec(vec![
+								JsonTreeKeyExpr::JsonTreeKey("i".into())
+							]).into(),
+							BinaryOp::Equal,
+							Expr::Int(3)
+						).into(),
+						Stmt::Break,
+					),
+					None,
+					None
+				)),
+				Stmt::new_raw("-"),
+			].into()),
+		))),
+		None
+	),
+	(
 		return_01,
 		Some("{{return}}"),
 		Some(vec![

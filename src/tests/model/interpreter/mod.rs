@@ -10,6 +10,7 @@ mod get_ctx;
 mod r#if;
 mod r#for;
 mod r#while;
+mod r#break;
 
 fn interpreter_test(
 	code: &str,
