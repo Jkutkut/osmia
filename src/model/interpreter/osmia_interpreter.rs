@@ -49,6 +49,7 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 			Stmt::Comment(_) => Ok("".to_string()),
 			Stmt::Assign(a) => self.visit_assign(a),
 			Stmt::If(i) => self.visit_if(i),
+			Stmt::While(w) => self.visit_while(w),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
