@@ -35,7 +35,7 @@ impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter<'_> {
 	fn interpret(&self, code: ParserCode) -> Result<OsmiaOutput, OsmiaError> {
 		match (&code).accept(self)? {
 			(ExitStatus::Okay, r) => Ok(r.unwrap_or("".into())),
-			(ExitStatus::Break, _) => Err("Cannot break out of the program".into()),
+			(ExitStatus::Break, _) | (ExitStatus::Continue, _) => Err("Cannot break or continue out of the program".into()),
 		}
 	}
 }
@@ -66,6 +66,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Stmt::While(w) => self.visit_while(w),
 			Stmt::For(f) => self.visit_for(f),
 			Stmt::Break => Ok((ExitStatus::Break, None)),
+			Stmt::Continue => Ok((ExitStatus::Continue, None)),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
@@ -89,12 +90,12 @@ impl OsmiaInterpreter<'_> {
 		let mut state = ExitStatus::Okay;
 		let mut content = String::new();
 		for s in block.stmts() {
-			match self.visit_stmt(s)? {
-				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
-				(ExitStatus::Break, _) => {
-					state = ExitStatus::Break;
-					break;
-				},
+			let (status, r) = s.accept(self)?;
+			push_op_string(&mut content, r);
+			state = status.clone();
+			match status {
+				ExitStatus::Okay => (),
+				ExitStatus::Break | ExitStatus::Continue => break,
 			}
 		}
 		Ok((state, string_or_none(content)))
@@ -120,13 +121,11 @@ impl OsmiaInterpreter<'_> {
 
 	fn visit_while(&self, while_stmt: &While) -> StmtResult {
 		let mut content = String::new();
-		while let Some(c) = self.visit_conditional(while_stmt)? {
-			match c {
-				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
-				(ExitStatus::Break, r) => {
-					push_op_string(&mut content, r);
-					break;
-				},
+		while let Some((status, r)) = self.visit_conditional(while_stmt)? {
+			push_op_string(&mut content, r);
+			match status {
+				ExitStatus::Okay | ExitStatus::Continue => (),
+				ExitStatus::Break => break,
 			}
 		}
 		Ok((ExitStatus::Okay, string_or_none(content)))
@@ -146,12 +145,11 @@ impl OsmiaInterpreter<'_> {
 		let mut content = String::new();
 		for e in iterable {
 			self.set_variable(&mut var.iter(), (&e).try_into()?)?;
-			match body.accept(self)? {
-				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
-				(ExitStatus::Break, r) => {
-					push_op_string(&mut content, r);
-					break;
-				}
+			let (status, r) = body.accept(self)?;
+			push_op_string(&mut content, r);
+			match status {
+				ExitStatus::Okay | ExitStatus::Continue => (),
+				ExitStatus::Break => break,
 			}
 		}
 		Ok((ExitStatus::Okay, string_or_none(content)))

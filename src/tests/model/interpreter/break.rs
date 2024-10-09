@@ -29,5 +29,12 @@ macro_tests!(
 		vec![
 			(Ctx::try_from("{}").unwrap(), Ok("1-2-3")),
 		]
+	),
+	(
+		break_05,
+		"{{break}}",
+		vec![
+			(Ctx::try_from("{}").unwrap(), Err(vec!["break", "program"])),
+		]
 	)
 );

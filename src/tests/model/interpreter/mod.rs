@@ -11,6 +11,7 @@ mod r#if;
 mod r#for;
 mod r#while;
 mod r#break;
+mod r#continue;
 
 fn interpreter_test(
 	code: &str,
