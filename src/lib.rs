@@ -85,7 +85,7 @@ impl CodeInterpreter for Osmia {
 	type Ctx = types::Ctx;
 
 	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::Error> {
-		OsmiaLexer::osmia()
+		OsmiaLexer::new()
 	}
 
 	fn new_parser() -> impl Parser<Self::LexerCode, Self::ParserCode, Self::Error> {

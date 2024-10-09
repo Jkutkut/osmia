@@ -2,24 +2,17 @@ use super::Lexer;
 use crate::LexerCode;
 use crate::OsmiaError;
 
-pub struct OsmiaLexer<'a> {
-	start_delimiter: &'a str,
-	end_delimiter: &'a str
-}
+pub struct OsmiaLexer {}
 
-impl<'a> OsmiaLexer<'a> {
-	pub fn new(start_delimiter: &'a str, end_delimiter: &'a str) -> Self {
-		Self { start_delimiter, end_delimiter }
-	}
-
-	pub fn osmia() -> Self {
-		Self::new("{{", "}}")
+impl OsmiaLexer {
+	pub fn new() -> Self {
+		Self {}
 	}
 }
 
-impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
+impl Lexer<LexerCode, OsmiaError> for OsmiaLexer {
 	fn lex(&self, code: &str) -> Result<LexerCode, OsmiaError> {
-		let mut scanner = LexerScanner::new(code, self.start_delimiter, self.end_delimiter);
+		let mut scanner = LexerScanner::new(code);
 		scanner.scan().map_err(|err| format!("Lexer error: {}", err))
 	}
 }
@@ -27,9 +20,10 @@ impl Lexer<LexerCode, OsmiaError> for OsmiaLexer<'_> {
 use crate::model::lexer::Token;
 use crate::utils::code_trace;
 
+const START_DELIMITER: &str = "{{";
+const END_DELIMITER: &str = "}}";
+
 struct LexerScanner<'a> {
-	start_delimiter: &'a str,
-	end_delimiter: &'a str,
 	code: &'a [u8],
 	index: usize,
 	current_line: usize,
@@ -38,10 +32,8 @@ struct LexerScanner<'a> {
 }
 
 impl<'a> LexerScanner<'a> {
-	pub fn new(code: &'a str, start_delimiter: &'a str, end_delimiter: &'a str) -> Self {
+	pub fn new(code: &'a str) -> Self {
 		Self {
-			start_delimiter,
-			end_delimiter,
 			code: code.as_bytes(),
 			index: 0,
 			current_line: 0,
@@ -81,7 +73,7 @@ impl<'a> LexerScanner<'a> {
 		if self.in_stmt {
 			return Err(self.error(format!(
 				"Unexpected end of statement. Expected '{}'",
-				self.end_delimiter
+				END_DELIMITER
 			)));
 		}
 		self.tokens.push(Token::Eof);
@@ -186,7 +178,7 @@ impl<'a> LexerScanner<'a> {
 impl<'a> LexerScanner<'a> {
 	fn consume_raw(&mut self) {
 		let start = self.current_index();
-		while self.code_left() && !self.is_match(self.start_delimiter) && self.current() != b'\n' {
+		while self.code_left() && !self.is_match(START_DELIMITER) && self.current() != b'\n' {
 			self.advance();
 		}
 		if let Some(content) = self.pick_non_empty_string(start, self.current_index()) {
@@ -203,14 +195,14 @@ impl<'a> LexerScanner<'a> {
 	}
 
 	fn consume_start_delimiter(&mut self) {
-		if self.consume(self.start_delimiter) {
+		if self.consume(START_DELIMITER) {
 			self.in_stmt = true;
 			self.tokens.push(Token::StmtStart);
 		}
 	}
 
 	fn consume_end_delimiter(&mut self) {
-		if self.consume(self.end_delimiter) {
+		if self.consume(END_DELIMITER) {
 			self.in_stmt = false;
 			self.tokens.push(Token::StmtEnd);
 		}
@@ -232,10 +224,10 @@ impl<'a> LexerScanner<'a> {
 				start = self.current_index();
 				continue;
 			}
-			if self.consume(self.start_delimiter) {
+			if self.consume(START_DELIMITER) {
 				depth += 1;
 			}
-			if self.is_match(self.end_delimiter) {
+			if self.is_match(END_DELIMITER) {
 				if depth == 0 {
 					break;
 				}

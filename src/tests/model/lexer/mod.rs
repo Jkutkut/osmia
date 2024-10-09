@@ -47,7 +47,7 @@ fn lexer_test_fail(
 	code: &str,
 	piece_error: &str
 ) {
-	let lexer = OsmiaLexer::osmia();
+	let lexer = OsmiaLexer::new();
 	match lexer.lex(code) {
 		Ok(t) => panic!("Should fail but gave: {:?}", t),
 		Err(err) => {
