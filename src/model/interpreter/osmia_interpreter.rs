@@ -1,8 +1,15 @@
 use std::cell::RefCell;
 
 use crate::types::*;
-use super::Interpreter;
-use crate::utils::Affirm;
+use super::{
+	Interpreter,
+	ExitStatus,
+};
+use crate::utils::{
+	Affirm,
+	string_or_none,
+	push_op_string,
+};
 use crate::ctx::{
 	JsonTree,
 	JsonTreeKey,
@@ -26,7 +33,9 @@ impl<'ctx> OsmiaInterpreter<'ctx> {
 
 impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter<'_> {
 	fn interpret(&self, code: ParserCode) -> Result<OsmiaOutput, OsmiaError> {
-		(&code).accept(self)
+		match (&code).accept(self)? {
+			(ExitStatus::Okay, r) => Ok(r.unwrap_or("".into())),
+		}
 	}
 }
 
@@ -40,13 +49,17 @@ use crate::model::{
 	expr::*,
 };
 
-impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for OsmiaInterpreter<'_> {
-	fn visit_stmt(&self, stmt: &Stmt) -> Result<OsmiaOutput, OsmiaError> {
+type StmtOutput = (ExitStatus, Option<OsmiaOutput>);
+type StmtResult = Result<StmtOutput, OsmiaError>;
+type ExprResult = Result<Expr, OsmiaError>;
+
+impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
+	fn visit_stmt(&self, stmt: &Stmt) -> StmtResult {
 		match stmt {
-			Stmt::Raw(s) => Ok(s.clone()),
+			Stmt::Raw(s) => Ok((ExitStatus::Okay, Some(s.clone()))),
 			Stmt::Block(b) => self.visit_block(b),
-			Stmt::Expr(e) => Ok(e.accept(self)?.to_string()),
-			Stmt::Comment(_) => Ok("".to_string()),
+			Stmt::Expr(e) => Ok((ExitStatus::Okay, Some(e.accept(self)?.to_string()))),
+			Stmt::Comment(_) => Ok((ExitStatus::Okay, None)),
 			Stmt::Assign(a) => self.visit_assign(a),
 			Stmt::If(i) => self.visit_if(i),
 			Stmt::While(w) => self.visit_while(w),
@@ -55,7 +68,7 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 		}
 	}
 
-	fn visit_expr(&self, expr: &Expr) -> Result<Expr, OsmiaError> {
+	fn visit_expr(&self, expr: &Expr) -> ExprResult {
 		match expr {
 			Expr::Float(_) | Expr::Int(_) | Expr::Str(_) | Expr::Bool(_) | Expr::Null => Ok(expr.clone()),
 			Expr::Binary(b) => Ok(self.visit_binary(b)?),
@@ -70,17 +83,17 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 }
 
 impl OsmiaInterpreter<'_> {
-	fn visit_block(&self, block: &Block) -> Result<OsmiaOutput, OsmiaError> {
-		// TODO this will change with flow breaking statements
-		let stmts = &block.stmts;
-		Ok(stmts.into_iter()
-			.map(|s| self.visit_stmt(&s))
-			.collect::<Result<Vec<String>, OsmiaError>>()?
-			.join("")
-		)
+	fn visit_block(&self, block: &Block) -> StmtResult {
+		let mut content = String::new();
+		for s in block.stmts() {
+			match self.visit_stmt(s)? {
+				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
+			}
+		}
+		Ok((ExitStatus::Okay, string_or_none(content)))
 	}
 
-	fn visit_if(&self, if_stmt: &If) -> Result<OsmiaOutput, OsmiaError> {
+	fn visit_if(&self, if_stmt: &If) -> StmtResult {
 		if let Some(content) = self.visit_conditional(if_stmt.conditional())? {
 			return Ok(content);
 		}
@@ -95,47 +108,51 @@ impl OsmiaInterpreter<'_> {
 			let e: &Stmt = &*e;
 			return Ok(e.accept(self)?);
 		}
-		Ok("".to_string())
+		Ok((ExitStatus::Okay, None))
 	}
 
-	fn visit_while(&self, while_stmt: &While) -> Result<OsmiaOutput, OsmiaError> {
+	fn visit_while(&self, while_stmt: &While) -> StmtResult {
 		let mut content = String::new();
 		while let Some(c) = self.visit_conditional(while_stmt)? {
-			content.push_str(&c);
+			match c {
+				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
+			}
 		}
-		Ok(content)
+		Ok((ExitStatus::Okay, string_or_none(content)))
 	}
 
-	fn visit_conditional(&self, conditional: &ConditionalStmt) -> Result<Option<OsmiaOutput>, OsmiaError> {
+	fn visit_conditional(&self, conditional: &ConditionalStmt) -> Result<Option<StmtOutput>, OsmiaError> {
 		match conditional.condition().accept(self)?.to_bool() {
 			false => Ok(None),
 			true => Ok(Some(conditional.body().accept(self)?)),
 		}
 	}
 
-	fn visit_for(&self, for_stmt: &For) -> Result<OsmiaOutput, OsmiaError> {
+	fn visit_for(&self, for_stmt: &For) -> StmtResult {
 		let var = Self::variable_to_ctx_variable(for_stmt.variable())?;
 		let iterable = self.visit_iterable(for_stmt.iterable())?;
 		let body = for_stmt.body();
 		let mut content = String::new();
 		for e in iterable {
 			self.set_variable(&mut var.iter(), (&e).try_into()?)?;
-			content.push_str(&self.visit_stmt(body)?);
+			match body.accept(self)? {
+				(ExitStatus::Okay, r) => push_op_string(&mut content, r),
+			}
 		}
-		Ok(content)
+		Ok((ExitStatus::Okay, string_or_none(content)))
 	}
 
-	fn visit_assign(&self, assign: &Assign) -> Result<OsmiaOutput, OsmiaError> {
+	fn visit_assign(&self, assign: &Assign) -> StmtResult {
 		let var = Self::variable_to_ctx_variable(assign.variable())?;
 		let value: Expr = assign.value().accept(self)?;
 		let value = (&value).try_into()?;
 		self.set_variable(&mut var.iter(), value)?;
-		Ok("".to_string())
+		Ok((ExitStatus::Okay, None))
 	}
 }
 
 impl OsmiaInterpreter<'_> {
-	fn visit_binary(&self, binary: &Binary) -> Result<Expr, OsmiaError> {
+	fn visit_binary(&self, binary: &Binary) -> ExprResult {
 		let left = binary.left().accept(self)?;
 		let right = binary.right().accept(self)?;
 		match binary.operator() {
@@ -160,11 +177,11 @@ impl OsmiaInterpreter<'_> {
 		}
 	}
 
-	fn visit_grouping(&self, grouping: &Grouping) -> Result<Expr, OsmiaError> {
+	fn visit_grouping(&self, grouping: &Grouping) -> ExprResult {
 		grouping.expr().accept(self)
 	}
 
-	fn visit_unary(&self, unary: &Unary) -> Result<Expr, OsmiaError> {
+	fn visit_unary(&self, unary: &Unary) -> ExprResult {
 		match unary.operator() {
 			UnaryOp::Plus => Ok(unary.expr().accept(self)?.affirm()?),
 			UnaryOp::Minus => Ok((-unary.expr().accept(self)?)?),
@@ -172,7 +189,7 @@ impl OsmiaInterpreter<'_> {
 		}
 	}
 
-	fn visit_array(&self, arr: &Array) -> Result<Expr, OsmiaError> {
+	fn visit_array(&self, arr: &Array) -> ExprResult {
 		let mut new_arr = Vec::new();
 		for e in arr.iter() {
 			new_arr.push(e.accept(self)?);
@@ -180,7 +197,7 @@ impl OsmiaInterpreter<'_> {
 		Ok(Expr::Array(new_arr.into()))
 	}
 
-	fn visit_object(&self, obj: &Object) -> Result<Expr, OsmiaError> {
+	fn visit_object(&self, obj: &Object) -> ExprResult {
 		match obj {
 			Object::Code(_) => {
 				let items: Vec<(Expr, Expr)> = obj.into();
@@ -217,7 +234,7 @@ impl OsmiaInterpreter<'_> {
 		})
 	}
 
-	fn visit_variable(&self, variable: &Variable) -> Result<Expr, OsmiaError> {
+	fn visit_variable(&self, variable: &Variable) -> ExprResult {
 		self.get_variable(&mut Self::variable_to_ctx_variable(variable)?.iter())
 	}
 
@@ -246,7 +263,7 @@ impl OsmiaInterpreter<'_> {
 }
 
 impl OsmiaInterpreter<'_> {
-	fn get_variable<'a>(&self, variable: &mut impl Iterator<Item = &'a JsonTreeKey<String>>) -> Result<Expr, OsmiaError> {
+	fn get_variable<'a>(&self, variable: &mut impl Iterator<Item = &'a JsonTreeKey<String>>) -> ExprResult {
 		match self.ctx.borrow().get(variable) {
 			Ok(r) => Ok(r.try_into()?),
 			Err(e) => return Err(match e {

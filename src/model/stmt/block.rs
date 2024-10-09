@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Block {
-	pub stmts: Vec<Stmt>,
+	stmts: Vec<Stmt>,
 }
 
 impl Block {
@@ -16,6 +16,10 @@ impl Block {
 
 	pub fn len(&self) -> usize {
 		self.stmts.len()
+	}
+
+	pub fn stmts(&self) -> &Vec<Stmt> {
+		&self.stmts
 	}
 }
 
