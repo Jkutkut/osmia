@@ -8,6 +8,7 @@ mod assign;
 mod expr;
 mod get_ctx;
 mod r#if;
+mod r#for;
 mod r#while;
 
 fn interpreter_test(

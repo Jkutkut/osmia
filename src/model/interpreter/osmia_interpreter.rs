@@ -50,6 +50,7 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 			Stmt::Assign(a) => self.visit_assign(a),
 			Stmt::If(i) => self.visit_if(i),
 			Stmt::While(w) => self.visit_while(w),
+			Stmt::For(f) => self.visit_for(f),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
@@ -110,6 +111,18 @@ impl OsmiaInterpreter<'_> {
 			false => Ok(None),
 			true => Ok(Some(conditional.body().accept(self)?)),
 		}
+	}
+
+	fn visit_for(&self, for_stmt: &For) -> Result<OsmiaOutput, OsmiaError> {
+		let var = Self::variable_to_ctx_variable(for_stmt.variable())?;
+		let iterable = self.visit_iterable(for_stmt.iterable())?;
+		let body = for_stmt.body();
+		let mut content = String::new();
+		for e in iterable {
+			self.set_variable(&mut var.iter(), (&e).try_into()?)?;
+			content.push_str(&self.visit_stmt(body)?);
+		}
+		Ok(content)
 	}
 
 	fn visit_assign(&self, assign: &Assign) -> Result<OsmiaOutput, OsmiaError> {
@@ -179,6 +192,29 @@ impl OsmiaInterpreter<'_> {
 			},
 			Object::Hash(h) => unreachable!("Interpreter for hash object: {:?}", h),
 		}
+	}
+
+	fn visit_iterable(&self, iterable: &Expr) -> Result<Vec<Expr>, OsmiaError> {
+		let iterable: Expr = match iterable {
+			Expr::Array(arr) => self.visit_array(arr)?,
+			Expr::Object(obj) => self.visit_object(obj)?,
+			Expr::Variable(v) => match self.visit_variable(v)? {
+				Expr::Array(a) => Expr::Array(a),
+				Expr::Object(o) => Expr::Object(o),
+				_ => return Err(format!("Variable {:?} is not iterable", v)),
+			},
+			_ => return Err(format!("Cannot iterate over: {:?}", iterable)),
+		};
+		Ok(match iterable {
+			Expr::Array(arr) => (&arr).into(),
+			Expr::Object(obj) => obj.entries().iter().map(|(k, v)| {
+				Ok(Expr::Object(Object::new_hash(vec![
+					(Expr::Str("key".into()), k.clone()),
+					(Expr::Str("value".into()), v.clone()),
+				])?))
+			}).collect::<Result<Vec<Expr>, OsmiaError>>()?,
+			_ => unreachable!(),
+		})
 	}
 
 	fn visit_variable(&self, variable: &Variable) -> Result<Expr, OsmiaError> {
