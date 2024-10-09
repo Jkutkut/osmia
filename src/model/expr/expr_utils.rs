@@ -2,6 +2,7 @@ use std::fmt::{
 	Display, Error,
 };
 
+use std::collections::HashMap;
 use super::*;
 use crate::types::OsmiaError;
 use crate::ctx::{
@@ -97,3 +98,39 @@ impl TryFrom<&JsonTree<String, CtxValue>> for Expr {
 		}
 	}
 }
+
+impl TryFrom<&Expr> for JsonTree<String, CtxValue> {
+	type Error = OsmiaError;
+
+	fn try_from(value: &Expr) -> Result<Self, Self::Error> {
+		Ok(match value {
+			Expr::Float(v) => JsonTree::Value(CtxValue::Float(*v)),
+			Expr::Int(v) => JsonTree::Value(CtxValue::Int(*v)),
+			Expr::Str(v) => JsonTree::Value(CtxValue::Str(v.into())),
+			Expr::Bool(v) => JsonTree::Value(CtxValue::Bool(*v)),
+			Expr::Null => JsonTree::Value(CtxValue::Null),
+			Expr::Array(arr) => {
+				let mut items: Vec<JsonTree<String, CtxValue>> = Vec::new();
+				for e in arr.iter() {
+					items.push(e.try_into()?);
+				}
+				JsonTree::Array(items)
+			},
+			Expr::Object(obj) => {
+				let mut items = HashMap::new();
+				for (e, v) in obj.entries() {
+					let key = match e {
+						Expr::Str(s) => s.into(),
+						_ => return Err("Object key must be a string".to_string()),
+					};
+					let value = Box::new((&v).try_into()?);
+					items.insert(key, value);
+				}
+				JsonTree::Object(items)
+			},
+			_ => return Err(format!("The expression {:?} cannot be stored in the context", value)),
+		})
+	}
+}
+
+

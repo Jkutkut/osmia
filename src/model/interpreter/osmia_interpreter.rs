@@ -4,8 +4,10 @@ use crate::types::*;
 use super::Interpreter;
 use crate::utils::Affirm;
 use crate::ctx::{
+	JsonTree,
 	JsonTreeKey,
 	JsonTreeError,
+	CtxValue,
 };
 
 pub struct OsmiaInterpreter<'ctx> {
@@ -45,6 +47,7 @@ impl Visitor<Result<OsmiaOutput, OsmiaError>, Result<Expr, OsmiaError>> for Osmi
 			Stmt::Block(b) => self.visit_block(b),
 			Stmt::Expr(e) => Ok(e.accept(self)?.to_string()),
 			Stmt::Comment(_) => Ok("".to_string()),
+			Stmt::Assign(a) => self.visit_assign(a),
 			Stmt::If(i) => self.visit_if(i),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
@@ -93,11 +96,27 @@ impl OsmiaInterpreter<'_> {
 		Ok("".to_string())
 	}
 
+	fn visit_while(&self, while_stmt: &While) -> Result<OsmiaOutput, OsmiaError> {
+		let mut content = String::new();
+		while let Some(c) = self.visit_conditional(while_stmt)? {
+			content.push_str(&c);
+		}
+		Ok(content)
+	}
+
 	fn visit_conditional(&self, conditional: &ConditionalStmt) -> Result<Option<OsmiaOutput>, OsmiaError> {
 		match conditional.condition().accept(self)?.to_bool() {
 			false => Ok(None),
 			true => Ok(Some(conditional.body().accept(self)?)),
 		}
+	}
+
+	fn visit_assign(&self, assign: &Assign) -> Result<OsmiaOutput, OsmiaError> {
+		let var = Self::variable_to_ctx_variable(assign.variable())?;
+		let value: Expr = assign.value().accept(self)?;
+		let value = (&value).try_into()?;
+		self.set_variable(&mut var.iter(), value)?;
+		Ok("".to_string())
 	}
 }
 
@@ -162,18 +181,22 @@ impl OsmiaInterpreter<'_> {
 	}
 
 	fn visit_variable(&self, variable: &Variable) -> Result<Expr, OsmiaError> {
+		self.get_variable(&mut Self::variable_to_ctx_variable(variable)?.iter())
+	}
+
+	fn variable_to_ctx_variable(variable: &Variable) -> Result<Vec<JsonTreeKey<String>>, OsmiaError> {
 		let mut variable_keys: Vec<JsonTreeKey<String>> = Vec::new();
 		for v in variable.vec() {
 			match v {
 				JsonTreeKeyExpr::JsonTreeKey(k) => variable_keys.push(k.clone()),
 				JsonTreeKeyExpr::Expr(e) => {
-					let key = match self.visit_expr(e)? {
-						Expr::Str(s) => JsonTreeKey::Key(s),
+					let key: JsonTreeKey<String> = match e {
+						Expr::Str(s) => JsonTreeKey::Key(s.into()),
 						Expr::Int(i) => {
-							if i < 0 {
+							if *i < 0 {
 								return Err(format!("Invalid variable index: {:?}", e));
 							}
-							JsonTreeKey::Index(i as usize)
+							JsonTreeKey::Index(*i as usize)
 						},
 						_ => return Err(format!("Invalid variable key: {:?}", e)),
 					};
@@ -181,9 +204,11 @@ impl OsmiaInterpreter<'_> {
 				},
 			}
 		}
-		self.get_variable(&mut variable_keys.iter())
+		Ok(variable_keys)
 	}
+}
 
+impl OsmiaInterpreter<'_> {
 	fn get_variable<'a>(&self, variable: &mut impl Iterator<Item = &'a JsonTreeKey<String>>) -> Result<Expr, OsmiaError> {
 		match self.ctx.borrow().get(variable) {
 			Ok(r) => Ok(r.try_into()?),
@@ -195,6 +220,20 @@ impl OsmiaInterpreter<'_> {
 				JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
 				JsonTreeError::NoKey => unreachable!(),
 			})
+		}
+	}
+
+	fn set_variable<'a>(&self, var: &mut impl Iterator<Item = &'a JsonTreeKey<String>>, value: JsonTree<String, CtxValue>) -> Result<(), OsmiaError> {
+		match self.ctx.borrow_mut().set(var, value) {
+			Err(e) => Err(match e {
+				JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
+				JsonTreeError::ArrayOutOfBounds((idx, len)) => format!("Array index out of bounds. Attempted to access index {} in an array of length {}", idx, len),
+				JsonTreeError::IndexInObject => format!("Cannot set by index from an object"),
+				JsonTreeError::KeyInArray => format!("Cannot set by key from an array"),
+				JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
+				JsonTreeError::NoKey => unreachable!(),
+			}),
+			Ok(_) => Ok(()),
 		}
 	}
 }

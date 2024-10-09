@@ -30,9 +30,9 @@ impl Ctx {
 	pub fn set<'a>(
 		&mut self,
 		key: &mut impl Iterator<Item = &'a JsonTreeKey<String>>,
-		value: CtxValue
+		value: JsonTree<String, CtxValue>,
 	) -> Result<(), JsonTreeError<JsonTreeKey<String>>> {
-		self.ctx.set(key, JsonTree::Value(value))
+		self.ctx.set(key, value)
 	}
 }
 

@@ -4,8 +4,9 @@ use crate::{
 	tests::test,
 };
 
+mod assign;
 mod expr;
-mod ctx_get;
+mod get_ctx;
 mod r#if;
 
 fn interpreter_test(
