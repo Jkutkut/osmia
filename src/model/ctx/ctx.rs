@@ -13,6 +13,17 @@ impl Ctx {
 		Self { ctx: JsonTree::Object(HashMap::new()) }
 	}
 
+	pub fn get_callable<'a>(
+		&self,
+		key: &mut impl Iterator<Item = &'a JsonTreeKey<String>>
+	) -> Result<Callable, OsmiaError> {
+		match self.ctx.get(key) {
+			Ok(JsonTree::Value(CtxValue::Callable(c))) => Ok(c.clone()),
+			Ok(_) => Err(format!("Not a callable")),
+			Err(e) => Err(Self::format_get_error(e)),
+		}
+	}
+
 	pub fn get<'a>(
 		&self,
 		key: &mut impl Iterator<Item = &'a JsonTreeKey<String>>

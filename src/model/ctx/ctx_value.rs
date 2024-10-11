@@ -9,4 +9,6 @@ pub enum CtxValue {
 	Str(String),
 	Bool(bool),
 	Null,
+	#[serde(skip)]
+	Callable(Callable),
 }
