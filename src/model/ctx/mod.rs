@@ -1,5 +1,5 @@
 mod ctx;
-mod lib;
+pub mod lib;
 mod ctx_value;
 mod json_tree;
 mod json_tree_error;

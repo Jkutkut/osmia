@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use super::*;
+use crate::stdlib;
 use crate::types::OsmiaError;
 use crate::model::interpreter::Callable;
 
@@ -10,6 +11,12 @@ pub struct Ctx {
 
 impl Ctx {
 	pub fn new() -> Self {
+		let mut ctx = Self::clean();
+		stdlib::import(&mut ctx);
+		ctx
+	}
+
+	pub fn clean() -> Self {
 		Self { ctx: JsonTree::Object(HashMap::new()) }
 	}
 
