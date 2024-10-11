@@ -13,7 +13,6 @@ use crate::utils::{
 use crate::ctx::{
 	JsonTree,
 	JsonTreeKey,
-	JsonTreeError,
 	CtxValue,
 };
 
@@ -277,30 +276,10 @@ impl OsmiaInterpreter<'_> {
 
 impl OsmiaInterpreter<'_> {
 	fn get_variable<'a>(&self, variable: &mut impl Iterator<Item = &'a JsonTreeKey<String>>) -> ExprResult {
-		match self.ctx.borrow().get(variable) {
-			Ok(r) => Ok(r.try_into()?),
-			Err(e) => return Err(match e {
-				JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
-				JsonTreeError::ArrayOutOfBounds((idx, len)) => format!("Array index out of bounds. Attempted to access index {} in an array of length {}", idx, len),
-				JsonTreeError::IndexInObject => format!("Cannot get by index from an object"),
-				JsonTreeError::KeyInArray => format!("Cannot get by key from an array"),
-				JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
-				JsonTreeError::NoKey => unreachable!(),
-			})
-		}
+		Ok(self.ctx.borrow().get(variable)?.try_into()?)
 	}
 
 	fn set_variable<'a>(&self, var: &mut impl Iterator<Item = &'a JsonTreeKey<String>>, value: JsonTree<String, CtxValue>) -> Result<(), OsmiaError> {
-		match self.ctx.borrow_mut().set(var, value) {
-			Err(e) => Err(match e {
-				JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
-				JsonTreeError::ArrayOutOfBounds((idx, len)) => format!("Array index out of bounds. Attempted to access index {} in an array of length {}", idx, len),
-				JsonTreeError::IndexInObject => format!("Cannot set by index from an object"),
-				JsonTreeError::KeyInArray => format!("Cannot set by key from an array"),
-				JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
-				JsonTreeError::NoKey => unreachable!(),
-			}),
-			Ok(_) => Ok(()),
-		}
+		self.ctx.borrow_mut().set(var, value)
 	}
 }
