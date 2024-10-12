@@ -78,7 +78,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Expr::Unary(u) => Ok(self.visit_unary(u)?),
 			Expr::Array(arr) => Ok(self.visit_array(arr)?),
 			Expr::Object(obj) => Ok(self.visit_object(obj)?),
-			Expr::Variable(v) => Ok(self.visit_variable(v)?),
+			Expr::Variable(v) => Ok(self.get_variable(v)?),
 			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
 		}
 	}
@@ -227,7 +227,7 @@ impl OsmiaInterpreter<'_> {
 		let iterable: Expr = match iterable {
 			Expr::Array(arr) => self.visit_array(arr)?,
 			Expr::Object(obj) => self.visit_object(obj)?,
-			Expr::Variable(v) => match self.visit_variable(v)? {
+			Expr::Variable(v) => match self.get_variable(v)? {
 				Expr::Array(a) => Expr::Array(a),
 				Expr::Object(o) => Expr::Object(o),
 				_ => return Err(format!("Variable {:?} is not iterable", v)),
@@ -244,10 +244,6 @@ impl OsmiaInterpreter<'_> {
 			}).collect::<Result<Vec<Expr>, OsmiaError>>()?,
 			_ => unreachable!(),
 		})
-	}
-
-	fn visit_variable(&self, variable: &Variable) -> ExprResult {
-		self.get_variable(&mut Self::variable_to_ctx_variable(variable)?.iter())
 	}
 
 	fn variable_to_ctx_variable(variable: &Variable) -> Result<Vec<JsonTreeKey<String>>, OsmiaError> {
@@ -275,8 +271,9 @@ impl OsmiaInterpreter<'_> {
 }
 
 impl OsmiaInterpreter<'_> {
-	fn get_variable<'a>(&self, variable: &mut impl Iterator<Item = &'a JsonTreeKey<String>>) -> ExprResult {
-		Ok(self.ctx.borrow().get(variable)?.try_into()?)
+	fn get_variable<'a>(&self, variable: &Variable) -> ExprResult {
+		let variable = Self::variable_to_ctx_variable(variable)?;
+		Ok(self.ctx.borrow().get(&mut variable.iter())?.try_into()?)
 	}
 
 	fn set_variable<'a>(&self, var: &mut impl Iterator<Item = &'a JsonTreeKey<String>>, value: JsonTree<String, CtxValue>) -> Result<(), OsmiaError> {
