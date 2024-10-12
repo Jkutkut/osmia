@@ -14,4 +14,11 @@ impl FunctionParam {
 	pub fn new_spread(name: JsonTreeKey<String>) -> Self {
 		Self::Spread(name)
 	}
+
+	pub fn name(&self) -> &JsonTreeKey<String> {
+		match self {
+			Self::Param(name, _) => name,
+			Self::Spread(name) => name,
+		}
+	}
 }
