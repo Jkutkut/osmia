@@ -4,6 +4,7 @@ use crate::{
 	tests::test,
 };
 
+mod lib;
 mod assign;
 mod expr;
 mod get_ctx;

@@ -10,4 +10,12 @@ impl Call {
 	pub fn new(callee: Expr, args: Vec<Expr>) -> Self {
 		Self { callee: Box::new(callee), args }
 	}
+
+	pub fn callee(&self) -> &Expr {
+		&self.callee
+	}
+
+	pub fn args(&self) -> &Vec<Expr> {
+		&self.args
+	}
 }

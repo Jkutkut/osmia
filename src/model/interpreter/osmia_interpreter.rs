@@ -4,6 +4,7 @@ use crate::types::*;
 use super::{
 	Interpreter,
 	ExitStatus,
+	Callable,
 };
 use crate::utils::{
 	Affirm,
@@ -78,6 +79,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Expr::Unary(u) => Ok(self.visit_unary(u)?),
 			Expr::Array(arr) => Ok(self.visit_array(arr)?),
 			Expr::Object(obj) => Ok(self.visit_object(obj)?),
+			Expr::Call(c) => Ok(self.visit_call(c)?),
 			Expr::Variable(v) => Ok(self.get_variable(v)?),
 			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
 		}
@@ -221,6 +223,23 @@ impl OsmiaInterpreter<'_> {
 			},
 			Object::Hash(h) => unreachable!("Interpreter for hash object: {:?}", h),
 		}
+	}
+
+	fn visit_call(&self, call: &Call) -> ExprResult {
+		match call.callee().accept(self)? {
+			Expr::Callable(c) => self.make_call(&c, call.args()),
+			e => Err(format!("Expression {} is not callable", e)),
+		}
+	}
+
+	fn make_call(&self, call: &Callable, args: &Vec<Expr>) -> ExprResult {
+		let args = args.iter().map(|a| a.accept(self)).collect::<Result<Vec<Expr>, OsmiaError>>()?;
+		let ctx: &mut Ctx = &mut self.ctx.borrow_mut();
+		let expr: Expr = match call {
+			Callable::Builtin(_) | Callable::Lambda(_) => call.call(ctx, &args)?,
+			Callable::Function(_) => todo!(), // TODO
+		};
+		self.visit_expr(&expr)
 	}
 
 	fn visit_iterable(&self, iterable: &Expr) -> Result<Vec<Expr>, OsmiaError> {

@@ -77,7 +77,7 @@ impl TryFrom<&JsonTree<String, CtxValue>> for Expr {
 				CtxValue::Str(s) => Ok(Expr::Str(s.clone())),
 				CtxValue::Bool(b) => Ok(Expr::Bool(*b)),
 				CtxValue::Null => Ok(Expr::Null),
-				_ => todo!() // TODO
+				CtxValue::Callable(c) => Ok(Expr::Callable(c.clone())),
 			},
 			JsonTree::Object(o) => {
 				let mut items: Vec<(Expr, Expr)> = Vec::new();

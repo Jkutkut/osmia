@@ -18,6 +18,8 @@ pub enum Expr {
 	Str(String),
 	Bool(bool),
 	Null,
+
+	Callable(Callable),
 }
 
 impl Expr {

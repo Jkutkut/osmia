@@ -8,6 +8,8 @@ use crate::model::{
 	interpreter::Callable,
 	ctx::{
 		JsonTreeKey,
+		CtxValue,
+		JsonTree,
 	},
 };
 
@@ -16,7 +18,11 @@ fn get_expr(ctx: &mut Ctx, key: &str) -> Result<Expr, OsmiaError> {
 }
 
 fn get_ft(ctx: &mut Ctx, key: &str) -> Result<Callable, OsmiaError> {
-	ctx.get_callable(&mut JsonTreeKey::from(key).iter())
+	match ctx.get(&mut JsonTreeKey::from(key).iter()) {
+		Ok(JsonTree::Value(CtxValue::Callable(c))) => Ok(c.clone()),
+		Ok(_) => Err(format!("Not a callable")),
+		Err(e) => Err(e),
+	}
 }
 
 fn check_pieces(

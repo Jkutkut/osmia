@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use super::*;
 use crate::stdlib;
 use crate::types::OsmiaError;
-use crate::model::interpreter::Callable;
 
 pub struct Ctx {
 	ctx: JsonTree<String, CtxValue>,
@@ -12,23 +11,20 @@ pub struct Ctx {
 impl Ctx {
 	pub fn new() -> Self {
 		let mut ctx = Self::clean();
-		stdlib::import(&mut ctx);
+		Self::default_libs(&mut ctx);
 		ctx
 	}
 
-	pub fn clean() -> Self {
-		Self { ctx: JsonTree::Object(HashMap::new()) }
+	pub fn from(ctx: JsonTree<String, CtxValue>) -> Self {
+		Self { ctx }
 	}
 
-	pub fn get_callable<'a>(
-		&self,
-		key: &mut impl Iterator<Item = &'a JsonTreeKey<String>>
-	) -> Result<Callable, OsmiaError> {
-		match self.ctx.get(key) {
-			Ok(JsonTree::Value(CtxValue::Callable(c))) => Ok(c.clone()),
-			Ok(_) => Err(format!("Not a callable")),
-			Err(e) => Err(Self::format_get_error(e)),
-		}
+	pub fn clean() -> Self {
+		Self::from(JsonTree::Object(HashMap::new()))
+	}
+
+	fn default_libs(ctx: &mut Self) {
+		stdlib::import(ctx);
 	}
 
 	pub fn get<'a>(
@@ -74,11 +70,20 @@ impl Ctx {
 }
 
 impl<'a> TryFrom<&'a str> for Ctx {
-	type Error = serde_json::Error;
+	type Error = OsmiaError;
 
-	fn try_from(s: &'a str) -> Result<Self, Self::Error> {
-		let tree = serde_json::from_str(s)?;
-		Ok(Self { ctx: tree })
+	fn try_from(json: &'a str) -> Result<Self, Self::Error> {
+		let content: JsonTree<String, CtxValue> = match serde_json::from_str(json) {
+			Ok(c) => match c {
+				JsonTree::Object(_) => c,
+				JsonTree::Array(_) => return Err("Cannot use an array as a context".into()),
+				_ => return Err("Ctx must be an object".into()),
+			}
+			Err(e) => return Err(format!("Invalid JSON: {}", e)),
+		};
+		let mut ctx = Self::from(content);
+		Self::default_libs(&mut ctx);
+		Ok(ctx)
 	}
 }
 

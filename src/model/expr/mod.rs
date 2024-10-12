@@ -30,5 +30,6 @@ pub use variable::Variable;
 
 use crate::model::lexer::Token;
 use crate::model::ctx::JsonTreeKey;
+use crate::model::interpreter::Callable;
 
 use std::fmt::Display;
