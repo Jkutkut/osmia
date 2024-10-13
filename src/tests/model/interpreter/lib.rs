@@ -46,8 +46,22 @@ macro_tests!(
 		builtin_04,
 		"{{ math.pow(2, 3, 4) }}",
 		vec![
-			(Ctx::new(), Err(vec!["2", "arguments", "got", "3"])),
+			(Ctx::new(), Ok("8")),
 			(Ctx::clean(), Err(vec!["not", "found", "math"])),
+		]
+	),
+	(
+		builtin_05,
+		"{{ math.pow(2) }}",
+		vec![
+			(Ctx::new(), Err(vec!["2", "arguments", "got", "1"])),
+		]
+	),
+	(
+		builtin_06,
+		"{{ math.pow(10 / 2 - 3, 5 * (--2)) }}",
+		vec![
+			(Ctx::new(), Ok("1024")),
 		]
 	)
 );

@@ -233,13 +233,30 @@ impl OsmiaInterpreter<'_> {
 	}
 
 	fn make_call(&self, call: &Callable, args: &Vec<Expr>) -> ExprResult {
-		let args = args.iter().map(|a| a.accept(self)).collect::<Result<Vec<Expr>, OsmiaError>>()?;
+		let args = self.setup_callable_args(args, call)?;
 		let ctx: &mut Ctx = &mut self.ctx.borrow_mut();
 		let expr: Expr = match call {
 			Callable::Builtin(_) | Callable::Lambda(_) => call.call(ctx, &args)?,
 			Callable::Function(_) => todo!(), // TODO
 		};
 		self.visit_expr(&expr)
+	}
+
+	fn setup_callable_args(&self, args: &Vec<Expr>, call: &Callable) -> Result<Vec<Expr>, OsmiaError> {
+		let call_arity = call.arity();
+		let mut arguments: Vec<Expr> = Vec::with_capacity(call_arity);
+		let mut i = 0;
+		match call {
+			Callable::Builtin(_) => {
+				while i < call_arity && i < args.len() {
+					arguments.push(self.visit_expr(&args[i])?);
+					i += 1;
+				}
+			},
+			Callable::Lambda(_) => todo!(), // TODO
+			Callable::Function(_) => todo!(), // TODO
+		};
+		Ok(arguments)
 	}
 
 	fn visit_iterable(&self, iterable: &Expr) -> Result<Vec<Expr>, OsmiaError> {
