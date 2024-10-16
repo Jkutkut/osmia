@@ -72,5 +72,61 @@ macro_tests!(
 		vec![
 			(Ctx::new(), Ok("fn (x) => x")),
 		]
+	),
+	(
+		lambda_execution_08_01,
+		"{{ (fn (...nbrs) => nbrs)() }}",
+		vec![
+			(Ctx::new(), Ok("[]")),
+		]
+	),
+	(
+		lambda_execution_08_02,
+		"{{ (fn (...nbrs) => nbrs)(1) }}",
+		vec![
+			(Ctx::new(), Ok("[1]")),
+		]
+	),
+	(
+		lambda_execution_08_03,
+		"{{ (fn (...nbrs) => nbrs)(1, 2) }}",
+		vec![
+			(Ctx::new(), Ok("[1, 2]")),
+		]
+	),
+	(
+		lambda_execution_08_04,
+		"{{ (fn (...nbrs) => nbrs)(1, 2, 3) }}",
+		vec![
+			(Ctx::new(), Ok("[1, 2, 3]")),
+		]
+	),
+	(
+		lambda_execution_09_01,
+		"{{ (fn (extra, ...nbrs) => extra + nbrs[0])() }}",
+		vec![
+			(Ctx::try_from(r#"{ "args": [] }"#).unwrap(), Err(vec!["missing", "extra"])),
+		]
+	),
+	(
+		lambda_execution_09_02,
+		"{{ (fn (extra, ...nbrs) => extra + nbrs[0])(1) }}",
+		vec![
+			(Ctx::try_from(r#"{ "args": [] }"#).unwrap(), Err(vec!["index", "out", "bounds", "0"])),
+		]
+	),
+	(
+		lambda_execution_09_03,
+		"{{ (fn (extra, ...nbrs) => extra + nbrs[0])(1, 2) }}",
+		vec![
+			(Ctx::new(), Ok("3")),
+		]
+	),
+	(
+		lambda_execution_09_04,
+		"{{ (fn (extra, ...nbrs) => extra + nbrs[0])(10, 20, 3) }}",
+		vec![
+			(Ctx::new(), Ok("30")),
+		]
 	)
 );

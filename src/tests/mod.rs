@@ -77,9 +77,10 @@ fn test(
 					Err(error_pieces) => match result {
 						Err(err) => {
 							println!("The code can not be executed:\n{}", err);
+							let err = err.to_lowercase();
 							for piece in error_pieces {
 								println!("  - {}", piece);
-								assert!(err.contains(piece));
+								assert!(err.contains(piece.to_lowercase().as_str()));
 							}
 						},
 						Ok(r) => panic!("The code can not be executed but the output is:\n{}", r)

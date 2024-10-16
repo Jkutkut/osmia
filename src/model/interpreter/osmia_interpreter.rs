@@ -270,17 +270,50 @@ impl OsmiaInterpreter<'_> {
 	fn setup_callable_args(&self, args: &Vec<Expr>, call: &Callable) -> Result<Vec<Expr>, OsmiaError> {
 		let call_arity = call.arity();
 		let mut arguments: Vec<Expr> = Vec::with_capacity(call_arity);
-		let mut i = 0;
 		match call {
 			Callable::Builtin(_) => {
+				let mut i = 0;
 				while i < call_arity && i < args.len() {
 					arguments.push(self.visit_expr(&args[i])?);
 					i += 1;
 				}
+				Ok(arguments)
 			},
-			Callable::Lambda(_) => todo!(), // TODO
+			Callable::Lambda(l) => {
+				let lambda_params = l.params();
+				self.setup_callable_args_with_params(arguments, args, lambda_params)
+			},
 			Callable::Function(_) => todo!(), // TODO
-		};
+		}
+	}
+
+	fn setup_callable_args_with_params(
+		&self,
+		mut arguments: Vec<Expr>,
+		args: &Vec<Expr>,
+		ft_params: &Vec<FunctionParam>
+	) -> Result<Vec<Expr>, OsmiaError> {
+		let mut i = 0;
+		loop {
+			match (args.get(i), ft_params.get(i)) {
+				(_, None) => break,
+				(arg, Some(p)) => match (arg, p) {
+					(_, FunctionParam::Spread(_)) => {
+						arguments.push(Expr::Array(args[i..].to_vec().into()));
+						break;
+					},
+					(Some(arg), _) => arguments.push(self.visit_expr(arg)?),
+					(None, _) => match p {
+						FunctionParam::Param(p, None) => return Err(format!(
+							"Missing argument: {}", p
+						)),
+						FunctionParam::Param(_, Some(d)) => arguments.push(self.visit_expr(d)?),
+						FunctionParam::Spread(_) => unreachable!(),
+					}
+				}
+			}
+			i += 1;
+		}
 		Ok(arguments)
 	}
 
