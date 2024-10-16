@@ -21,3 +21,12 @@ impl Builtin {
 		(self.call)(ctx, args)
 	}
 }
+
+impl std::fmt::Display for Builtin {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let args: String = (0..self.arity)
+			.map(|idx| format!("arg{idx}"))
+			.collect::<Vec<String>>().join(", ");
+		write!(f, "{{ fn ({args}) => ... }}")
+	}
+}

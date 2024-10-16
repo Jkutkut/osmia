@@ -161,4 +161,11 @@ macro_tests!(
 			(Ctx::try_from(r#"{"v": []}"#).unwrap(), Err(vec!["index", "bounds"])),
 		]
 	),
+	(
+		multiple_assingn01,
+		"{{ v = 1 }}{{ v = 2 }}{{ v }}",
+		vec![
+			(Ctx::new(), Ok("2")),
+		]
+	)
 );

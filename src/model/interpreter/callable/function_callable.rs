@@ -27,3 +27,9 @@ impl FunctionCallable {
 		Ok(self.ft.body().clone())
 	}
 }
+
+impl std::fmt::Display for FunctionCallable {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}", self.ft)
+	}
+}

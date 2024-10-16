@@ -28,3 +28,26 @@ impl From<Variable> for Vec<JsonTreeKeyExpr> {
 		var.var
 	}
 }
+
+impl std::fmt::Display for Variable {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let mut brackets;
+		for (i, v) in self.var.iter().enumerate() {
+			brackets = false;
+			if i > 0 {
+				match v {
+					JsonTreeKeyExpr::JsonTreeKey(JsonTreeKey::Key(_)) => write!(f, ".")?,
+					_ => {
+						brackets = true;
+						write!(f, "[")?;
+					}
+				}
+			}
+			write!(f, "{v}")?;
+			if brackets {
+				write!(f, "]")?;
+			}
+		}
+		Ok(())
+	}
+}

@@ -1,6 +1,7 @@
 use std::hash::Hash;
 use std::collections::HashMap;
 use std::iter::Peekable;
+use std::fmt::Display;
 use serde::Deserialize;
 use super::{
 	JsonTreeKey,
@@ -9,13 +10,13 @@ use super::{
 
 #[derive(Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
-pub enum JsonTree<K: Eq + Hash + Clone, T> {
+pub enum JsonTree<K: Eq + Hash + Clone + Display, T> {
 	Value(T),
 	Array(Vec<JsonTree<K, T>>),
 	Object(HashMap<K, Box<JsonTree<K, T>>>),
 }
 
-impl<K: Eq + Hash + Clone, T> JsonTree<K, T> where T: Clone {
+impl<K: Eq + Hash + Clone + Display, T: Clone> JsonTree<K, T> {
 	pub fn get<'a>(
 		&self,
 		keys: &mut impl Iterator<Item = &'a JsonTreeKey<K>>

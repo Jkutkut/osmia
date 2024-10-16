@@ -13,6 +13,7 @@ mod r#for;
 mod r#while;
 mod r#break;
 mod r#continue;
+mod lambda;
 
 fn interpreter_test(
 	code: &str,

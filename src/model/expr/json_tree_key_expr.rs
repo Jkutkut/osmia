@@ -23,3 +23,12 @@ impl From<Expr> for JsonTreeKeyExpr {
 		JsonTreeKeyExpr::Expr(expr)
 	}
 }
+
+impl std::fmt::Display for JsonTreeKeyExpr {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			JsonTreeKeyExpr::JsonTreeKey(key) => write!(f, "{key}"),
+			JsonTreeKeyExpr::Expr(expr) => write!(f, "{expr}"),
+		}
+	}
+}

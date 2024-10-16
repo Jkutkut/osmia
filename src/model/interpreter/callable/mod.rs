@@ -12,6 +12,7 @@ use crate::model::{
 	expr::{
 		Expr,
 		Lambda,
+		FunctionParam,
 	},
 };
 

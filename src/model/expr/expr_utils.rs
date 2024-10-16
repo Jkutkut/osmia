@@ -23,6 +23,9 @@ impl Display for Expr {
 			Expr::Binary(b) => Ok(write!(f, "{b}")?),
 			Expr::Grouping(g) => Ok(write!(f, "{g}")?),
 			Expr::Unary(u) => Ok(write!(f, "{u}")?),
+			Expr::Variable(v) => Ok(write!(f, "{v}")?),
+			Expr::Lambda(l) => Ok(write!(f, "{l}")?),
+			Expr::Callable(c) => Ok(write!(f, "{c}")?),
 			e => unimplemented!("Display for: {:?}", e), // TODO
 		}
 	}
@@ -129,6 +132,7 @@ impl TryFrom<&Expr> for JsonTree<String, CtxValue> {
 				}
 				JsonTree::Object(items)
 			},
+			Expr::Callable(c) => JsonTree::Value(CtxValue::Callable(c.clone())),
 			_ => return Err(format!("The expression {:?} cannot be stored in the context", value)),
 		})
 	}

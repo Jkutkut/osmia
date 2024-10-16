@@ -19,3 +19,10 @@ impl Lambda {
 		&self.body
 	}
 }
+
+impl Display for Lambda {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let params = self.params.iter().map(|p| p.to_string()).collect::<Vec<String>>().join(", ");
+		write!(f, "fn ({}) => {}", params, self.body)
+	}
+}

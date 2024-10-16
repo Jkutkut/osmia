@@ -4,7 +4,7 @@ use crate::types::*;
 use super::{
 	Interpreter,
 	ExitStatus,
-	Callable,
+	callable::*,
 };
 use crate::utils::{
 	Affirm,
@@ -79,6 +79,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Expr::Unary(u) => Ok(self.visit_unary(u)?),
 			Expr::Array(arr) => Ok(self.visit_array(arr)?),
 			Expr::Object(obj) => Ok(self.visit_object(obj)?),
+			Expr::Lambda(l) => Ok(self.visit_lambda(l)?),
 			Expr::Call(c) => Ok(self.visit_call(c)?),
 			Expr::Variable(v) => Ok(self.get_variable(v)?),
 			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
@@ -225,9 +226,33 @@ impl OsmiaInterpreter<'_> {
 		}
 	}
 
+	fn visit_lambda(&self, lambda: &Lambda) -> ExprResult {
+		let params = self.visit_function_params(lambda.params())?;
+		let lambda = Lambda::new(params, lambda.body().clone());
+		let callable = Callable::Lambda(LambdaCallable::new(lambda));
+		Ok(Expr::Callable(callable))
+	}
+
+	fn visit_function_params(&self, params: &Vec<FunctionParam>) -> Result<Vec<FunctionParam>, OsmiaError> {
+		let mut new_params = Vec::new();
+		for p in params {
+			match p {
+				FunctionParam::Param(p, default) => {
+					let default = match default {
+						None => None,
+						Some(d) => Some(self.visit_expr(d)?),
+					};
+					new_params.push(FunctionParam::Param(p.clone(), default));
+				},
+				FunctionParam::Spread(_) => new_params.push(p.clone()),
+			}
+		}
+		Ok(new_params)
+	}
+
 	fn visit_call(&self, call: &Call) -> ExprResult {
 		match call.callee().accept(self)? {
-			Expr::Callable(c) => self.make_call(&c, call.args()),
+			Expr::Callable(c) => self.visit_expr(&self.make_call(&c, call.args())?),
 			e => Err(format!("Expression {} is not callable", e)),
 		}
 	}
@@ -239,7 +264,7 @@ impl OsmiaInterpreter<'_> {
 			Callable::Builtin(_) | Callable::Lambda(_) => call.call(ctx, &args)?,
 			Callable::Function(_) => todo!(), // TODO
 		};
-		self.visit_expr(&expr)
+		Ok(expr)
 	}
 
 	fn setup_callable_args(&self, args: &Vec<Expr>, call: &Callable) -> Result<Vec<Expr>, OsmiaError> {

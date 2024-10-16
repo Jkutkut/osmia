@@ -480,7 +480,7 @@ impl OsmiaParserImpl {
 	}
 
 	fn method_call(&mut self) -> Result<Expr, OsmiaError> {
-		let mut p: Expr = self.primary()?;
+		let mut p: Expr = self.call()?;
 		while self.match_and_advance(&[Token::Question]) {
 			match self.call()? {
 				Expr::Call(call) => p = MethodCall::new(p, call).into(),
@@ -494,45 +494,8 @@ impl OsmiaParserImpl {
 		Ok(p)
 	}
 
-	fn primary(&mut self) -> Result<Expr, OsmiaError> {
-		match self.get_current() {
-			Token::ArrayStart => self.array(),
-			Token::ObjectStart => self.object(),
-			Token::ParentStart => self.grouping(),
-			Token::Str(_) | Token::Number(_) | Token::Bool(_) | Token::Null => self.literal(),
-			_ => self.call(),
-		}
-	}
-
-	fn literal(&mut self) -> Result<Expr, OsmiaError> {
-		let expr = match self.get_current() {
-			Token::Null => Expr::Null,
-			Token::Bool(b) => Expr::Bool(*b),
-			Token::Str(s) => Expr::Str(s.to_string()),
-			Token::Number(n) => {
-				match n.contains('.') {
-					true => match n.parse::<f64>() {
-						Ok(f) => Expr::Float(f),
-						Err(_) => return Err(self.error_msg(
-							ParserErrorMsg::ParseValue("float".into())
-						))
-					},
-					false => match n.parse::<i64>() {
-						Ok(i) => Expr::Int(i),
-						Err(_) => return Err(self.error_msg(
-							ParserErrorMsg::ParseValue("int".into())
-						))
-					}
-				}
-			},
-			_ => unreachable!(),
-		};
-		self.advance();
-		Ok(expr)
-	}
-
 	fn call(&mut self) -> Result<Expr, OsmiaError> {
-		let mut v: Expr = self.variable()?;
+		let mut v: Expr = self.primary()?;
 		while self.check_current(&Token::ParentStart) {
 			v = Call::new(v, self.arguments()?).into();
 		}
@@ -561,6 +524,43 @@ impl OsmiaParserImpl {
 			ParserErrorMsg::Unclosed("arguments".to_string(), Token::ParentEnd)
 		))?;
 		Ok(arr)
+	}
+
+	fn primary(&mut self) -> Result<Expr, OsmiaError> {
+		match self.get_current() {
+			Token::ArrayStart => self.array(),
+			Token::ObjectStart => self.object(),
+			Token::ParentStart => self.grouping(),
+			Token::Str(_) | Token::Number(_) | Token::Bool(_) | Token::Null => self.literal(),
+			_ => self.variable(),
+		}
+	}
+
+	fn literal(&mut self) -> Result<Expr, OsmiaError> {
+		let expr = match self.get_current() {
+			Token::Null => Expr::Null,
+			Token::Bool(b) => Expr::Bool(*b),
+			Token::Str(s) => Expr::Str(s.to_string()),
+			Token::Number(n) => {
+				match n.contains('.') {
+					true => match n.parse::<f64>() {
+						Ok(f) => Expr::Float(f),
+						Err(_) => return Err(self.error_msg(
+							ParserErrorMsg::ParseValue("float".into())
+						))
+					},
+					false => match n.parse::<i64>() {
+						Ok(i) => Expr::Int(i),
+						Err(_) => return Err(self.error_msg(
+							ParserErrorMsg::ParseValue("int".into())
+						))
+					}
+				}
+			},
+			_ => unreachable!(),
+		};
+		self.advance();
+		Ok(expr)
 	}
 
 	fn variable(&mut self) -> Result<Expr, OsmiaError> {

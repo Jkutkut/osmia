@@ -24,3 +24,10 @@ impl Function {
 		&self.body
 	}
 }
+
+impl std::fmt::Display for Function {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let args = self.params.iter().map(|p| p.to_string()).collect::<Vec<String>>().join(", ");
+		write!(f, "fn {}({}) => ...", self.name, args)
+	}
+}

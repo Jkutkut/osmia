@@ -26,4 +26,14 @@ impl LambdaCallable {
 		}
 		Ok(self.lambda.body().clone())
 	}
+
+	pub fn params(&self) -> &Vec<FunctionParam> {
+		self.lambda.params()
+	}
+}
+
+impl std::fmt::Display for LambdaCallable {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}", self.lambda)
+	}
 }

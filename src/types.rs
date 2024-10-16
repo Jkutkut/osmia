@@ -45,11 +45,11 @@ pub type LexerCode = Vec<Token>;
 /// term           → factor ( ( "-" | "+" ) factor )*
 /// factor         → unary ( ( "/" | "*" | "%" ) unary )*
 /// unary          → ( "!" | "-" | "+" )* method_call
-/// method_call    → primary ( "?" call )*
-/// primary        → literal | call | array | object | grouping
-/// literal        → float | int | string | boolean | null
-/// call           → variable ( "(" arguments? ")" )*
+/// method_call    → call ( "?" call )*
+/// call           → primary ( "(" arguments? ")" )*
 /// arguments      → expression ( "," expression )*
+/// primary        → literal | variable | array | object | grouping
+/// literal        → float | int | string | boolean | null
 /// variable       → obj
 /// obj            → arr ( "." arr )*
 /// arr            → identifier ( "[" expression "]" )*
