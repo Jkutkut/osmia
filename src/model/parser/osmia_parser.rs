@@ -377,6 +377,7 @@ impl OsmiaParserImpl {
 
 	fn parameters(&mut self, exit_token: &Token) -> Result<Vec<FunctionParam>, OsmiaError> {
 		self.consume_whitespaces();
+		let mut are_mandatory_params_allowed = true;
 		let mut params: Vec<FunctionParam> = Vec::new();
 		while !self.check_current(exit_token) {
 			if params.len() > 0 {
@@ -390,7 +391,20 @@ impl OsmiaParserImpl {
 				self.consume_whitespaces();
 				break;
 			}
-			params.push(self.parameter()?);
+			let param = self.parameter()?;
+			match &param {
+				FunctionParam::Param(_, None) if !are_mandatory_params_allowed => {
+					return Err(format!(
+						"Invalid parameter: A mandatory parameter can not be after an optional parameter: {}",
+						param
+					));
+				},
+				FunctionParam::Param(_, Some(_)) if are_mandatory_params_allowed => {
+					are_mandatory_params_allowed = false;
+				},
+				_ => (),
+			};
+			params.push(param);
 			self.consume_whitespaces();
 		}
 		Ok(params)

@@ -1,5 +1,6 @@
 mod literal;
 mod grouping;
+mod lambda;
 mod number;
 mod white_box_tests;
 
