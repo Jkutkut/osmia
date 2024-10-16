@@ -271,13 +271,16 @@ impl OsmiaInterpreter<'_> {
 		let call_arity = call.arity();
 		let mut arguments: Vec<Expr> = Vec::with_capacity(call_arity);
 		match call {
-			Callable::Builtin(_) => {
-				let mut i = 0;
-				while i < call_arity && i < args.len() {
-					arguments.push(self.visit_expr(&args[i])?);
-					i += 1;
-				}
-				Ok(arguments)
+			Callable::Builtin(b) => match b.params() {
+				Some(params) => self.setup_callable_args_with_params(arguments, args, params),
+				None => {
+					let mut i = 0;
+					while i < call_arity && i < args.len() {
+						arguments.push(self.visit_expr(&args[i])?);
+						i += 1;
+					}
+					Ok(arguments)
+				},
 			},
 			Callable::Lambda(l) => {
 				let lambda_params = l.params();
