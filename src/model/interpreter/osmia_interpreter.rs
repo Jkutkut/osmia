@@ -5,11 +5,10 @@ use super::{
 	Interpreter,
 	ExitStatus,
 	callable::*,
+	OsmiaResult,
 };
 use crate::utils::{
 	Affirm,
-	string_or_none,
-	push_op_string,
 };
 use crate::ctx::{
 	JsonTree,
@@ -34,7 +33,7 @@ impl<'ctx> OsmiaInterpreter<'ctx> {
 impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter<'_> {
 	fn interpret(&self, code: ParserCode) -> Result<OsmiaOutput, OsmiaError> {
 		match (&code).accept(self)? {
-			(ExitStatus::Okay, r) => Ok(r.unwrap_or("".into())),
+			(ExitStatus::Okay, r) => Ok(r.to_string()),
 			(ExitStatus::Break, _) | (ExitStatus::Continue, _) => Err("Cannot break or continue out of the program".into()),
 		}
 	}
@@ -50,23 +49,23 @@ use crate::model::{
 	expr::*,
 };
 
-type StmtOutput = (ExitStatus, Option<OsmiaOutput>);
+type StmtOutput = (ExitStatus, OsmiaResult);
 type StmtResult = Result<StmtOutput, OsmiaError>;
 type ExprResult = Result<Expr, OsmiaError>;
 
 impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 	fn visit_stmt(&self, stmt: &Stmt) -> StmtResult {
 		match stmt {
-			Stmt::Raw(s) => Ok((ExitStatus::Okay, Some(s.clone()))),
+			Stmt::Raw(s) => Ok((ExitStatus::Okay, OsmiaResult::OsmiaOutput(s.into()))),
 			Stmt::Block(b) => self.visit_block(b),
-			Stmt::Expr(e) => Ok((ExitStatus::Okay, Some(e.accept(self)?.to_string()))),
-			Stmt::Comment(_) => Ok((ExitStatus::Okay, None)),
+			Stmt::Expr(e) => Ok((ExitStatus::Okay, OsmiaResult::Expr(e.accept(self)?))),
+			Stmt::Comment(_) => Ok((ExitStatus::Okay, OsmiaResult::None)),
 			Stmt::Assign(a) => self.visit_assign(a),
 			Stmt::If(i) => self.visit_if(i),
 			Stmt::While(w) => self.visit_while(w),
 			Stmt::For(f) => self.visit_for(f),
-			Stmt::Break => Ok((ExitStatus::Break, None)),
-			Stmt::Continue => Ok((ExitStatus::Continue, None)),
+			Stmt::Break => Ok((ExitStatus::Break, OsmiaResult::None)),
+			Stmt::Continue => Ok((ExitStatus::Continue, OsmiaResult::None)),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
@@ -93,14 +92,14 @@ impl OsmiaInterpreter<'_> {
 		let mut content = String::new();
 		for s in block.stmts() {
 			let (status, r) = s.accept(self)?;
-			push_op_string(&mut content, r);
-			state = status.clone();
-			match status {
+			content += r.to_string().as_str();
+			state = status;
+			match &state {
 				ExitStatus::Okay => (),
 				ExitStatus::Break | ExitStatus::Continue => break,
 			}
 		}
-		Ok((state, string_or_none(content)))
+		Ok((state, content.into()))
 	}
 
 	fn visit_if(&self, if_stmt: &If) -> StmtResult {
@@ -118,19 +117,19 @@ impl OsmiaInterpreter<'_> {
 			let e: &Stmt = &*e;
 			return Ok(e.accept(self)?);
 		}
-		Ok((ExitStatus::Okay, None))
+		Ok((ExitStatus::Okay, OsmiaResult::None))
 	}
 
 	fn visit_while(&self, while_stmt: &While) -> StmtResult {
 		let mut content = String::new();
 		while let Some((status, r)) = self.visit_conditional(while_stmt)? {
-			push_op_string(&mut content, r);
+			content.push_str(r.to_string().as_str());
 			match status {
 				ExitStatus::Okay | ExitStatus::Continue => (),
 				ExitStatus::Break => break,
 			}
 		}
-		Ok((ExitStatus::Okay, string_or_none(content)))
+		Ok((ExitStatus::Okay, content.into()))
 	}
 
 	fn visit_conditional(&self, conditional: &ConditionalStmt) -> Result<Option<StmtOutput>, OsmiaError> {
@@ -148,13 +147,13 @@ impl OsmiaInterpreter<'_> {
 		for e in iterable {
 			self.set_variable(&mut var.iter(), (&e).try_into()?)?;
 			let (status, r) = body.accept(self)?;
-			push_op_string(&mut content, r);
+			content += r.to_string().as_str();
 			match status {
 				ExitStatus::Okay | ExitStatus::Continue => (),
 				ExitStatus::Break => break,
 			}
 		}
-		Ok((ExitStatus::Okay, string_or_none(content)))
+		Ok((ExitStatus::Okay, content.into()))
 	}
 
 	fn visit_assign(&self, assign: &Assign) -> StmtResult {
@@ -162,7 +161,7 @@ impl OsmiaInterpreter<'_> {
 		let value: Expr = assign.value().accept(self)?;
 		let value = (&value).try_into()?;
 		self.set_variable(&mut var.iter(), value)?;
-		Ok((ExitStatus::Okay, None))
+		Ok((ExitStatus::Okay, OsmiaResult::None))
 	}
 }
 
