@@ -24,3 +24,9 @@ impl Into<OsmiaResult> for OsmiaOutput {
 		OsmiaResult::OsmiaOutput(self)
 	}
 }
+
+impl Into<OsmiaResult> for Expr {
+	fn into(self) -> OsmiaResult {
+		OsmiaResult::Expr(self)
+	}
+}

@@ -35,6 +35,7 @@ impl Interpreter<ParserCode, OsmiaOutput, OsmiaError> for OsmiaInterpreter<'_> {
 		match (&code).accept(self)? {
 			(ExitStatus::Okay, r) => Ok(r.to_string()),
 			(ExitStatus::Break, _) | (ExitStatus::Continue, _) => Err("Cannot break or continue out of the program".into()),
+			(ExitStatus::Return, r) => Ok(r.to_string()),
 		}
 	}
 }
@@ -66,6 +67,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Stmt::For(f) => self.visit_for(f),
 			Stmt::Break => Ok((ExitStatus::Break, OsmiaResult::None)),
 			Stmt::Continue => Ok((ExitStatus::Continue, OsmiaResult::None)),
+			Stmt::Return(r) => self.visit_return(r),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
@@ -97,6 +99,10 @@ impl OsmiaInterpreter<'_> {
 			match &state {
 				ExitStatus::Okay => (),
 				ExitStatus::Break | ExitStatus::Continue => break,
+				ExitStatus::Return => match r {
+					OsmiaResult::None => break,
+					_ => return Ok((state, r)),
+				}
 			}
 		}
 		Ok((state, content.into()))
@@ -127,6 +133,10 @@ impl OsmiaInterpreter<'_> {
 			match status {
 				ExitStatus::Okay | ExitStatus::Continue => (),
 				ExitStatus::Break => break,
+				ExitStatus::Return => match r {
+					OsmiaResult::None => break,
+					_ => return Ok((status, r)),
+				}
 			}
 		}
 		Ok((ExitStatus::Okay, content.into()))
@@ -151,6 +161,10 @@ impl OsmiaInterpreter<'_> {
 			match status {
 				ExitStatus::Okay | ExitStatus::Continue => (),
 				ExitStatus::Break => break,
+				ExitStatus::Return => match r {
+					OsmiaResult::None => break,
+					_ => return Ok((status, r)),
+				}
 			}
 		}
 		Ok((ExitStatus::Okay, content.into()))
@@ -162,6 +176,14 @@ impl OsmiaInterpreter<'_> {
 		let value = (&value).try_into()?;
 		self.set_variable(&mut var.iter(), value)?;
 		Ok((ExitStatus::Okay, OsmiaResult::None))
+	}
+
+	fn visit_return(&self, r: &Return) -> StmtResult {
+		let value = match r.expr() {
+			Some(expr) => expr.accept(self)?.into(),
+			None => OsmiaResult::None,
+		};
+		Ok((ExitStatus::Return, value))
 	}
 }
 
@@ -258,9 +280,8 @@ impl OsmiaInterpreter<'_> {
 
 	fn make_call(&self, call: &Callable, args: &Vec<Expr>) -> ExprResult {
 		let args = self.setup_callable_args(args, call)?;
-		let ctx: &mut Ctx = &mut self.ctx.borrow_mut();
 		let expr: Expr = match call {
-			Callable::Builtin(_) | Callable::Lambda(_) => call.call(ctx, &args)?,
+			Callable::Builtin(_) | Callable::Lambda(_) => call.call(&mut self.ctx.borrow_mut(), &args)?,
 			Callable::Function(_) => todo!(), // TODO
 		};
 		Ok(expr)
@@ -281,10 +302,9 @@ impl OsmiaInterpreter<'_> {
 					Ok(arguments)
 				},
 			},
-			Callable::Lambda(l) => {
-				let lambda_params = l.params();
-				self.setup_callable_args_with_params(arguments, args, lambda_params)
-			},
+			Callable::Lambda(l) => self.setup_callable_args_with_params(
+				arguments, args, l.params()
+			),
 			Callable::Function(_) => todo!(), // TODO
 		}
 	}
@@ -372,7 +392,11 @@ impl OsmiaInterpreter<'_> {
 		Ok(self.ctx.borrow().get(&mut variable.iter())?.try_into()?)
 	}
 
-	fn set_variable<'a>(&self, var: &mut impl Iterator<Item = &'a JsonTreeKey<String>>, value: JsonTree<String, CtxValue>) -> Result<(), OsmiaError> {
+	fn set_variable<'a>(
+		&self,
+		var: &mut impl Iterator<Item = &'a JsonTreeKey<String>>,
+		value: JsonTree<String, CtxValue>
+	) -> Result<(), OsmiaError> {
 		self.ctx.borrow_mut().set(var, value)
 	}
 }
