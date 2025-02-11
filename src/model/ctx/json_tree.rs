@@ -8,15 +8,24 @@ use super::{
 	JsonTreeError,
 };
 
+pub trait JsonTreeKeyTrait: Eq + Hash + Clone + Display {}
+impl<K> JsonTreeKeyTrait for K where K: Eq + Hash + Clone + Display {}
+
 #[derive(Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
-pub enum JsonTree<K: Eq + Hash + Clone + Display, T> {
+pub enum JsonTree<K: JsonTreeKeyTrait, T> {
 	Value(T),
 	Array(Vec<JsonTree<K, T>>),
 	Object(HashMap<K, Box<JsonTree<K, T>>>),
 }
 
-impl<K: Eq + Hash + Clone + Display, T: Clone> JsonTree<K, T> {
+impl<K: JsonTreeKeyTrait, T> JsonTree<K, T> {
+	pub fn new_obj() -> Self {
+		Self::Object(HashMap::new())
+	}
+}
+
+impl<K: JsonTreeKeyTrait, T: Clone> JsonTree<K, T> {
 	pub fn get<'a>(
 		&self,
 		keys: &mut impl Iterator<Item = &'a JsonTreeKey<K>>
