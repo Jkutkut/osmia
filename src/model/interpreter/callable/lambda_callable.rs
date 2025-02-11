@@ -19,7 +19,7 @@ impl LambdaCallable {
 		let mut i = 0;
 		while i < arity {
 			ctx.set(
-				&mut vec![self.lambda.params()[i].name().clone()].iter(),
+				&vec![self.lambda.params()[i].name().clone()],
 				(&args[i]).try_into()?,
 			)?;
 			i += 1;

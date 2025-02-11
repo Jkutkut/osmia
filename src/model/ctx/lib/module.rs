@@ -19,19 +19,19 @@ impl Module {
 
 impl Into<JsonTree<String, CtxValue>> for Module {
 	fn into(self) -> JsonTree<String, CtxValue> {
-		let mut ctx = Ctx::clean();
+		let mut obj = JsonTree::new_obj();
 		for ModuleConstant { key, value } in self.constants {
-			ctx.set(
+			obj.set(
 				&mut key.iter(),
 				JsonTree::Value(value),
 			).unwrap();
 		}
 		for ModuleCallable { key, callable } in self.callables {
-			ctx.set(
+			obj.set(
 				&mut key.iter(),
 				JsonTree::Value(CtxValue::Callable(callable)),
 			).unwrap();
 		}
-		ctx.into()
+		obj
 	}
 }

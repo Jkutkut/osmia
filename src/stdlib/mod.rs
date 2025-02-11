@@ -13,11 +13,11 @@ use crate::model::expr::Expr;
 
 pub fn import(ctx: &mut Ctx) {
 	ctx.set(
-		&mut JsonTreeKey::from("_OSMIA_VERSION").iter(),
+		&JsonTreeKey::from("_OSMIA_VERSION"),
 		CtxValue::Str(VERSION.into()).into()
 	).unwrap();
 	ctx.set(
-		&mut JsonTreeKey::from("math").iter(),
+		&JsonTreeKey::from("math"),
 		math::module().into()
 	).unwrap();
 }

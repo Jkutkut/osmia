@@ -19,7 +19,7 @@ impl FunctionCallable {
 		let mut i = 0;
 		while i < arity {
 			ctx.set(
-				&mut vec![self.ft.params()[i].name().clone()].iter(),
+				&vec![self.ft.params()[i].name().clone()],
 				(&args[i]).try_into()?,
 			)?;
 			i += 1;

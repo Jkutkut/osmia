@@ -155,7 +155,7 @@ impl OsmiaInterpreter<'_> {
 		let body = for_stmt.body();
 		let mut content = String::new();
 		for e in iterable {
-			self.set_variable(&mut var.iter(), (&e).try_into()?)?;
+			self.set_variable(&var, (&e).try_into()?)?;
 			let (status, r) = body.accept(self)?;
 			content += r.to_string().as_str();
 			match status {
@@ -174,7 +174,7 @@ impl OsmiaInterpreter<'_> {
 		let var = Self::variable_to_ctx_variable(assign.variable())?;
 		let value: Expr = assign.value().accept(self)?;
 		let value = (&value).try_into()?;
-		self.set_variable(&mut var.iter(), value)?;
+		self.set_variable(&var, value)?;
 		Ok((ExitStatus::Okay, OsmiaResult::None))
 	}
 
@@ -389,12 +389,12 @@ impl OsmiaInterpreter<'_> {
 impl OsmiaInterpreter<'_> {
 	fn get_variable<'a>(&self, variable: &Variable) -> ExprResult {
 		let variable = Self::variable_to_ctx_variable(variable)?;
-		Ok(self.ctx.borrow().get(&mut variable.iter())?.try_into()?)
+		Ok(self.ctx.borrow().get(&variable)?.try_into()?)
 	}
 
 	fn set_variable<'a>(
 		&self,
-		var: &mut impl Iterator<Item = &'a JsonTreeKey<String>>,
+		var: &Vec<JsonTreeKey<String>>,
 		value: JsonTree<String, CtxValue>
 	) -> Result<(), OsmiaError> {
 		self.ctx.borrow_mut().set(var, value)

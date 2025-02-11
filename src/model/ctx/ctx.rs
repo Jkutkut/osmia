@@ -1,37 +1,59 @@
-use std::collections::HashMap;
+use std::collections::VecDeque;
 
 use super::*;
 use crate::stdlib;
 use crate::types::OsmiaError;
 
 pub struct Ctx {
-	ctx: JsonTree<String, CtxValue>,
+	ctx: VecDeque<JsonTree<String, CtxValue>>,
 }
 
 impl Ctx {
 	pub fn new() -> Self {
 		let mut ctx = Self::clean();
 		Self::default_libs(&mut ctx);
+		ctx.begin_scope();
 		ctx
 	}
 
 	pub fn from(ctx: JsonTree<String, CtxValue>) -> Self {
-		Self { ctx }
+		Self { ctx: VecDeque::from([ctx]) }
 	}
 
 	pub fn clean() -> Self {
-		Self::from(JsonTree::Object(HashMap::new()))
+		Self::from(JsonTree::new_obj())
 	}
 
 	fn default_libs(ctx: &mut Self) {
 		stdlib::import(ctx);
 	}
 
+	pub fn begin_scope(&mut self) {
+		self.ctx.push_back(JsonTree::new_obj());
+	}
+
+	pub fn end_scope(&mut self) {
+		self.ctx.pop_back();
+	}
+
 	pub fn get<'a>(
 		&self,
-		key: &mut impl Iterator<Item = &'a JsonTreeKey<String>>
+		key: &Vec<JsonTreeKey<String>>
 	) -> Result<&JsonTree<String, CtxValue>, OsmiaError> {
-		self.ctx.get(key).map_err(Self::format_get_error)
+		let mut error: Option<JsonTreeError<JsonTreeKey<String>>> = None;
+		for scope in self.ctx.iter().rev() {
+			error = match scope.get(&mut key.iter()) {
+				Ok(v) => return Ok(v),
+				Err(e) => match e {
+					JsonTreeError::KeyNotFound(_) => Some(e),
+					e => return Err(Self::format_get_error(e)),
+				}
+			};
+		}
+		match error {
+			Some(e) => Err(Self::format_set_error(e)),
+			None => unreachable!(),
+		}
 	}
 
 	fn format_get_error(error: JsonTreeError<JsonTreeKey<String>>) -> OsmiaError {
@@ -50,23 +72,39 @@ impl Ctx {
 
 	pub fn set<'a>(
 		&mut self,
-		key: &mut impl Iterator<Item = &'a JsonTreeKey<String>>,
-		value: JsonTree<String, CtxValue>,
+		key: &Vec<JsonTreeKey<String>>,
+		value: JsonTree<String, CtxValue>
 	) -> Result<(), OsmiaError> {
-		self.ctx.set(key, value).map_err(|e| {
-			match e {
-				JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
-				JsonTreeError::ArrayOutOfBounds((idx, len)) => format!(
-					"Array index out of bounds. Attempted to access index {} in an array of length {}",
-					idx, len
-				),
-				JsonTreeError::IndexInObject => format!("Cannot set by index from an object"),
-				JsonTreeError::KeyInArray => format!("Cannot set by key from an array"),
-				JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
-				JsonTreeError::NoKey => unreachable!(),
-			}
-		})
+		let mut error: Option<JsonTreeError<JsonTreeKey<String>>> = None;
+		for scope in self.ctx.iter_mut().rev() {
+			error = match scope.set(&mut key.iter(), value.clone()) {
+				Ok(_) => return Ok(()),
+				Err(e) => match e {
+					JsonTreeError::KeyNotFound(_) => Some(e),
+					e => return Err(Self::format_set_error(e)),
+				}
+			};
+		}
+		match error {
+			Some(e) => Err(Self::format_set_error(e)),
+			None => unreachable!(),
+		}
 	}
+
+	fn format_set_error(error: JsonTreeError<JsonTreeKey<String>>) -> OsmiaError {
+		match error {
+			JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
+			JsonTreeError::ArrayOutOfBounds((idx, len)) => format!(
+				"Array index out of bounds. Attempted to access index {} in an array of length {}",
+				idx, len
+			),
+			JsonTreeError::IndexInObject => format!("Cannot set by index from an object"),
+			JsonTreeError::KeyInArray => format!("Cannot set by key from an array"),
+			JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
+			JsonTreeError::NoKey => unreachable!(),
+		}
+	}
+
 }
 
 impl<'a> TryFrom<&'a str> for Ctx {
@@ -83,12 +121,7 @@ impl<'a> TryFrom<&'a str> for Ctx {
 		};
 		let mut ctx = Self::from(content);
 		Self::default_libs(&mut ctx);
+		ctx.begin_scope();
 		Ok(ctx)
-	}
-}
-
-impl Into<JsonTree<String, CtxValue>> for Ctx {
-	fn into(self) -> JsonTree<String, CtxValue> {
-		self.ctx
 	}
 }
