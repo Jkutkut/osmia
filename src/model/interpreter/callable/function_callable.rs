@@ -26,6 +26,10 @@ impl FunctionCallable {
 		}
 		Ok(self.ft.body().clone())
 	}
+
+	pub fn params(&self) -> &Vec<FunctionParam> {
+		self.ft.params()
+	}
 }
 
 impl std::fmt::Display for FunctionCallable {

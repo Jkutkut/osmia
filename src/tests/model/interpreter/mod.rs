@@ -14,6 +14,7 @@ mod r#while;
 mod r#break;
 mod r#continue;
 mod lambda;
+mod function;
 
 fn interpreter_test(
 	code: &str,

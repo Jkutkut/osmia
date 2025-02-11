@@ -68,6 +68,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Stmt::Break => Ok((ExitStatus::Break, OsmiaResult::None)),
 			Stmt::Continue => Ok((ExitStatus::Continue, OsmiaResult::None)),
 			Stmt::Return(r) => self.visit_return(r),
+			Stmt::Function(f) => self.visit_function(f),
 			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
@@ -185,6 +186,18 @@ impl OsmiaInterpreter<'_> {
 		};
 		Ok((ExitStatus::Return, value))
 	}
+
+	fn visit_function(&self, ft: &Function) -> StmtResult {
+		let name = ft.name().clone();
+		let params = self.visit_function_params(ft.params())?;
+		let ft = Function::new(ft.name().clone(), params, ft.body().clone());
+		let callable = Callable::Function(FunctionCallable::new(ft));
+		self.set_variable(
+			&vec![name],
+			(&Expr::Callable(callable)).try_into()?,
+		)?;
+		Ok((ExitStatus::Okay, OsmiaResult::None))
+	}
 }
 
 impl OsmiaInterpreter<'_> {
@@ -282,7 +295,23 @@ impl OsmiaInterpreter<'_> {
 		let args = self.setup_callable_args(args, call)?;
 		let expr: Expr = match call {
 			Callable::Builtin(_) | Callable::Lambda(_) => call.call(&mut self.ctx.borrow_mut(), &args)?,
-			Callable::Function(_) => todo!(), // TODO
+			Callable::Function(_) => {
+				self.ctx.borrow_mut().begin_scope();
+				let ft_body = call.call_stmt(&mut self.ctx.borrow_mut(), &args)?;
+				let (status, r) = self.visit_stmt(&ft_body)?;
+				let result = match status {
+					ExitStatus::Continue | ExitStatus::Break => return Err(format!(
+						"Cannot break or continue out of a function"
+					)),
+					ExitStatus::Okay | ExitStatus::Return => match r {
+						OsmiaResult::None => Expr::Null,
+						OsmiaResult::Expr(e) => e,
+						OsmiaResult::OsmiaOutput(s) => Expr::Str(s),
+					}
+				};
+				self.ctx.borrow_mut().end_scope();
+				result
+			}
 		};
 		Ok(expr)
 	}
@@ -305,7 +334,9 @@ impl OsmiaInterpreter<'_> {
 			Callable::Lambda(l) => self.setup_callable_args_with_params(
 				arguments, args, l.params()
 			),
-			Callable::Function(_) => todo!(), // TODO
+			Callable::Function(f) => self.setup_callable_args_with_params(
+				arguments, args, f.params()
+			),
 		}
 	}
 

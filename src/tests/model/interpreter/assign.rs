@@ -53,6 +53,15 @@ macro_tests!(
 		]
 	),
 	(
+		assign_object_item,
+		"{{ v.foo = 2 }}{{ v.foo }}",
+		vec![
+			(Ctx::try_from(r#"{"v": {"foo": 1}}"#).unwrap(), Ok("2")),
+			(Ctx::try_from(r#"{"v": {}}"#).unwrap(), Ok("2")),
+			(Ctx::try_from(r#"{}"#).unwrap(), Err(vec!["not", "found"]))
+		]
+	),
+	(
 		assign_override01,
 		"{{ v = 1 }}{{v}}",
 		vec![
