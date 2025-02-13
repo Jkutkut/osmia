@@ -151,7 +151,7 @@ impl OsmiaInterpreter<'_> {
 	}
 
 	fn visit_for(&self, for_stmt: &For) -> StmtResult {
-		let var = Self::variable_to_ctx_variable(for_stmt.variable())?;
+		let var = Self::var_arr_to_ctx_variable(self.visit_variable(for_stmt.variable())?.vec())?;
 		let iterable = self.visit_iterable(for_stmt.iterable())?;
 		let body = for_stmt.body();
 		let mut content = String::new();
@@ -172,7 +172,7 @@ impl OsmiaInterpreter<'_> {
 	}
 
 	fn visit_assign(&self, assign: &Assign) -> StmtResult {
-		let var = Self::variable_to_ctx_variable(assign.variable())?;
+		let var = Self::var_arr_to_ctx_variable(self.visit_variable(assign.variable())?.vec())?;
 		let value: Expr = assign.value().accept(self)?;
 		let value = (&value).try_into()?;
 		self.set_variable(&var, value)?;
@@ -256,7 +256,7 @@ impl OsmiaInterpreter<'_> {
 				}
 				Ok(Expr::Object(Object::new_hash(new_obj)?))
 			},
-			Object::Hash(h) => unreachable!("Interpreter for hash object: {:?}", h),
+			Object::Hash(h) => Ok(self.visit_object(&Object::new_code(h.entries()))?),
 		}
 	}
 
@@ -393,9 +393,22 @@ impl OsmiaInterpreter<'_> {
 		})
 	}
 
-	fn variable_to_ctx_variable(variable: &Variable) -> Result<Vec<JsonTreeKey<String>>, OsmiaError> {
-		let mut variable_keys: Vec<JsonTreeKey<String>> = Vec::new();
+	fn visit_variable(&self, variable: &Variable) -> Result<Variable, OsmiaError> {
+		let mut arr: Vec<JsonTreeKeyExpr> = Vec::with_capacity(variable.vec().len());
 		for v in variable.vec() {
+			match v {
+				JsonTreeKeyExpr::Expr(e) => arr.push(self.visit_expr(e)?.into()),
+				k => arr.push(k.clone()),
+			}
+		}
+		Ok(Variable::from_vec(arr))
+	}
+
+	fn var_arr_to_ctx_variable(
+		var: &Vec<JsonTreeKeyExpr>
+	) -> Result<Vec<JsonTreeKey<String>>, OsmiaError> {
+		let mut variable_keys: Vec<JsonTreeKey<String>> = Vec::with_capacity(var.len());
+		for v in var {
 			match v {
 				JsonTreeKeyExpr::JsonTreeKey(k) => variable_keys.push(k.clone()),
 				JsonTreeKeyExpr::Expr(e) => {
@@ -419,8 +432,23 @@ impl OsmiaInterpreter<'_> {
 
 impl OsmiaInterpreter<'_> {
 	fn get_variable<'a>(&self, variable: &Variable) -> ExprResult {
-		let variable = Self::variable_to_ctx_variable(variable)?;
-		Ok(self.ctx.borrow().get(&variable)?.try_into()?)
+		let variable = self.visit_variable(variable)?;
+		match variable.vec().get(0) {
+			None => unreachable!(),
+			Some(JsonTreeKeyExpr::JsonTreeKey(k)) => {
+				let keys = Self::var_arr_to_ctx_variable(variable.vec())?;
+				Ok(self.ctx.borrow().get(&keys)?.try_into()?)
+			},
+			Some(JsonTreeKeyExpr::Expr(e)) => {
+				let e: JsonTree<String, CtxValue> = e.try_into()?;
+				let keys: Vec<_> = variable.into();
+				let keys: Vec<JsonTreeKeyExpr> = keys.into_iter().skip(1).collect();
+				println!("Accessing:\n{:?}\n{:?}", &e, &keys);
+				let context = Ctx::from(e);
+				let keys = Self::var_arr_to_ctx_variable(&keys)?;
+				Ok(context.get(&keys)?.try_into()?)
+			}
+		}
 	}
 
 	fn set_variable<'a>(

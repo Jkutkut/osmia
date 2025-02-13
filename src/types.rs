@@ -44,19 +44,21 @@ pub type LexerCode = Vec<Token>;
 /// bitshift       → term ( ( ">>" | "<<" ) term )*
 /// term           → factor ( ( "-" | "+" ) factor )*
 /// factor         → unary ( ( "/" | "*" | "%" ) unary )*
-/// unary          → ( "!" | "-" | "+" )* method_call
-/// method_call    → call ( "?" call )*
-/// call           → primary ( "(" arguments? ")" )*
-/// arguments      → expression ( "," expression )*
-/// primary        → literal | variable | array | object | grouping
-/// literal        → float | int | string | boolean | null
-/// variable       → obj
-/// obj            → arr ( "." arr )*
-/// arr            → identifier ( "[" expression "]" )*
+/// unary          → ( "!" | "-" | "+" )* value
+///
+/// value          → primary ( method_call | call | variable )*
+/// primary        → array | object | grouping | literal | var_name
 /// array          → "[" ( expression? ( "," expression )* )? "]"
 /// object         → "{" ( object_entry ( "," object_entry )* )? "}"
 /// object_entry   → expression ":" expression
 /// grouping       → "(" expression ")"
+/// literal        → float | int | string | boolean | null
+/// var_name       → identifier
+///
+/// method_call    → ( "?" identifier call )*
+/// call           → ( "(" arguments? ")" )*
+/// arguments      → expression ( "," expression )*
+/// variable       → ( ( "[" expression "]" ) | ( "." identifier ) )*
 ///
 /// identifier     → alpha ( alpha | digit )*
 /// alpha          → [a-zA-Z_]

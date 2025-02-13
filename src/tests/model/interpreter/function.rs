@@ -38,10 +38,18 @@ macro_tests!(
 	),
 	(
 		function_05,
-		r#"{{fn vecPlus; v}}{{v.x = v.x + 1}}{{return v.x}}{{done}}{{vecPlus({"x": 1})}} vs {{v.x}}"#,
+		r#"{{fn vecPlus; v}}{{v.x = v.x + 1}}{{return v}}{{done}}{{vecPlus({"x": 1}).x}} vs {{v.x}}"#,
 		vec![
 			(Ctx::try_from("{\"v\": {\"x\": 1}}").unwrap(), Ok("2 vs 1")),
 			(Ctx::try_from("{\"v\": {\"x\": 0}}").unwrap(), Ok("2 vs 0")),
 		]
-	)
+	),
+	(
+		function_06,
+		r#"{{fn arrPlus; a}}{{a[0] = a[0] + 1}}{{return a}}{{done}}{{arrPlus([1])[0]}} vs {{a[0]}}"#,
+		vec![
+			(Ctx::try_from("{\"a\": [1]}").unwrap(), Ok("2 vs 1")),
+			(Ctx::try_from("{\"a\": [0]}").unwrap(), Ok("2 vs 0")),
+		]
+	),
 );

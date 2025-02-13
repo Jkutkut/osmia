@@ -490,54 +490,20 @@ impl OsmiaParserImpl {
 			let right = self.unary()?;
 			return Ok(Unary::new(operator.unwrap(), right).into());
 		}
-		self.method_call()
+		self.value()
 	}
 
-	fn method_call(&mut self) -> Result<Expr, OsmiaError> {
-		let mut p: Expr = self.call()?;
-		while self.match_and_advance(&[Token::Question]) {
-			match self.call()? {
-				Expr::Call(call) => p = MethodCall::new(p, call).into(),
-				_ => return Err(self.error_msg(
-					ParserErrorMsg::Custom(
-						"Expected method call. Maybe you forgot to call it?".to_string()
-					)
-				))
-			};
-		}
-		Ok(p)
-	}
-
-	fn call(&mut self) -> Result<Expr, OsmiaError> {
-		let mut v: Expr = self.primary()?;
-		while self.check_current(&Token::ParentStart) {
-			v = Call::new(v, self.arguments()?).into();
-		}
-		Ok(v)
-	}
-
-	fn arguments(&mut self) -> Result<Vec<Expr>, OsmiaError> {
-		self.consume(Token::ParentStart, |parser| parser.error_msg(
-			ParserErrorMsg::Expected(Token::ParentStart)
-		))?;
-		let mut arr = Vec::new();
-		self.consume_whitespaces();
-		if !self.check_current(&Token::ParentEnd) {
-			arr.push(self.expr()?.into());
-			self.consume_whitespaces();
-			while !self.check_current(&Token::ParentEnd) {
-				self.consume(Token::Comma, |parser| parser.error_msg(
-					ParserErrorMsg::Expected(Token::Comma)
-				))?;
-				self.consume_whitespaces();
-				arr.push(self.expr()?.into());
-				self.consume_whitespaces();
+	fn value(&mut self) -> Result<Expr, OsmiaError> {
+		let mut value = self.primary()?;
+		loop {
+			value = match self.get_current() {
+				Token::Question => self.method_call(value)?,
+				Token::ParentStart => self.call(value)?,
+				Token::Dot | Token::ArrayStart => self.variable(value)?,
+				_ => break,
 			}
 		}
-		self.consume(Token::ParentEnd, |parser| parser.error_msg(
-			ParserErrorMsg::Unclosed("arguments".to_string(), Token::ParentEnd)
-		))?;
-		Ok(arr)
+		Ok(value)
 	}
 
 	fn primary(&mut self) -> Result<Expr, OsmiaError> {
@@ -546,58 +512,8 @@ impl OsmiaParserImpl {
 			Token::ObjectStart => self.object(),
 			Token::ParentStart => self.grouping(),
 			Token::Str(_) | Token::Number(_) | Token::Bool(_) | Token::Null => self.literal(),
-			_ => self.variable(),
+			_ => Ok(Variable::from_name(self.identifier()?.into()).into()),
 		}
-	}
-
-	fn literal(&mut self) -> Result<Expr, OsmiaError> {
-		let expr = match self.get_current() {
-			Token::Null => Expr::Null,
-			Token::Bool(b) => Expr::Bool(*b),
-			Token::Str(s) => Expr::Str(s.to_string()),
-			Token::Number(n) => {
-				match n.contains('.') {
-					true => match n.parse::<f64>() {
-						Ok(f) => Expr::Float(f),
-						Err(_) => return Err(self.error_msg(
-							ParserErrorMsg::ParseValue("float".into())
-						))
-					},
-					false => match n.parse::<i64>() {
-						Ok(i) => Expr::Int(i),
-						Err(_) => return Err(self.error_msg(
-							ParserErrorMsg::ParseValue("int".into())
-						))
-					}
-				}
-			},
-			_ => unreachable!(),
-		};
-		self.advance();
-		Ok(expr)
-	}
-
-	fn variable(&mut self) -> Result<Expr, OsmiaError> {
-		Ok(self.obj()?.into())
-	}
-
-	fn obj(&mut self) -> Result<Variable, OsmiaError> {
-		let mut var = self.arr()?;
-		while self.match_and_advance(&[Token::Dot]) {
-			var.extend(self.arr()?.into())
-		}
-		Ok(var)
-	}
-
-	fn arr(&mut self) -> Result<Variable, OsmiaError> {
-		let mut arr = vec![self.identifier()?.into()];
-		while self.match_and_advance(&[Token::ArrayStart]) {
-			arr.push(self.expr()?.into());
-			self.consume(Token::ArrayEnd, |parser| parser.error_msg(
-				ParserErrorMsg::Unclosed("array selector".to_string(), Token::ArrayEnd)
-			))?;
-		}
-		Ok(Variable::from_vec(arr))
 	}
 
 	fn array(&mut self) -> Result<Expr, OsmiaError> {
@@ -664,6 +580,104 @@ impl OsmiaParserImpl {
 			ParserErrorMsg::Unclosed("grouping".to_string(), Token::ParentEnd)
 		))?;
 		Ok(Grouping::new(expr).into())
+	}
+
+	fn literal(&mut self) -> Result<Expr, OsmiaError> {
+		let expr = match self.get_current() {
+			Token::Null => Expr::Null,
+			Token::Bool(b) => Expr::Bool(*b),
+			Token::Str(s) => Expr::Str(s.to_string()),
+			Token::Number(n) => {
+				match n.contains('.') {
+					true => match n.parse::<f64>() {
+						Ok(f) => Expr::Float(f),
+						Err(_) => return Err(self.error_msg(
+							ParserErrorMsg::ParseValue("float".into())
+						))
+					},
+					false => match n.parse::<i64>() {
+						Ok(i) => Expr::Int(i),
+						Err(_) => return Err(self.error_msg(
+							ParserErrorMsg::ParseValue("int".into())
+						))
+					}
+				}
+			},
+			_ => unreachable!(),
+		};
+		self.advance();
+		Ok(expr)
+	}
+
+	fn method_call(&mut self, mut obj: Expr) -> Result<Expr, OsmiaError> {
+		while self.match_and_advance(&[Token::Question]) {
+			let name = Variable::from_name(self.identifier()?.into()).into();
+			match self.call(name)? {
+				Expr::Call(call) => obj = MethodCall::new(obj, call).into(),
+				_ => return Err(self.error_msg(
+					ParserErrorMsg::Custom(
+						"Expected method call. Maybe you forgot to call it?".to_string()
+					)
+				))
+			};
+		}
+		Ok(obj)
+	}
+
+	fn call(&mut self, mut callable: Expr) -> Result<Expr, OsmiaError> {
+		while self.check_current(&Token::ParentStart) {
+			callable = Call::new(callable, self.arguments()?).into();
+		}
+		Ok(callable)
+	}
+
+	fn arguments(&mut self) -> Result<Vec<Expr>, OsmiaError> {
+		self.consume(Token::ParentStart, |parser| parser.error_msg(
+			ParserErrorMsg::Expected(Token::ParentStart)
+		))?;
+		let mut arr = Vec::new();
+		self.consume_whitespaces();
+		if !self.check_current(&Token::ParentEnd) {
+			arr.push(self.expr()?.into());
+			self.consume_whitespaces();
+			while !self.check_current(&Token::ParentEnd) {
+				self.consume(Token::Comma, |parser| parser.error_msg(
+					ParserErrorMsg::Expected(Token::Comma)
+				))?;
+				self.consume_whitespaces();
+				arr.push(self.expr()?.into());
+				self.consume_whitespaces();
+			}
+		}
+		self.consume(Token::ParentEnd, |parser| parser.error_msg(
+			ParserErrorMsg::Unclosed("arguments".to_string(), Token::ParentEnd)
+		))?;
+		Ok(arr)
+	}
+
+	fn variable(&mut self, name: Expr) -> Result<Expr, OsmiaError> {
+		let mut var: Vec<JsonTreeKeyExpr> = vec![];
+		match name {
+			Expr::Variable(v) => var = v.into(),
+			e => var.push(e.into())
+		}
+		loop {
+			match self.get_current() {
+				Token::Dot => {
+					self.advance();
+					var.push(self.identifier()?.into());
+				},
+				Token::ArrayStart => {
+					self.advance();
+					var.push(self.expr()?.into());
+					self.consume(Token::ArrayEnd, |parser| parser.error_msg(
+						ParserErrorMsg::Unclosed("array selector".to_string(), Token::ArrayEnd)
+					))?;
+				},
+				_ => break
+			}
+		}
+		Ok(Variable::from_vec(var).into())
 	}
 
 	fn identifier(&mut self) -> Result<JsonTreeKey<String>, OsmiaError> {

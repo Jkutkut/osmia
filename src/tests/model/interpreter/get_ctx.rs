@@ -239,5 +239,15 @@ macro_tests! {
 				Err(vec!["key", "array"])
 			)
 		]
+	),
+	(
+		ctx_get_multiple_03,
+		"{{ data[0].foo[0].bar }}",
+		vec![
+			(
+				Ctx::try_from(r#"{"data": [{"foo": [{"bar": "baz"}]}]}"#).unwrap(),
+				Ok("baz")
+			),
+		]
 	)
 }

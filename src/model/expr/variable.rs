@@ -10,6 +10,10 @@ impl Variable {
 		Self { var }
 	}
 
+	pub fn from_name(name: JsonTreeKeyExpr) -> Self {
+		Self::from_vec(vec![name])
+	}
+
 	pub fn push(&mut self, key: JsonTreeKeyExpr) {
 		self.var.push(key)
 	}
