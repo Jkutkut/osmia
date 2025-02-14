@@ -84,6 +84,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Expr::Lambda(l) => Ok(self.visit_lambda(l)?),
 			Expr::Call(c) => Ok(self.visit_call(c)?),
 			Expr::Variable(v) => Ok(self.get_variable(v)?),
+			Expr::Callable(_) => Ok(expr.clone()),
 			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
 		}
 	}
@@ -435,7 +436,7 @@ impl OsmiaInterpreter<'_> {
 		let variable = self.visit_variable(variable)?;
 		match variable.vec().get(0) {
 			None => unreachable!(),
-			Some(JsonTreeKeyExpr::JsonTreeKey(k)) => {
+			Some(JsonTreeKeyExpr::JsonTreeKey(_)) => {
 				let keys = Self::var_arr_to_ctx_variable(variable.vec())?;
 				Ok(self.ctx.borrow().get(&keys)?.try_into()?)
 			},

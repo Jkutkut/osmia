@@ -52,4 +52,11 @@ macro_tests!(
 			(Ctx::try_from("{\"a\": [0]}").unwrap(), Ok("2 vs 0")),
 		]
 	),
+	(
+		function_07,
+		r#"{{fn foo}}{{return 1}}{{done}}{{fn foo_gen}}{{return foo}}{{done}}{{foo_gen()()}}"#,
+		vec![
+			(Ctx::new(), Ok("1")),
+		]
+	),
 );
