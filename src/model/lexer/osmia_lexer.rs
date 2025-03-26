@@ -1,6 +1,10 @@
 use super::Lexer;
 use crate::LexerCode;
 use crate::OsmiaError;
+use crate::constants::{
+	START_DELIMITER,
+	END_DELIMITER
+};
 
 pub struct OsmiaLexer {}
 
@@ -19,9 +23,6 @@ impl Lexer<LexerCode, OsmiaError> for OsmiaLexer {
 
 use crate::model::lexer::Token;
 use crate::utils::code_trace;
-
-const START_DELIMITER: &str = "{{";
-const END_DELIMITER: &str = "}}";
 
 struct LexerScanner<'a> {
 	code: &'a [u8],
