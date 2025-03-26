@@ -1,12 +1,9 @@
 use super::*;
-use crate::model::{
-	interpreter::Callable,
-};
 
 mod module;
-mod module_constant;
-mod module_callable;
+mod module_element;
+mod module_value;
 
 pub use module::Module;
-pub use module_constant::ModuleConstant;
-pub use module_callable::ModuleCallable;
+pub use module_element::ModuleElement;
+pub use module_value::ModuleValue;

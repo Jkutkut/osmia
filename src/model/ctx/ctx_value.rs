@@ -19,3 +19,9 @@ impl Into<JsonTree<String, CtxValue>> for CtxValue {
 		JsonTree::Value(self)
 	}
 }
+
+impl Into<CtxValue> for Callable {
+	fn into(self) -> CtxValue {
+		CtxValue::Callable(self)
+	}
+}
