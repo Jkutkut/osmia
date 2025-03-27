@@ -249,5 +249,12 @@ macro_tests! {
 				Ok("baz")
 			),
 		]
+	),
+	(
+		ctx_get_multiple_04,
+		r#"{{ x = 0 }}{{if true}}{{ x = 1 }}{{fi}}{{ x }}"#,
+		vec![
+			(Ctx::new(), Ok("1"))
+		]
 	)
 }

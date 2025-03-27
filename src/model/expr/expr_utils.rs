@@ -47,7 +47,10 @@ impl Expr {
 		match self {
 			Expr::Float(f) => Ok(*f),
 			Expr::Int(i) => Ok(*i as f64),
-			Expr::Str(s) => Err(format!("Cannot convert {:?} to float", s)),
+			Expr::Str(n) => match n.parse::<f64>() {
+				Ok(f) => Ok(f),
+				Err(_) => Err(format!("Cannot convert {:?} to float", n)),
+			},
 			_ => Err(format!("Cannot convert {} to float", self))
 		}
 	}
@@ -56,7 +59,10 @@ impl Expr {
 		match self {
 			Expr::Float(f) => Ok(*f as i64),
 			Expr::Int(i) => Ok(*i),
-			Expr::Str(s) => Err(format!("Cannot convert {:?} to int", s)),
+			Expr::Str(s) => match s.parse::<i64>() {
+				Ok(i) => Ok(i),
+				Err(_) => Err(format!("Cannot convert {:?} to int", s)),
+			},
 			_ => Err(format!("Cannot convert {} to int", self))
 		}
 	}
@@ -137,5 +143,3 @@ impl TryFrom<&Expr> for JsonTree<String, CtxValue> {
 		})
 	}
 }
-
-

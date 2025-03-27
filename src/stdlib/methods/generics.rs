@@ -1,0 +1,49 @@
+use super::*;
+
+const len: BuiltinArg = |_, args| {
+	match &args[0] {
+		Expr::Str(s) => Ok(Expr::Int(s.len() as i64)),
+		Expr::Array(arr) => Ok(Expr::Int(arr.len() as i64)),
+		_ => return Err("Cannot get length for this".into()),
+	}
+};
+
+const has_content: BuiltinArg = |_, args| {
+	match &args[0] {
+		Expr::Str(s) => Ok(Expr::Bool(!s.is_empty())),
+		Expr::Array(arr) => Ok(Expr::Bool(arr.len() != 0)),
+		Expr::Object(obj) => Ok(Expr::Bool(obj.len() != 0)),
+		Expr::Int(_) | Expr::Float(_) => Ok(Expr::Bool(true)),
+		Expr::Bool(_) => Ok(Expr::Bool(true)),
+		Expr::Null => Ok(Expr::Bool(false)),
+		Expr::Callable(_) => Ok(Expr::Bool(true)),
+		_ => unreachable!()
+	}
+};
+
+const to_bool: BuiltinArg = |_, args| {
+	Ok(Expr::Bool(args[0].to_bool()))
+};
+
+const to_float: BuiltinArg = |_, args| {
+	match &args[0].to_float() {
+		Ok(f) => Ok(Expr::Float(*f)),
+		Err(e) => Err(e.into()),
+	}
+};
+
+const to_int: BuiltinArg = |_, args| {
+	match &args[0].to_int() {
+		Ok(i) => Ok(Expr::Int(*i)),
+		Err(e) => Err(e.into()),
+	}
+};
+
+pub fn add_generics(module: Module) -> Module {
+	module
+	.add_value("len", Callable::new(1, len).into())
+	.add_value("has_content", Callable::new(1, has_content).into())
+	.add_value("to_bool", Callable::new(1, to_bool).into())
+	.add_value("to_float", Callable::new(1, to_float).into())
+	.add_value("to_int", Callable::new(1, to_int).into())
+}
