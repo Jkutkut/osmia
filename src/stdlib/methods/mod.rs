@@ -1,5 +1,6 @@
 use super::*;
 use generics::add_generics;
+use crate::OsmiaError;
 
 #[allow(non_upper_case_globals)]
 mod generics;
