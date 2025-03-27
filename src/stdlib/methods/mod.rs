@@ -14,6 +14,35 @@ mod object;
 mod callable;
 mod lambda;
 
+// TODO refactor
+mod utils {
+	use super::*;
+
+	pub fn string_or_fail(expr: &Expr) -> Result<&str, OsmiaError> {
+		match expr {
+			Expr::Str(s) => Ok(s),
+			_ => Err(format!("{} is not a string", expr)),
+			// TODO unreachable
+		}
+	}
+
+	pub fn int_or_fail(expr: &Expr) -> Result<i64, OsmiaError> {
+		match expr {
+			Expr::Int(i) => Ok(*i),
+			_ => Err(format!("{} is not an integer", expr)),
+			// TODO unreachable
+		}
+	}
+
+	pub fn usize_or_fail(expr: &Expr) -> Result<usize, OsmiaError> {
+		match int_or_fail(expr)? {
+			i if i >= 0 => Ok(i as usize),
+			_ => Err(format!("{} is not a positive integer", expr)),
+		}
+	}
+}
+pub use utils::*;
+
 pub fn module() -> Module {
 	Module::new()
 	.add_module(

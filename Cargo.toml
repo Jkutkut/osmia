@@ -1,9 +1,10 @@
 [package]
 name = "osmia"
-version = "2.5.52"
+version = "2.5.53"
 edition = "2021"
 authors = ["Jkutkut"]
 
 [dependencies]
+regex = "1.11.1"
 serde = { version = "1.0.206", features = ["derive"] }
 serde_json = "1.0.124"

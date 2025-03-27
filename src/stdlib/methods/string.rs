@@ -1,12 +1,5 @@
 use super::*;
-
-fn string_or_fail(expr: &Expr) -> Result<&str, OsmiaError> {
-	match expr {
-		Expr::Str(s) => Ok(s),
-		_ => Err("This method should be called on a string".into()),
-		// TODO unreachable
-	}
-}
+use regex::Regex;
 
 pub fn module() -> Module {
 	Module::new()
@@ -72,6 +65,74 @@ pub fn module() -> Module {
 		|_, args| match string_or_fail(&args[0])?.rfind(string_or_fail(&args[1])?) {
 			Some(i) => Ok(Expr::Int(i as i64)),
 			None => Ok(Expr::Int(-1))
+		}
+	).into())
+	// .add_value("left_pad", Callable::new(2,
+	// 	|_, args| todo!() // TODO
+	// ).into())
+	// .add_value("right_pad", Callable::new(2,
+	// 	|_, args| todo!() // TODO
+	// ).into())
+	// .add_value("pad", Callable::new(2,
+	// 	|_, args| todo!() // TODO
+	// ).into())
+	.add_value("match", Callable::new(2,
+		|_, args| {
+			let s = string_or_fail(&args[0])?;
+			let pattern = string_or_fail(&args[1])?;
+			let re = match Regex::new(pattern) {
+				Ok(re) => re,
+				Err(e) => return Err(format!("Invalid regex: {}", e))
+			};
+			Ok(Expr::Bool(re.is_match(&s)))
+		}
+	).into())
+	.add_value("replace", Callable::new(3,
+		|_, args| {
+			let s = string_or_fail(&args[0])?;
+			let pattern = match Regex::new(string_or_fail(&args[1])?) {
+				Ok(re) => re,
+				Err(e) => return Err(format!("Invalid regex: {}", e))
+			};
+			let repl = string_or_fail(&args[2])?;
+			Ok(Expr::Str(pattern.replace(&s, repl).into()))
+		}
+	).into())
+	.add_value("replace_all", Callable::new(3,
+		|_, args| {
+			let s = string_or_fail(&args[0])?;
+			let pattern = match Regex::new(string_or_fail(&args[1])?) {
+				Ok(re) => re,
+				Err(e) => return Err(format!("Invalid regex: {}", e))
+			};
+			let repl = string_or_fail(&args[2])?;
+			Ok(Expr::Str(pattern.replace_all(&s, repl).into()))
+		}
+	).into())
+	.add_value("split", Callable::new(2,
+		|_, args| Ok(Expr::Array(
+			string_or_fail(&args[0])?
+				.split(string_or_fail(&args[1])?)
+				.map(|s| Expr::Str(s.into()))
+				.collect::<Vec<Expr>>().into()
+		))
+	).into())
+	.add_value("substring", Callable::new(3,
+		|_, args| {
+			let s = string_or_fail(&args[0])?;
+			let start = usize_or_fail(&args[1])?;
+			let end = usize_or_fail(&args[2])?;
+			if start > end {
+				return Err(format!("Cannot start after end: {} > {}", start, end));
+			}
+			Ok(Expr::Str(s[start..end].into()))
+		}
+	).into())
+	.add_value("truncate", Callable::new(2,
+		|_, args| {
+			let s = string_or_fail(&args[0])?;
+			let len = std::cmp::min(usize_or_fail(&args[1])?, s.len());
+			Ok(Expr::Str(s[..len].into()))
 		}
 	).into())
 }

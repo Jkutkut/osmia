@@ -140,5 +140,95 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "s": "hello hello", "t": "hello" }"#).unwrap(), Ok("6")),
 			(Ctx::try_from(r#"{ "s": "ello hell hello hello", "t": "hello" }"#).unwrap(), Ok("16")),
 		]
+	),
+	// (
+	// 	left_pad,
+	// 	r#"{{ s?left_pad(t) }}"#,
+	// 	vec![
+	// 		// TODO
+	// 	]
+	// ),
+	// (
+	// 	right_pad,
+	// 	r#"{{ s?right_pad(t) }}"#,
+	// 	vec![
+	// 		// TODO
+	// 	]
+	// ),
+	// (
+	// 	pad,
+	// 	r#"{{ s?pad(t) }}"#,
+	// 	vec![
+	// 		// TODO
+	// 	]
+	// ),
+	(
+		r#match,
+		r#"{{ s?match(t) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "s": "hello", "t": "h" }"#).unwrap(), Ok("true")),
+			(Ctx::try_from(r#"{ "s": "hello", "t": "\\w" }"#).unwrap(), Ok("true")),
+			(Ctx::try_from(r#"{ "s": "hello", "t": "^[helo]+$" }"#).unwrap(), Ok("true")),
+			(Ctx::try_from(r#"{ "s": "hello", "t": "[" }"#).unwrap(), Err(vec!["regex", "parse"])),
+			(Ctx::try_from(r#"{ "s": "hello", "t": "\\d" }"#).unwrap(), Ok("false")),
+		]
+	),
+	(
+		replace,
+		r#"{{ s?replace(r, t) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "s": "hello", "r": "h", "t": "x" }"#).unwrap(), Ok("xello")),
+			(Ctx::try_from(r#"{ "s": "hello", "r": "l", "t": "x" }"#).unwrap(), Ok("hexlo")),
+			(Ctx::try_from(r#"{ "s": "hello", "r": "\\w", "t": "x" }"#).unwrap(), Ok("xello")),
+			(Ctx::try_from(r#"{ "s": "hello", "r": "\\w+", "t": "x" }"#).unwrap(), Ok("x")),
+			(Ctx::try_from(r#"{ "s": "hello", "r": "", "t": "x" }"#).unwrap(), Ok("xhello")),
+			(Ctx::try_from(r#"{ "s": "", "r": "", "t": "x" }"#).unwrap(), Ok("x")),
+		]
+	),
+	(
+		replace_all,
+		r#"{{ s?replace_all(r, t) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "s": "hello", "r": "h", "t": "x" }"#).unwrap(), Ok("xello")),
+			(Ctx::try_from(r#"{ "s": "hello", "r": "l", "t": "x" }"#).unwrap(), Ok("hexxo")),
+			(Ctx::try_from(r#"{ "s": "hello", "r": "\\w", "t": "x" }"#).unwrap(), Ok("xxxxx")),
+			(Ctx::try_from(r#"{ "s": "hello", "r": "\\w+", "t": "x" }"#).unwrap(), Ok("x")),
+			(Ctx::try_from(r#"{ "s": "hello", "r": "", "t": "x" }"#).unwrap(), Ok("xhxexlxlxox")),
+			(Ctx::try_from(r#"{ "s": "", "r": "", "t": "x" }"#).unwrap(), Ok("x")),
+		]
+	),
+	(
+		split,
+		r#"{{ s?split(t) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "s": "foo.bar.baz", "t": "." }"#).unwrap(), Ok(r#"["foo", "bar", "baz"]"#)),
+			(Ctx::try_from(r#"{ "s": "foo.!.bar.!.baz", "t": ".!." }"#).unwrap(), Ok(r#"["foo", "bar", "baz"]"#)),
+			(Ctx::try_from(r#"{ "s": "foo.bar.baz", "t": "x" }"#).unwrap(), Ok(r#"["foo.bar.baz"]"#)),
+			(Ctx::try_from(r#"{ "s": "", "t": "" }"#).unwrap(), Ok(r#"["", ""]"#)),
+			(Ctx::try_from(r#"{ "s": ".", "t": "" }"#).unwrap(), Ok(r#"["", ".", ""]"#)),
+			(Ctx::try_from(r#"{ "s": ".!", "t": "" }"#).unwrap(), Ok(r#"["", ".", "!", ""]"#)),
+		]
+	),
+	(
+		substring,
+		r#"{{ t?substring(s,e) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "t": "hello", "s": 0, "e": 0 }"#).unwrap(), Ok("")),
+			(Ctx::try_from(r#"{ "t": "hello", "s": 0, "e": 1 }"#).unwrap(), Ok("h")),
+			(Ctx::try_from(r#"{ "t": "hello", "s": 0, "e": 2 }"#).unwrap(), Ok("he")),
+			(Ctx::try_from(r#"{ "t": "hello", "s": 1, "e": 0 }"#).unwrap(), Err(vec!["not", "1 > 0"])),
+			(Ctx::try_from(r#"{ "t": "hello", "s": 1, "e": -1 }"#).unwrap(), Err(vec!["positive", "integer", "-1"])),
+		]
+	),
+	(
+		truncate,
+		r#"{{ s?truncate(t) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "s": "hello", "t": 0 }"#).unwrap(), Ok("")),
+			(Ctx::try_from(r#"{ "s": "hello", "t": 1 }"#).unwrap(), Ok("h")),
+			(Ctx::try_from(r#"{ "s": "hello", "t": 2 }"#).unwrap(), Ok("he")),
+			(Ctx::try_from(r#"{ "s": "hello", "t": 10 }"#).unwrap(), Ok("hello")),
+			(Ctx::try_from(r#"{ "s": "hello", "t": -1 }"#).unwrap(), Err(vec!["positive", "integer", "-1"])),
+		]
 	)
 );

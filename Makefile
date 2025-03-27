@@ -20,7 +20,7 @@ DOCKER_RUN_IT = ${DOCKER_RUN} -it --name ${REPO}
 RUN_ATTRS = ${CODE_VOLUME} ${CARGO_REGISTRY} -w /${REPO}
 
 terminal:
-	${DOCKER_RUN_IT} ${RUN_ATTRS} jkutkut/docker4rust
+	${DOCKER_RUN_IT}_terminal ${RUN_ATTRS} jkutkut/docker4rust
 
 reset_file_permissions:
 	sudo chown -R ${USER}:${USER} .
