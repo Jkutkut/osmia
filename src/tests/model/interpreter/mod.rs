@@ -15,6 +15,7 @@ mod r#break;
 mod r#continue;
 mod lambda;
 mod function;
+mod method_call;
 
 fn interpreter_test(
 	code: &str,

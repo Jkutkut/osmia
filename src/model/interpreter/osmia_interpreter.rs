@@ -6,6 +6,7 @@ use super::{
 	ExitStatus,
 	callable::*,
 	OsmiaResult,
+	MethodExpression
 };
 use crate::utils::{
 	Affirm,
@@ -74,19 +75,19 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 	}
 
 	fn visit_expr(&self, expr: &Expr) -> ExprResult {
-		match expr {
-			Expr::Float(_) | Expr::Int(_) | Expr::Str(_) | Expr::Bool(_) | Expr::Null => Ok(expr.clone()),
-			Expr::Binary(b) => Ok(self.visit_binary(b)?),
-			Expr::Grouping(g) => Ok(self.visit_grouping(g)?),
-			Expr::Unary(u) => Ok(self.visit_unary(u)?),
-			Expr::Array(arr) => Ok(self.visit_array(arr)?),
-			Expr::Object(obj) => Ok(self.visit_object(obj)?),
-			Expr::Lambda(l) => Ok(self.visit_lambda(l)?),
-			Expr::Call(c) => Ok(self.visit_call(c)?),
-			Expr::Variable(v) => Ok(self.get_variable(v)?),
-			Expr::Callable(_) => Ok(expr.clone()),
-			_ => unimplemented!("Interpreter for expr: {:?}", expr), // TODO
-		}
+		Ok(match expr {
+			Expr::Float(_) | Expr::Int(_) | Expr::Str(_) | Expr::Bool(_) | Expr::Null => expr.clone(),
+			Expr::Binary(b) => self.visit_binary(b)?,
+			Expr::Grouping(g) => self.visit_grouping(g)?,
+			Expr::Unary(u) => self.visit_unary(u)?,
+			Expr::Array(arr) => self.visit_array(arr)?,
+			Expr::Object(obj) => self.visit_object(obj)?,
+			Expr::Lambda(l) => self.visit_lambda(l)?,
+			Expr::Call(c) => self.visit_call(c)?,
+			Expr::MethodCall(m) => self.visit_method_call(m)?,
+			Expr::Variable(v) => self.get_variable(v)?,
+			Expr::Callable(_) => expr.clone(),
+		})
 	}
 }
 
@@ -290,6 +291,26 @@ impl OsmiaInterpreter<'_> {
 			Expr::Callable(c) => self.visit_expr(&self.make_call(&c, call.args())?),
 			e => Err(format!("Expression {} is not callable", e)),
 		}
+	}
+
+	fn visit_method_call(&self, m: &MethodCall) -> ExprResult {
+		let obj = m.obj.as_ref().accept(self)?;
+		let var_type = MethodExpression::try_from(&obj).unwrap_or_else(|_| unreachable!());
+		let var = match m.call.callee() {
+			Expr::Variable(v) => v,
+			_ => unreachable!()
+		}.vec().get(0).unwrap();
+		let call_path = vec![
+			JsonTreeKeyExpr::JsonTreeKey(JsonTreeKey::Key("_method".into())),
+			JsonTreeKeyExpr::JsonTreeKey(JsonTreeKey::Key((&var_type).into())),
+			var.clone()
+		];
+		let mut args = Vec::with_capacity(m.call.args().len() + 1);
+		args.push(obj.clone());
+		args.extend_from_slice(m.call.args());
+		let call_expr: Expr = Variable::from_vec(call_path).into();
+		let call = Call::new(call_expr, args);
+		self.visit_call(&call)
 	}
 
 	fn make_call(&self, call: &Callable, args: &Vec<Expr>) -> ExprResult {
