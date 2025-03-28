@@ -46,27 +46,13 @@ impl Ctx {
 				Ok(v) => return Ok(v),
 				Err(e) => match e {
 					JsonTreeError::KeyNotFound(_) => Some(e),
-					e => return Err(Self::format_get_error(e)),
+					e => return Err(e.format_get_error()),
 				}
 			};
 		}
 		match error {
-			Some(e) => Err(Self::format_set_error(e)),
+			Some(e) => Err(e.format_get_error()),
 			None => unreachable!(),
-		}
-	}
-
-	fn format_get_error(error: JsonTreeError<JsonTreeKey<String>>) -> OsmiaError {
-		match error {
-			JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
-			JsonTreeError::ArrayOutOfBounds((idx, len)) => format!(
-				"Array index out of bounds. Attempted to access index {} in an array of length {}",
-				idx, len
-			),
-			JsonTreeError::IndexInObject => format!("Cannot get by index from an object"),
-			JsonTreeError::KeyInArray => format!("Cannot get by key from an array"),
-			JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
-			JsonTreeError::NoKey => unreachable!(),
 		}
 	}
 
@@ -81,30 +67,15 @@ impl Ctx {
 				Ok(_) => return Ok(()),
 				Err(e) => match e {
 					JsonTreeError::KeyNotFound(_) => Some(e),
-					e => return Err(Self::format_set_error(e)),
+					e => return Err(e.format_set_error()),
 				}
 			};
 		}
 		match error {
-			Some(e) => Err(Self::format_set_error(e)),
+			Some(e) => Err(e.format_set_error()),
 			None => unreachable!(),
 		}
 	}
-
-	fn format_set_error(error: JsonTreeError<JsonTreeKey<String>>) -> OsmiaError {
-		match error {
-			JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
-			JsonTreeError::ArrayOutOfBounds((idx, len)) => format!(
-				"Array index out of bounds. Attempted to access index {} in an array of length {}",
-				idx, len
-			),
-			JsonTreeError::IndexInObject => format!("Cannot set by index from an object"),
-			JsonTreeError::KeyInArray => format!("Cannot set by key from an array"),
-			JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
-			JsonTreeError::NoKey => unreachable!(),
-		}
-	}
-
 }
 
 impl<'a> TryFrom<&'a str> for Ctx {
@@ -123,5 +94,36 @@ impl<'a> TryFrom<&'a str> for Ctx {
 		Self::default_libs(&mut ctx);
 		ctx.begin_scope();
 		Ok(ctx)
+	}
+}
+
+
+impl JsonTreeError<JsonTreeKey<String>> {
+	fn format_get_error(self) -> OsmiaError {
+		match self {
+			JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
+			JsonTreeError::ArrayOutOfBounds((idx, len)) => format!(
+				"Array index out of bounds. Attempted to access index {} in an array of length {}",
+				idx, len
+			),
+			JsonTreeError::IndexInObject => format!("Cannot get by index from an object"),
+			JsonTreeError::KeyInArray => format!("Cannot get by key from an array"),
+			JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
+			JsonTreeError::NoKey => unreachable!(),
+		}
+	}
+
+	fn format_set_error(self) -> OsmiaError {
+		match self {
+			JsonTreeError::AccessValue(k) => format!("Cannot access a value: {}", k),
+			JsonTreeError::ArrayOutOfBounds((idx, len)) => format!(
+				"Array index out of bounds. Attempted to access index {} in an array of length {}",
+				idx, len
+			),
+			JsonTreeError::IndexInObject => format!("Cannot set by index from an object"),
+			JsonTreeError::KeyInArray => format!("Cannot set by key from an array"),
+			JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
+			JsonTreeError::NoKey => unreachable!(),
+		}
 	}
 }
