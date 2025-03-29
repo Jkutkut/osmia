@@ -3,6 +3,7 @@ use generics::add_generics;
 use crate::OsmiaError;
 use crate::model::expr::{
 	Array,
+	Object
 };
 
 #[allow(non_upper_case_globals)]
@@ -50,6 +51,13 @@ mod utils {
 		match expr {
 			Expr::Array(a) => Ok(a),
 			_ => Err(format!("{} is not an array", expr)),
+		}
+	}
+
+	pub fn obj_or_fail(expr: &Expr) -> Result<&Object, OsmiaError> {
+		match expr {
+			Expr::Object(o) => Ok(o),
+			_ => Err(format!("{} is not an object", expr)),
 		}
 	}
 }

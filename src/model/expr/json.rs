@@ -106,6 +106,20 @@ impl Object {
 			Object::Hash(h) => h.entries(),
 		}
 	}
+
+	pub fn keys(&self) -> Vec<Expr> {
+		match self {
+			Object::Code(c) => c.keys(),
+			Object::Hash(h) => h.keys(),
+		}
+	}
+
+	pub fn values(&self) -> Vec<Expr> {
+		match self {
+			Object::Code(c) => c.values(),
+			Object::Hash(h) => h.values(),
+		}
+	}
 }
 
 impl From<Vec<(Expr, Expr)>> for Object {
@@ -156,6 +170,14 @@ impl CodeObject {
 
 	pub fn entries(&self) -> Vec<(Expr, Expr)> {
 		self.obj.clone()
+	}
+
+	pub fn keys(&self) -> Vec<Expr> {
+		self.obj.iter().map(|(k, _)| k.clone()).collect()
+	}
+
+	pub fn values(&self) -> Vec<Expr> {
+		self.obj.iter().map(|(_, v)| v.clone()).collect()
 	}
 }
 
@@ -215,6 +237,14 @@ impl HashObject {
 			.collect::<Vec<_>>();
 		entries.sort_by(|a, b| a.0.to_string().cmp(&b.0.to_string()));
 		entries
+	}
+
+	pub fn keys(&self) -> Vec<Expr> {
+		self.obj.iter().map(|(k, _)| Expr::Str(k.clone())).collect()
+	}
+
+	pub fn values(&self) -> Vec<Expr> {
+		self.obj.iter().map(|(_, v)| v.clone()).collect()
 	}
 }
 
