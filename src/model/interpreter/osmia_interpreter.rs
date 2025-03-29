@@ -11,6 +11,7 @@ use super::{
 use crate::utils::{
 	Affirm,
 };
+use crate::constants::METHOD_CTX_LOCATION;
 use crate::ctx::{
 	JsonTree,
 	JsonTreeKey,
@@ -297,11 +298,11 @@ impl OsmiaInterpreter<'_> {
 		let obj = m.obj.as_ref().accept(self)?;
 		let var_type = MethodExpression::try_from(&obj).unwrap_or_else(|_| unreachable!());
 		let var = match m.call.callee() {
-			Expr::Variable(v) => v,
+			Expr::Variable(v) => v.vec().get(0).unwrap(),
 			_ => unreachable!()
-		}.vec().get(0).unwrap();
+		};
 		let call_path = vec![
-			JsonTreeKeyExpr::JsonTreeKey(JsonTreeKey::Key("_method".into())),
+			JsonTreeKeyExpr::JsonTreeKey(JsonTreeKey::Key(METHOD_CTX_LOCATION.into())),
 			JsonTreeKeyExpr::JsonTreeKey(JsonTreeKey::Key((&var_type).into())),
 			var.clone()
 		];
@@ -456,21 +457,19 @@ impl OsmiaInterpreter<'_> {
 	fn get_variable<'a>(&self, variable: &Variable) -> ExprResult {
 		let variable = self.visit_variable(variable)?;
 		match variable.vec().get(0) {
-			None => unreachable!(),
-			Some(JsonTreeKeyExpr::JsonTreeKey(_)) => {
-				let keys = Self::var_arr_to_ctx_variable(variable.vec())?;
-				Ok(self.ctx.borrow().get(&keys)?.try_into()?)
-			},
+			Some(JsonTreeKeyExpr::JsonTreeKey(_)) => self.get_variable_from_ctx(&self.ctx.borrow(), &variable.vec()),
 			Some(JsonTreeKeyExpr::Expr(e)) => {
-				let e: JsonTree<String, CtxValue> = e.try_into()?;
-				let keys: Vec<_> = variable.into();
-				let keys: Vec<JsonTreeKeyExpr> = keys.into_iter().skip(1).collect();
-				println!("Accessing:\n{:?}\n{:?}", &e, &keys);
-				let context = Ctx::from(e);
-				let keys = Self::var_arr_to_ctx_variable(&keys)?;
-				Ok(context.get(&keys)?.try_into()?)
-			}
+				let context = Ctx::from(e.try_into()?);
+				let keys: Vec<JsonTreeKeyExpr> = variable.vec().iter().skip(1).map(|k| k.clone()).collect();
+				self.get_variable_from_ctx(&context, &keys)
+			},
+			None => unreachable!()
 		}
+	}
+
+	fn get_variable_from_ctx(&self, ctx: &Ctx, variable: &Vec<JsonTreeKeyExpr>) -> ExprResult {
+		let keys = Self::var_arr_to_ctx_variable(&variable)?;
+		Ok(ctx.get(&keys)?.try_into()?)
 	}
 
 	fn set_variable<'a>(
