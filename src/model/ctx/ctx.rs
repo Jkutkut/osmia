@@ -108,7 +108,7 @@ impl JsonTreeError<JsonTreeKey<String>> {
 			),
 			JsonTreeError::IndexInObject => format!("Cannot get by index from an object"),
 			JsonTreeError::KeyInArray => format!("Cannot get by key from an array"),
-			JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
+			JsonTreeError::KeyNotFound(k) => format!("{} not found", k),
 			JsonTreeError::NoKey => unreachable!(),
 		}
 	}
@@ -122,7 +122,7 @@ impl JsonTreeError<JsonTreeKey<String>> {
 			),
 			JsonTreeError::IndexInObject => format!("Cannot set by index from an object"),
 			JsonTreeError::KeyInArray => format!("Cannot set by key from an array"),
-			JsonTreeError::KeyNotFound(k) => format!("Variable not found: {}", k),
+			JsonTreeError::KeyNotFound(k) => format!("{} not found", k),
 			JsonTreeError::NoKey => unreachable!(),
 		}
 	}
