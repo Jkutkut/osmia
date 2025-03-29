@@ -22,7 +22,6 @@ mod utils {
 		match expr {
 			Expr::Str(s) => Ok(s),
 			_ => Err(format!("{} is not a string", expr)),
-			// TODO unreachable
 		}
 	}
 
@@ -30,7 +29,6 @@ mod utils {
 		match expr {
 			Expr::Int(i) => Ok(*i),
 			_ => Err(format!("{} is not an integer", expr)),
-			// TODO unreachable
 		}
 	}
 
@@ -39,6 +37,10 @@ mod utils {
 			i if i >= 0 => Ok(i as usize),
 			_ => Err(format!("{} is not a positive integer", expr)),
 		}
+	}
+
+	pub fn boolean(expr: &Expr) -> bool {
+		expr.to_bool()
 	}
 }
 pub use utils::*;

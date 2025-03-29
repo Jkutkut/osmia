@@ -14,4 +14,25 @@ pub fn module() -> Module {
 			}
 		}
 	).into())
+	.add_value("not", Callable::new(1,
+		|_, args| Ok(Expr::Bool(!boolean(&args[0])))
+	).into())
+	.add_value("and", Callable::new(2,
+		|_, args| Ok(Expr::Bool(boolean(&args[0]) && boolean(&args[1])))
+	).into())
+	.add_value("or", Callable::new(2,
+		|_, args| Ok(Expr::Bool(boolean(&args[0]) || boolean(&args[1])))
+	).into())
+	.add_value("nand", Callable::new(2,
+		|_, args| Ok(Expr::Bool(!(boolean(&args[0]) && boolean(&args[1]))))
+	).into())
+	.add_value("nor", Callable::new(2,
+		|_, args| Ok(Expr::Bool(!(boolean(&args[0]) || boolean(&args[1]))))
+	).into())
+	.add_value("xor", Callable::new(2,
+		|_, args| Ok(Expr::Bool(boolean(&args[0]) ^ boolean(&args[1])))
+	).into())
+	.add_value("xnor", Callable::new(2,
+		|_, args| Ok(Expr::Bool(!(boolean(&args[0]) ^ boolean(&args[1]))))
+	).into())
 }
