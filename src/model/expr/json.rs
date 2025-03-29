@@ -1,5 +1,7 @@
 use super::*;
 use std::collections::HashMap;
+use crate::OsmiaError;
+use std::cmp::Ordering;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Array {
@@ -21,6 +23,15 @@ impl Array {
 
 	pub fn iter(&self) -> std::slice::Iter<'_, Expr> {
 		self.arr.iter()
+	}
+
+	pub fn sort(&self) -> Result<Self, OsmiaError> {
+		let mut sorted = self.arr.clone();
+		sorted.sort_by(|a, b| match a.partial_cmp(b) {
+			Some(o) => o,
+			None => Ordering::Equal
+		});
+		Ok(Self::new(sorted))
 	}
 }
 

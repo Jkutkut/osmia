@@ -1,6 +1,9 @@
 use super::*;
 use generics::add_generics;
 use crate::OsmiaError;
+use crate::model::expr::{
+	Array,
+};
 
 #[allow(non_upper_case_globals)]
 mod generics;
@@ -41,6 +44,13 @@ mod utils {
 
 	pub fn boolean(expr: &Expr) -> bool {
 		expr.to_bool()
+	}
+
+	pub fn arr_or_fail(expr: &Expr) -> Result<&Array, OsmiaError> {
+		match expr {
+			Expr::Array(a) => Ok(a),
+			_ => Err(format!("{} is not an array", expr)),
+		}
 	}
 }
 pub use utils::*;
