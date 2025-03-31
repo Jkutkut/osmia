@@ -26,6 +26,29 @@ impl Expr {
 	pub fn new_str(s: &str) -> Self {
 		Self::Str(s.to_string())
 	}
+
+	pub fn r#type(&self) -> String {
+		match self {
+			Expr::Binary(_) => "binary",
+			Expr::Grouping(_) => "grouping",
+			Expr::Unary(_) => "unary",
+			Expr::Lambda(_) => "lambda",
+			Expr::Object(_) => "object",
+			Expr::Array(_) => "array",
+			Expr::Call(_) => "call",
+			Expr::MethodCall(_) => "method_call",
+			Expr::Variable(_) => "variable",
+			Expr::Float(_) => "float",
+			Expr::Int(_) => "int",
+			Expr::Str(_) => "string",
+			Expr::Bool(_) => "bool",
+			Expr::Null => "null",
+			Expr::Callable(c) => match c {
+				Callable::Function(_) | Callable::Builtin(_) => "function",
+				Callable::Lambda(_) => "lambda",
+			}
+		}.to_string()
+	}
 }
 
 impl From<Binary> for Expr {

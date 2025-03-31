@@ -39,6 +39,13 @@ const to_int: BuiltinArg = |_, args| {
 	}
 };
 
+const to_string: BuiltinArg = |_, args| {
+	Ok(Expr::Str(args[0].to_string()))
+};
+
+const r#type: BuiltinArg = |_, args| {
+	Ok(Expr::Str(args[0].r#type()))
+};
 pub fn add_generics(module: Module) -> Module {
 	module
 	.add_value("len", Callable::new(1, len).into())
@@ -46,4 +53,6 @@ pub fn add_generics(module: Module) -> Module {
 	.add_value("to_bool", Callable::new(1, to_bool).into())
 	.add_value("to_float", Callable::new(1, to_float).into())
 	.add_value("to_int", Callable::new(1, to_int).into())
+	.add_value("to_string", Callable::new(1, to_string).into())
+	.add_value("type", Callable::new(1, r#type).into())
 }

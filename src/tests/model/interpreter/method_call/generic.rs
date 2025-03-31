@@ -111,5 +111,65 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "value": true }"#).unwrap(), Err(vec!["true", "int"])),
 			(Ctx::try_from(r#"{ "value": false }"#).unwrap(), Err(vec!["false", "int"])),
 		]
+	),
+	(
+		to_string,
+		r#"{{ value?to_string() }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "value": 0 }"#).unwrap(), Ok("0")),
+			(Ctx::try_from(r#"{ "value": 1 }"#).unwrap(), Ok("1")),
+			(Ctx::try_from(r#"{ "value": 1.0 }"#).unwrap(), Ok("1")),
+			(Ctx::try_from(r#"{ "value": -1.0 }"#).unwrap(), Ok("-1")),
+			(Ctx::try_from(r#"{ "value": "0" }"#).unwrap(), Ok("0")),
+			(Ctx::try_from(r#"{ "value": "1" }"#).unwrap(), Ok("1")),
+			(Ctx::try_from(r#"{ "value": "-1" }"#).unwrap(), Ok("-1")),
+			(Ctx::try_from(r#"{ "value": "-1.01" }"#).unwrap(), Ok("-1.01")),
+			(Ctx::try_from(r#"{ "value": "1.01" }"#).unwrap(), Ok("1.01")),
+			(Ctx::try_from(r#"{ "value": null }"#).unwrap(), Ok("null")),
+			(Ctx::try_from(r#"{ "value": "" }"#).unwrap(), Ok("")),
+			(Ctx::try_from(r#"{ "value": "Hello" }"#).unwrap(), Ok("Hello")),
+			(Ctx::try_from(r#"{ "value": true }"#).unwrap(), Ok("true")),
+			(Ctx::try_from(r#"{ "value": false }"#).unwrap(), Ok("false")),
+			(Ctx::try_from(r#"{ "value": [] }"#).unwrap(), Ok("[]")),
+			(Ctx::try_from(r#"{ "value": [0] }"#).unwrap(), Ok("[0]")),
+			(Ctx::try_from(r#"{ "value": [0, 1] }"#).unwrap(), Ok("[0, 1]")),
+			(Ctx::try_from(r#"{ "value": {} }"#).unwrap(), Ok("{}")),
+			(Ctx::try_from(r#"{ "value": { "a": 0 } }"#).unwrap(), Ok("{\"a\": 0}")),
+			(Ctx::try_from(r#"{ "value": { "a": 0, "b": 1 } }"#).unwrap(), Ok("{\"a\": 0, \"b\": 1}")),
+		]
+	),
+	(
+		r#type,
+		r#"{{ value?type() }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "value": 0 }"#).unwrap(), Ok("int")),
+			(Ctx::try_from(r#"{ "value": 1 }"#).unwrap(), Ok("int")),
+			(Ctx::try_from(r#"{ "value": 1.0 }"#).unwrap(), Ok("float")),
+			(Ctx::try_from(r#"{ "value": -1.0 }"#).unwrap(), Ok("float")),
+			(Ctx::try_from(r#"{ "value": "0" }"#).unwrap(), Ok("string")),
+			(Ctx::try_from(r#"{ "value": "1" }"#).unwrap(), Ok("string")),
+			(Ctx::try_from(r#"{ "value": "-1" }"#).unwrap(), Ok("string")),
+			(Ctx::try_from(r#"{ "value": "-1.01" }"#).unwrap(), Ok("string")),
+			(Ctx::try_from(r#"{ "value": "1.01" }"#).unwrap(), Ok("string")),
+			(Ctx::try_from(r#"{ "value": null }"#).unwrap(), Ok("null")),
+			(Ctx::try_from(r#"{ "value": "" }"#).unwrap(), Ok("string")),
+			(Ctx::try_from(r#"{ "value": "Hello" }"#).unwrap(), Ok("string")),
+			(Ctx::try_from(r#"{ "value": true }"#).unwrap(), Ok("bool")),
+			(Ctx::try_from(r#"{ "value": false }"#).unwrap(), Ok("bool")),
+		]
+	),
+	(
+		type_lambda,
+		r#"{{ (fn () => true)?type() }}"#,
+		vec![
+			(Ctx::new(), Ok("lambda")),
+		]
+	),
+	(
+		type_ft,
+		r#"{{ math.abs?type() }}"#,
+		vec![
+			(Ctx::new(), Ok("function")),
+		]
 	)
 );
