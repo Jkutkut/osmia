@@ -12,7 +12,11 @@ impl Callable {
 		Self::Builtin(Builtin::new(arity, call))
 	}
 
-	pub fn arity(&self) -> usize {
+	pub fn new_variable_args(call: BuiltinArg) -> Self {
+		Self::Builtin(Builtin::new_variable_args(call))
+	}
+
+	pub fn arity(&self) -> Option<usize> {
 		match self {
 			Callable::Builtin(f) => f.arity(),
 			Callable::Lambda(l) => l.arity(),
@@ -21,15 +25,21 @@ impl Callable {
 	}
 
 	fn argc_error(&self, argc: usize) -> OsmiaError {
+		let arity = match self.arity() {
+			Some(a) => a.to_string(),
+			None => "infinite".to_string(),
+		};
 		return format!(
 			"Expected {} arguments, got {}",
-			self.arity(), argc
+			arity, argc
 		);
 	}
 
 	pub fn call(&self, ctx: &mut Ctx, args: &Vec<Expr>) -> Result<Expr, OsmiaError> {
-		if args.len() != self.arity() {
-			return Err(self.argc_error(args.len()));
+		if let Some(arity) = self.arity() {
+			if args.len() != arity {
+				return Err(self.argc_error(args.len()));
+			}
 		}
 		match self {
 			Callable::Builtin(f) => f.call(ctx, args),
@@ -39,8 +49,10 @@ impl Callable {
 	}
 
 	pub fn call_stmt(&self, ctx: &mut Ctx, args: &Vec<Expr>) -> Result<Stmt, OsmiaError> {
-		if args.len() != self.arity() {
-			return Err(self.argc_error(args.len()));
+		if let Some(arity) = self.arity() {
+			if args.len() != arity {
+				return Err(self.argc_error(args.len()));
+			}
 		}
 		match self {
 			Callable::Builtin(f) => Ok(Stmt::Expr(f.call(ctx, args)?)),

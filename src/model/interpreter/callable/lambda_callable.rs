@@ -10,12 +10,12 @@ impl LambdaCallable {
 		Self { lambda }
 	}
 
-	pub fn arity(&self) -> usize {
-		self.lambda.params().len()
+	pub fn arity(&self) -> Option<usize> {
+		Some(self.lambda.params().len()) // TODO maybe return None
 	}
 
 	pub fn call(&self, ctx: &mut Ctx, args: CallableArgs) -> Result<Expr, OsmiaError> {
-		let arity = self.arity();
+		let arity = self.arity().unwrap_or(args.len());
 		let mut i = 0;
 		while i < arity {
 			ctx.set(

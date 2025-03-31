@@ -171,5 +171,69 @@ macro_tests!(
 		vec![
 			(Ctx::new(), Ok("function")),
 		]
+	),
+	(
+		switch,
+		r#"{{ value?switch(true, "foo") }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "value": true }"#).unwrap(), Ok("foo")),
+			(Ctx::try_from(r#"{ "value": false }"#).unwrap(), Ok("null")),
+		]
+	),
+	(
+		switch_none,
+		r#"{{ value?switch() }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "value": true }"#).unwrap(), Ok("null")),
+			(Ctx::try_from(r#"{ "value": false }"#).unwrap(), Ok("null")),
+		]
+	),
+	(
+		switch_default,
+		r#"{{ value?switch(true, "foo", 2) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "value": true }"#).unwrap(), Ok("foo")),
+			(Ctx::try_from(r#"{ "value": false }"#).unwrap(), Ok("2")),
+		]
+	),
+	(
+		switch_multiple,
+		r#"{{ value?switch(1, "foo", 1.2, "bar") }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "value": 1 }"#).unwrap(), Ok("foo")),
+			(Ctx::try_from(r#"{ "value": 1.2 }"#).unwrap(), Ok("bar")),
+			(Ctx::try_from(r#"{ "value": 2 }"#).unwrap(), Ok("null")),
+		]
+	),
+	(
+		switch_multiple_default,
+		r#"{{ value?switch(1, "foo", 1.2, "bar", 2) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "value": 1 }"#).unwrap(), Ok("foo")),
+			(Ctx::try_from(r#"{ "value": 1.2 }"#).unwrap(), Ok("bar")),
+			(Ctx::try_from(r#"{ "value": 2 }"#).unwrap(), Ok("2")),
+		]
+	),
+	(
+		switch_type,
+		r#"{{ value?type()?switch(
+			"bool", "boolean!",
+			"int", "int!",
+			"float", "float!",
+			"string", "string!",
+			"null", "null!",
+			"array", "array!",
+			"object", "object!"
+		) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "value": true }"#).unwrap(), Ok("boolean!")),
+			(Ctx::try_from(r#"{ "value": false }"#).unwrap(), Ok("boolean!")),
+			(Ctx::try_from(r#"{ "value": 0 }"#).unwrap(), Ok("int!")),
+			(Ctx::try_from(r#"{ "value": 0.0 }"#).unwrap(), Ok("float!")),
+			(Ctx::try_from(r#"{ "value": "foo" }"#).unwrap(), Ok("string!")),
+			(Ctx::try_from(r#"{ "value": null }"#).unwrap(), Ok("null!")),
+			(Ctx::try_from(r#"{ "value": [] }"#).unwrap(), Ok("array!")),
+			(Ctx::try_from(r#"{ "value": {} }"#).unwrap(), Ok("object!")),
+		]
 	)
 );

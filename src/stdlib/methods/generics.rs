@@ -46,6 +46,25 @@ const to_string: BuiltinArg = |_, args| {
 const r#type: BuiltinArg = |_, args| {
 	Ok(Expr::Str(args[0].r#type()))
 };
+
+const switch: BuiltinArg = |_, args| {
+	let obj = &args[0];
+	let argc = args.len() - 1;
+	let else_expr = match argc % 2 == 0 {
+		true => Expr::Null,
+		false => args[argc].clone(),
+	};
+	let mut i = 1;
+	while i < argc {
+		let value = &args[i];
+		if obj == value {
+			return Ok(args[i + 1].clone());
+		}
+		i += 2;
+	}
+	Ok(Expr::Str(else_expr.to_string()))
+};
+
 pub fn add_generics(module: Module) -> Module {
 	module
 	.add_value("len", Callable::new(1, len).into())
@@ -55,4 +74,5 @@ pub fn add_generics(module: Module) -> Module {
 	.add_value("to_int", Callable::new(1, to_int).into())
 	.add_value("to_string", Callable::new(1, to_string).into())
 	.add_value("type", Callable::new(1, r#type).into())
+	.add_value("switch", Callable::new_variable_args(switch).into())
 }

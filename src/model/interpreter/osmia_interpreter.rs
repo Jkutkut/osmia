@@ -340,7 +340,7 @@ impl OsmiaInterpreter<'_> {
 	}
 
 	fn setup_callable_args(&self, args: &Vec<Expr>, call: &Callable) -> Result<Vec<Expr>, OsmiaError> {
-		let call_arity = call.arity();
+		let call_arity = call.arity().unwrap_or(args.len());
 		let mut arguments: Vec<Expr> = Vec::with_capacity(call_arity);
 		match call {
 			Callable::Builtin(b) => match b.params() {

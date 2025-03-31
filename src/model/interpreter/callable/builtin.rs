@@ -4,21 +4,25 @@ pub type BuiltinArg = fn(ctx: &mut Ctx, args: CallableArgs) -> Result<Expr, Osmi
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Builtin {
-	arity: usize,
+	arity: Option<usize>,
 	call: BuiltinArg,
 	params: Option<Vec<FunctionParam>>,
 }
 
 impl Builtin {
 	pub fn new(arity: usize, call: BuiltinArg) -> Self {
-		Self { arity, call, params: None }
+		Self { arity: Some(arity), call, params: None }
+	}
+
+	pub fn new_variable_args(call: BuiltinArg) -> Self {
+		Self { arity: None, call, params: None }
 	}
 
 	pub fn with_params(arity: usize, call: BuiltinArg, params: Vec<FunctionParam>) -> Self {
-		Self { arity, call, params: Some(params) }
+		Self { arity: Some(arity), call, params: Some(params) }
 	}
 
-	pub fn arity(&self) -> usize {
+	pub fn arity(&self) -> Option<usize> {
 		self.arity
 	}
 
@@ -33,9 +37,6 @@ impl Builtin {
 
 impl std::fmt::Display for Builtin {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let args: String = (0..self.arity)
-			.map(|idx| format!("arg{idx}"))
-			.collect::<Vec<String>>().join(", ");
-		write!(f, "{{ fn ({args}) => ... }}")
+		write!(f, "{{ fn (...) => ... }}")
 	}
 }
