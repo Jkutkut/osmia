@@ -1,6 +1,6 @@
 use crate::macro_tests;
 use crate::types::{
-	Ctx,
+	Ctx, CtxRef,
 	OsmiaError,
 };
 use crate::model::{
@@ -13,12 +13,12 @@ use crate::model::{
 	},
 };
 
-fn get_expr(ctx: &mut Ctx, key: &str) -> Result<Expr, OsmiaError> {
-	Ok(ctx.get(&JsonTreeKey::from(key))?.try_into()?)
+fn get_expr(ctx: &CtxRef, key: &str) -> Result<Expr, OsmiaError> {
+	Ok(ctx.borrow().get(&JsonTreeKey::from(key))?.try_into()?)
 }
 
-fn get_ft(ctx: &mut Ctx, key: &str) -> Result<Callable, OsmiaError> {
-	match ctx.get(&JsonTreeKey::from(key)) {
+fn get_ft(ctx: &CtxRef, key: &str) -> Result<Callable, OsmiaError> {
+	match ctx.borrow().get(&JsonTreeKey::from(key)) {
 		Ok(JsonTree::Value(CtxValue::Callable(c))) => Ok(c.clone()),
 		Ok(_) => Err(format!("Not a callable")),
 		Err(e) => Err(e),
@@ -41,7 +41,8 @@ fn test_constant(
 	expected: Result<Expr, Vec<&str>>,
 ) {
 	let mut ctx = Ctx::new();
-	match (get_expr(&mut ctx, key), expected) {
+	let ctx = std::cell::RefCell::new(&mut ctx);
+	match (get_expr(&ctx, key), expected) {
 		(Ok(expr), Ok(expected)) => assert_eq!(expr, expected),
 		(Err(err), Err(error_pieces)) => check_pieces(&err, error_pieces),
 		(r, e) => panic!("Constant should return {:?} but returned {:?}", e, r),
@@ -54,14 +55,15 @@ fn test_callable(
 	expected: Result<Expr, Vec<&str>>,
 ) {
 	let mut ctx = Ctx::new();
-	let ft: Callable = match get_ft(&mut ctx, ft) {
+	let ctx = std::cell::RefCell::new(&mut ctx);
+	let ft: Callable = match get_ft(&ctx, ft) {
 		Ok(f) => f,
 		Err(err) => match expected {
 			Ok(expr) => panic!("Callable should return {:?} but returned {:?}", expr, err),
 			Err(error_pieces) => return check_pieces(&err, error_pieces),
 		},
 	};
-	match (ft.call(&mut ctx, &args), expected) {
+	match (ft.call(&ctx, &args), expected) {
 		(Ok(expr), Ok(expected)) => assert_eq!(expr, expected),
 		(Err(err), Err(error_pieces)) => check_pieces(&err, error_pieces),
 		(r, e) => panic!("Callable should return {:?} but returned {:?}", e, r),

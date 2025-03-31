@@ -14,11 +14,11 @@ impl FunctionCallable {
 		Some(self.ft.params().len()) // TODO maybe return None
 	}
 
-	pub fn call(&self, ctx: &mut Ctx, args: CallableArgs) -> Result<Stmt, OsmiaError> {
+	pub fn call(&self, ctx: &CtxRef, args: CallableArgs) -> Result<Stmt, OsmiaError> {
 		let arity = self.arity().unwrap_or(args.len());
 		let mut i = 0;
 		while i < arity {
-			ctx.set(
+			ctx.borrow_mut().set(
 				&vec![self.ft.params()[i].name().clone()],
 				(&args[i]).try_into()?,
 			)?;

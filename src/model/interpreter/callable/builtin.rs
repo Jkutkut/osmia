@@ -1,6 +1,6 @@
 use super::*;
 
-pub type BuiltinArg = fn(ctx: &mut Ctx, args: CallableArgs) -> Result<Expr, OsmiaError>;
+pub type BuiltinArg = fn(ctx: &CtxRef, args: CallableArgs) -> Result<Expr, OsmiaError>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Builtin {
@@ -26,7 +26,7 @@ impl Builtin {
 		self.arity
 	}
 
-	pub fn call(&self, ctx: &mut Ctx, args: CallableArgs) -> Result<Expr, OsmiaError> {
+	pub fn call(&self, ctx: &CtxRef, args: CallableArgs) -> Result<Expr, OsmiaError> {
 		(self.call)(ctx, args)
 	}
 

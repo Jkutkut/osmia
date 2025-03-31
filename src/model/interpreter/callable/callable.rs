@@ -35,7 +35,7 @@ impl Callable {
 		);
 	}
 
-	pub fn call(&self, ctx: &mut Ctx, args: &Vec<Expr>) -> Result<Expr, OsmiaError> {
+	pub fn call(&self, ctx: &CtxRef, args: &Vec<Expr>) -> Result<Expr, OsmiaError> {
 		if let Some(arity) = self.arity() {
 			if args.len() != arity {
 				return Err(self.argc_error(args.len()));
@@ -48,7 +48,7 @@ impl Callable {
 		}
 	}
 
-	pub fn call_stmt(&self, ctx: &mut Ctx, args: &Vec<Expr>) -> Result<Stmt, OsmiaError> {
+	pub fn call_stmt(&self, ctx: &CtxRef, args: &Vec<Expr>) -> Result<Stmt, OsmiaError> {
 		if let Some(arity) = self.arity() {
 			if args.len() != arity {
 				return Err(self.argc_error(args.len()));

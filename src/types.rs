@@ -1,5 +1,6 @@
 use crate::model::lexer::Token;
 use crate::model::stmt::Stmt;
+use std::cell::RefCell;
 
 /// The type of the lexer's output.
 pub type LexerCode = Vec<Token>;
@@ -78,3 +79,4 @@ pub type OsmiaOutput = String;
 pub type OsmiaError = String;
 
 pub use crate::ctx::Ctx;
+pub type CtxRef<'a> = RefCell<&'a mut Ctx>;

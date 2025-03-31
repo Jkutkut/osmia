@@ -7,11 +7,13 @@ macro_tests!(
 		r#"{{ a?sort() }}"#,
 		vec![
 			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b"] }"#).unwrap(), Ok(r#"["a", "b"]"#)),
 			(Ctx::try_from(r#"{ "a": ["b", "a"]}"#).unwrap(), Ok(r#"["a", "b"]"#)),
 			(Ctx::try_from(r#"{ "a": [3, 2, 1] }"#).unwrap(), Ok(r#"[1, 2, 3]"#)),
 			(Ctx::try_from(r#"{ "a": [1, 2, 3] }"#).unwrap(), Ok(r#"[1, 2, 3]"#)),
 			(Ctx::try_from(r#"{ "a": [1, 3, 2] }"#).unwrap(), Ok(r#"[1, 2, 3]"#)),
-			// TODO
+			(Ctx::try_from(r#"{ "a": [true, false, null, 2, 2.3, "str"] }"#).unwrap(), Ok(r#"[false, true, null, 2, 2.3, "str"]"#)),
+			(Ctx::try_from(r#"{ "a": ["a", true, false, null, 2, 2.3, "str"] }"#).unwrap(), Ok(r#"[false, "a", true, null, 2, 2.3, "str"]"#)),
 		]
-	)
+	),
 );

@@ -14,11 +14,11 @@ impl LambdaCallable {
 		Some(self.lambda.params().len()) // TODO maybe return None
 	}
 
-	pub fn call(&self, ctx: &mut Ctx, args: CallableArgs) -> Result<Expr, OsmiaError> {
+	pub fn call(&self, ctx: &CtxRef, args: CallableArgs) -> Result<Expr, OsmiaError> {
 		let arity = self.arity().unwrap_or(args.len());
 		let mut i = 0;
 		while i < arity {
-			ctx.set(
+			ctx.borrow_mut().set(
 				&vec![self.lambda.params()[i].name().clone()],
 				(&args[i]).try_into()?,
 			)?;
