@@ -4,4 +4,4 @@ pub mod lexer;
 pub mod parser;
 pub mod stmt;
 pub mod expr;
-mod visitor_pattern;
+pub mod visitor_pattern;

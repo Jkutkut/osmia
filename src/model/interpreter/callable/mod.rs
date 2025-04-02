@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
+use crate::OsmiaInterpreter;
 use crate::types::{
-	CtxRef,
 	OsmiaError,
 };
 use crate::model::{

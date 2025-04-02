@@ -5,6 +5,7 @@ use crate::model::expr::{
 	Array,
 	Object
 };
+use crate::model::visitor_pattern::Visitor;
 
 #[allow(non_upper_case_globals)]
 mod generics;
@@ -58,6 +59,13 @@ mod utils {
 		match expr {
 			Expr::Object(o) => Ok(o),
 			_ => Err(format!("{} is not an object", expr)),
+		}
+	}
+
+	pub fn callable_or_fail(expr: &Expr) -> Result<&Callable, OsmiaError> {
+		match expr {
+			Expr::Callable(c) => Ok(c),
+			_ => Err(format!("{} is not callable", expr)),
 		}
 	}
 }

@@ -35,29 +35,29 @@ impl Callable {
 		);
 	}
 
-	pub fn call(&self, ctx: &CtxRef, args: &Vec<Expr>) -> Result<Expr, OsmiaError> {
+	pub fn call(&self, intpr: &OsmiaInterpreter<'_>, args: &Vec<Expr>) -> Result<Expr, OsmiaError> {
 		if let Some(arity) = self.arity() {
 			if args.len() != arity {
 				return Err(self.argc_error(args.len()));
 			}
 		}
 		match self {
-			Callable::Builtin(f) => f.call(ctx, args),
-			Callable::Lambda(l) => l.call(ctx, args),
+			Callable::Builtin(f) => f.call(intpr, args),
+			Callable::Lambda(l) => l.call(intpr, args),
 			Callable::Function(_) => unreachable!("Function should be called with the call_stmt method"),
 		}
 	}
 
-	pub fn call_stmt(&self, ctx: &CtxRef, args: &Vec<Expr>) -> Result<Stmt, OsmiaError> {
+	pub fn call_stmt(&self, intpr: &OsmiaInterpreter<'_>, args: &Vec<Expr>) -> Result<Stmt, OsmiaError> {
 		if let Some(arity) = self.arity() {
 			if args.len() != arity {
 				return Err(self.argc_error(args.len()));
 			}
 		}
 		match self {
-			Callable::Builtin(f) => Ok(Stmt::Expr(f.call(ctx, args)?)),
-			Callable::Lambda(l) => Ok(Stmt::Expr(l.call(ctx, args)?)),
-			Callable::Function(f) => f.call(ctx, args),
+			Callable::Builtin(f) => Ok(Stmt::Expr(f.call(intpr, args)?)),
+			Callable::Lambda(l) => Ok(Stmt::Expr(l.call(intpr, args)?)),
+			Callable::Function(f) => f.call(intpr, args),
 		}
 	}
 }

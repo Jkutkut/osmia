@@ -26,12 +26,16 @@ impl Array {
 	}
 
 	pub fn sort(&self) -> Result<Self, OsmiaError> {
-		let mut sorted = self.arr.clone();
-		sorted.sort_by(|a, b| match a.partial_cmp(b) {
+		Ok(self.sort_by(|a, b| match a.partial_cmp(b) {
 			Some(o) => o,
 			None => Ordering::Equal
-		});
-		Ok(Self::new(sorted))
+		}))
+	}
+
+	pub fn sort_by(&self, func: impl Fn(&Expr, &Expr) -> Ordering) -> Self {
+		let mut sorted = self.arr.clone();
+		sorted.sort_by(func);
+		Self::new(sorted)
 	}
 }
 

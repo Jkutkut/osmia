@@ -19,7 +19,7 @@ use crate::ctx::{
 };
 
 pub struct OsmiaInterpreter<'ctx> {
-	ctx: CtxRef<'ctx>,
+	pub ctx: CtxRef<'ctx>,
 }
 
 
@@ -316,10 +316,10 @@ impl OsmiaInterpreter<'_> {
 	fn make_call(&self, call: &Callable, args: &Vec<Expr>) -> ExprResult {
 		let args = self.setup_callable_args(args, call)?;
 		let expr: Expr = match call {
-			Callable::Builtin(_) | Callable::Lambda(_) => call.call(&self.ctx, &args)?,
+			Callable::Builtin(_) | Callable::Lambda(_) => call.call(self, &args)?,
 			Callable::Function(_) => {
 				self.ctx.borrow_mut().begin_scope();
-				let ft_body = call.call_stmt(&self.ctx, &args)?;
+				let ft_body = call.call_stmt(self, &args)?;
 				let (status, r) = self.visit_stmt(&ft_body)?;
 				let result = match status {
 					ExitStatus::Continue | ExitStatus::Break => return Err(format!(
