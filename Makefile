@@ -70,8 +70,14 @@ stop:
 clean:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust clean
 
-prepare_commit:
+# ****** Git ******
+
+prepare_commit: hooks
 	${EDITOR} Cargo.toml
 	make test
 	git add Cargo.toml Cargo.lock; git add -N .;
 	git add -p
+
+hooks:
+	git config core.hooksPath .githooks
+	# git config --unset core.hooksPath
