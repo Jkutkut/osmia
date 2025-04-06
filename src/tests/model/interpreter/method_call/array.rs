@@ -125,5 +125,22 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "arr": ["a", "b", "c"] }"#).unwrap(), Ok(r#"abc"#)),
 		]
 	),
-
+	(
+		for_each_index01,
+		r#"{{fn add_even; e, idx}}{{if idx % 2 == 0}}{{s = s + e}}{{fi}}{{done}}{{s = ""}}{{arr?for_each_index(fn (e, idx) => add_even(e, idx)) }}{{s}}"#,
+		vec![
+			(Ctx::try_from(r#"{ "arr": [] }"#).unwrap(), Ok(r#""#)),
+			(Ctx::try_from(r#"{ "arr": ["a", "b", "c"] }"#).unwrap(), Ok(r#"ac"#)),
+		]
+	),
+	(
+		reverse,
+		r#"{{ a?reverse() }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": ["a"] }"#).unwrap(), Ok(r#"["a"]"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b"] }"#).unwrap(), Ok(r#"["b", "a"]"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b", "c"] }"#).unwrap(), Ok(r#"["c", "b", "a"]"#)),
+		]
+	)
 );

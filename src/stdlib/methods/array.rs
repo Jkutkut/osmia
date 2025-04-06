@@ -63,4 +63,27 @@ pub fn module() -> Module {
 			Ok(Expr::new_str("").into())
 		}
 	).into())
+	.add_value("for_each_index", Callable::new(2,
+		|intpr, args| {
+			let arr = arr_or_fail(&args[0])?;
+			let func = callable_or_fail(&args[1])?;
+			if func.arity() != Some(2) {
+				return Err("for_each_index function must accept exactly 2 arguments".into());
+			}
+			arr.iter().enumerate()
+				.map(|(i, e)| {
+					intpr.visit_expr(
+						&func.call(intpr, &vec![e.clone(), Expr::Int(i as i64)])?
+					)
+				})
+				.collect::<Result<Vec<Expr>, OsmiaError>>()?;
+			Ok(Expr::new_str("").into())
+		}
+	).into())
+	.add_value("reverse", Callable::new(1,
+		|_, args| {
+			let arr = arr_or_fail(&args[0])?;
+			Ok(Array::new(arr.iter().rev().cloned().collect()).into())
+		}
+	).into())
 }
