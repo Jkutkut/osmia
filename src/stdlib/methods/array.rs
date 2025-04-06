@@ -46,4 +46,21 @@ pub fn module() -> Module {
 			Ok(Array::new(result).into())
 		}
 	).into())
+	.add_value("for_each", Callable::new(2,
+		|intpr, args| {
+			let arr = arr_or_fail(&args[0])?;
+			let func = callable_or_fail(&args[1])?;
+			if func.arity() != Some(1) {
+				return Err("for_each function must accept exactly 1 argument".into());
+			}
+			arr.iter()
+				.map(|e| {
+					intpr.visit_expr(
+						&func.call(intpr, &vec![e.clone().into()])?
+					)
+				})
+				.collect::<Result<Vec<Expr>, OsmiaError>>()?;
+			Ok(Expr::new_str("").into())
+		}
+	).into())
 }

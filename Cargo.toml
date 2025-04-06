@@ -1,6 +1,6 @@
 [package]
 name = "osmia"
-version = "2.5.66"
+version = "2.5.67"
 edition = "2021"
 authors = ["Jkutkut"]
 

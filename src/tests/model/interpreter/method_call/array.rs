@@ -116,5 +116,14 @@ macro_tests!(
 		vec![
 			(Ctx::try_from(r#"{ "a": [null, false, true, "", "hola", 0, 1, 2] }"#).unwrap(), Ok(r#"[false, true, true, false, true, true, true, true]"#)),
 		]
-	)
+	),
+	(
+		for_each01,
+		r#"{{fn increment; e}}{{s = s + e}}{{done}}{{s = ""}}{{arr?for_each(fn (e) => increment(e)) }}{{s}}"#,
+		vec![
+			(Ctx::try_from(r#"{ "arr": [] }"#).unwrap(), Ok(r#""#)),
+			(Ctx::try_from(r#"{ "arr": ["a", "b", "c"] }"#).unwrap(), Ok(r#"abc"#)),
+		]
+	),
+
 );
