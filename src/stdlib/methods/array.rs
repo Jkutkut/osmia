@@ -102,4 +102,20 @@ pub fn module() -> Module {
 			Ok(Array::new(result).into())
 		}
 	).into())
+	.add_value("filter_index", Callable::new(2,
+		|intpr, args| {
+			let arr = arr_or_fail(&args[0])?;
+			let func = callable_or_fail(&args[1])?;
+			if func.arity() != Some(2) {
+				return Err("filter_index function must accept exactly 2 arguments".into());
+			}
+			let mut result = Vec::with_capacity(arr.len());
+			for (i, e) in arr.iter().enumerate() {
+				if intpr.visit_expr(&func.call(intpr, &vec![e.clone(), Expr::Int(i as i64)])?)?.to_bool() {
+					result.push(e.clone());
+				}
+			}
+			Ok(Array::new(result).into())
+		}
+	).into())
 }
