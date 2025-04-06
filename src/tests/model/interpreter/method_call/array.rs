@@ -92,4 +92,29 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "a": ["hey", "call", "foo"] }"#).unwrap(), Ok(r#"["hey", "foo", "call"]"#)),
 		]
 	),
+	(
+		map01,
+		r#"{{ a?map(fn (a) => a?upper()) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": ["foo"] }"#).unwrap(), Ok(r#"["FOO"]"#)),
+			(Ctx::try_from(r#"{ "a": ["foo", "bar"] }"#).unwrap(), Ok(r#"["FOO", "BAR"]"#)),
+		]
+	),
+	(
+		map02,
+		r#"{{ a?map(fn (a) => a * 2) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": [1] }"#).unwrap(), Ok(r#"[2]"#)),
+			(Ctx::try_from(r#"{ "a": [1.2, 6] }"#).unwrap(), Ok(r#"[2.4, 12]"#)),
+		]
+	),
+	(
+		map03,
+		r#"{{ a?map(fn (a) => a?has_content()) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [null, false, true, "", "hola", 0, 1, 2] }"#).unwrap(), Ok(r#"[false, true, true, false, true, true, true, true]"#)),
+		]
+	)
 );

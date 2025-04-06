@@ -31,4 +31,19 @@ pub fn module() -> Module {
 			Ok(sorted.into())
 		}
 	).into())
+	.add_value("map", Callable::new(2,
+		|intpr, args| {
+			let arr = arr_or_fail(&args[0])?;
+			let func = callable_or_fail(&args[1])?;
+			if func.arity() != Some(1) {
+				return Err("map function must accept exactly 1 argument".into());
+			}
+			let result = arr.iter()
+				.map(|e| Ok(intpr.visit_expr(
+					&func.call(intpr, &vec![e.clone().into()])?
+				)?))
+				.collect::<Result<Vec<Expr>, OsmiaError>>()?;
+			Ok(Array::new(result).into())
+		}
+	).into())
 }
