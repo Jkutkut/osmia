@@ -56,25 +56,38 @@ impl Ctx {
 		}
 	}
 
+	pub fn set_in_current_scope<'a>(
+		&mut self,
+		key: &Vec<JsonTreeKey<String>>,
+		value: JsonTree<String, CtxValue>
+	) -> Result<(), OsmiaError> {
+		let current_scope = self.ctx.back_mut().unwrap_or_else(|| unreachable!());
+		match current_scope.set(&mut key.iter(), value) {
+			Ok(_) => Ok(()),
+			Err(e) => match e {
+				JsonTreeError::KeyNotFound(_) => Err(e.format_set_error()),
+				e => Err(e.format_set_error()),
+			}
+		}
+	}
+
 	pub fn set<'a>(
 		&mut self,
 		key: &Vec<JsonTreeKey<String>>,
 		value: JsonTree<String, CtxValue>
 	) -> Result<(), OsmiaError> {
-		let mut error: Option<JsonTreeError<JsonTreeKey<String>>> = None;
+		let root_variable: Vec<JsonTreeKey<String>> = vec![key.get(0).unwrap_or(&JsonTreeKey::Key("".into())).clone()];
 		for scope in self.ctx.iter_mut().rev() {
-			error = match scope.set(&mut key.iter(), value.clone()) {
-				Ok(_) => return Ok(()),
+			let get_result = scope.get(&mut root_variable.iter());
+			match get_result {
+				Ok(_) => return scope.set(&mut key.iter(), value).map_err(|e| e.format_set_error()),
 				Err(e) => match e {
-					JsonTreeError::KeyNotFound(_) => Some(e),
+					JsonTreeError::KeyNotFound(_) => (),
 					e => return Err(e.format_set_error()),
 				}
-			};
+			}
 		}
-		match error {
-			Some(e) => Err(e.format_set_error()),
-			None => unreachable!(),
-		}
+		self.set_in_current_scope(key, value)
 	}
 }
 
