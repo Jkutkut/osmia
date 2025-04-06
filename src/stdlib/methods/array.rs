@@ -86,4 +86,20 @@ pub fn module() -> Module {
 			Ok(Array::new(arr.iter().rev().cloned().collect()).into())
 		}
 	).into())
+	.add_value("filter", Callable::new(2,
+		|intpr, args| {
+			let arr = arr_or_fail(&args[0])?;
+			let func = callable_or_fail(&args[1])?;
+			if func.arity() != Some(1) {
+				return Err("filter function must accept exactly 1 argument".into());
+			}
+			let mut result = Vec::with_capacity(arr.len());
+			for e in arr.iter() {
+				if intpr.visit_expr(&func.call(intpr, &vec![e.clone().into()])?)?.to_bool() {
+					result.push(e.clone());
+				}
+			}
+			Ok(Array::new(result).into())
+		}
+	).into())
 }

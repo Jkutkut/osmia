@@ -142,5 +142,31 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "a": ["a", "b"] }"#).unwrap(), Ok(r#"["b", "a"]"#)),
 			(Ctx::try_from(r#"{ "a": ["a", "b", "c"] }"#).unwrap(), Ok(r#"["c", "b", "a"]"#)),
 		]
+	),
+	(
+		filter01,
+		r#"{{ a?filter(fn (a) => a?has_content()) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": [null, false, true, "", "hola", 0, 1, 2] }"#).unwrap(), Ok(r#"[false, true, "hola", 0, 1, 2]"#)),
+		]
+	),
+	(
+		filter_02,
+		r#"{{ a?filter(fn (a) => a?to_bool()) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": [null, false, true, "", "hola", 0, 1, 2] }"#).unwrap(), Ok(r#"[true, "hola", 1, 2]"#)),
+		]
+	),
+	(
+		filter_03,
+		r#"{{ a?filter(fn (a) => b) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [], "b": false }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": [], "b": true}"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": [null, false, true, "", "hola", 0, 1, 2], "b": false }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": [null, false, true, "", "hola", 0, 1, 2], "b": true }"#).unwrap(), Ok(r#"[null, false, true, "", "hola", 0, 1, 2]"#)),
+		]
 	)
 );
