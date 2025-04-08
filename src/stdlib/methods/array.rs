@@ -137,4 +137,15 @@ pub fn module() -> Module {
 			Ok(result)
 		}
 	).into())
+	.add_value("join", Callable::new(2,
+		|_, args| {
+			let arr = arr_or_fail(&args[0])?;
+			let sep = string_or_fail(&args[1])?;
+			Ok(Expr::new_str(&arr.iter()
+				.map(std::string::ToString::to_string)
+				.collect::<Vec<_>>()
+				.join(&sep)
+			).into())
+		}
+	).into())
 }
