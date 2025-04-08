@@ -30,5 +30,17 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "o": {"foo": 1}}"#).unwrap(), Ok(r#"[{"key": "foo", "value": 1}]"#)),
 			(Ctx::try_from(r#"{ "o": {"foo": 1, "bar": 2}}"#).unwrap(), Ok(r#"[{"key": "bar", "value": 2}, {"key": "foo", "value": 1}]"#)),
 		]
+	),
+	(
+		get,
+		r#"{{ o?get(k, "?") }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "o": {}, "k": "foo"}"#).unwrap(), Ok(r#"?"#)),
+			(Ctx::try_from(r#"{ "o": {"foo": 1}, "k": "foo"}"#).unwrap(), Ok(r#"1"#)),
+			(Ctx::try_from(r#"{ "o": {"foo": 1, "bar": 2}, "k": "foo"}"#).unwrap(), Ok(r#"1"#)),
+			(Ctx::try_from(r#"{ "o": {"foo": 1, "bar": 2}, "k": "baz"}"#).unwrap(), Ok(r#"?"#)),
+			(Ctx::try_from(r#"{ "o": {"foo": 1, "bar": 2}, "k": 1}"#).unwrap(), Err(vec!["Invalid", "key"])),
+			(Ctx::try_from(r#"{ "o": {"foo": 1, "bar": 2}, "k": null}"#).unwrap(), Err(vec!["Invalid", "key"])),
+		]
 	)
 );

@@ -256,5 +256,20 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "a": [true, false, []] }"#).unwrap(), Ok(r#"[0:true,1:false,2:[]]"#)),
 			(Ctx::try_from(r#"{ "a": ["a", "b", "c"] }"#).unwrap(), Ok(r#"[0:a,1:b,2:c]"#)),
 		]
+	),
+	(
+		get,
+		r#"{{ a?get(k, d) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [], "k": 0, "d": "?" }"#).unwrap(), Ok(r#"?"#)),
+			(Ctx::try_from(r#"{ "a": ["a"], "k": 0, "d": "?" }"#).unwrap(), Ok(r#"a"#)),
+			(Ctx::try_from(r#"{ "a": ["a"], "k": 1, "d": "?" }"#).unwrap(), Ok(r#"?"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b"], "k": 0, "d": "?" }"#).unwrap(), Ok(r#"a"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b"], "k": 1, "d": "?" }"#).unwrap(), Ok(r#"b"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b"], "k": 2, "d": "?" }"#).unwrap(), Ok(r#"?"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b"], "k": -1, "d": "?" }"#).unwrap(), Err(vec!["Invalid", "index"])),
+			(Ctx::try_from(r#"{ "a": ["a", "b"], "k": "0", "d": "?" }"#).unwrap(), Err(vec!["Invalid", "index"])),
+			(Ctx::try_from(r#"{ "a": ["a", "b"], "k": true, "d": "?" }"#).unwrap(), Err(vec!["Invalid", "index"])),
+		]
 	)
 );

@@ -99,6 +99,25 @@ const entries: BuiltinArg = |_, args| {
 	}))
 };
 
+const get: BuiltinArg = |_, args| {
+	let e = &args[0];
+	let k = &args[1];
+	let default = &args[2];
+	match (e, k) {
+		(Expr::Object(obj), Expr::Str(key)) => match obj.get(key) {
+			Some(v) => Ok(v.clone()),
+			None => Ok(default.clone()),
+		},
+		(Expr::Object(_), _) => Err("Invalid key".into()),
+		(Expr::Array(arr), Expr::Int(key)) if *key >= 0 => match arr.get(*key as usize) {
+			Some(v) => Ok(v.clone()),
+			None => Ok(default.clone()),
+		},
+		(Expr::Array(_), _) => Err("Invalid index".into()),
+		_ => Err("Cannot use get method on this".into()),
+	}
+};
+
 pub fn add_generics(module: Module) -> Module {
 	module
 	.add_value("len", Callable::new(1, len).into())
@@ -112,4 +131,5 @@ pub fn add_generics(module: Module) -> Module {
 	.add_value("keys", Callable::new_variable_args(keys).into())
 	.add_value("values", Callable::new_variable_args(values).into())
 	.add_value("entries", Callable::new_variable_args(entries).into())
+	.add_value("get", Callable::new_variable_args(get).into())
 }

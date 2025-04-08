@@ -25,6 +25,10 @@ impl Array {
 		self.arr.iter()
 	}
 
+	pub fn get(&self, i: usize) -> Option<&Expr> {
+		self.arr.get(i)
+	}
+
 	pub fn entries(&self) -> Vec<(Expr, Expr)> {
 		self.arr.iter().enumerate()
 			.map(|(i, e)| (Expr::Int(i as i64), e.clone()))
@@ -110,6 +114,13 @@ impl Object {
 		}
 	}
 
+	pub fn get(&self, key: &str) -> Option<&Expr> {
+		match self {
+			Object::Code(c) => c.get(key),
+			Object::Hash(h) => h.get(key),
+		}
+	}
+
 	pub fn entries(&self) -> Vec<(Expr, Expr)> {
 		match self {
 			Object::Code(c) => c.entries(),
@@ -172,6 +183,16 @@ impl CodeObject {
 
 	pub fn contains_key(&self, key: &Expr) -> bool {
 		self.obj.iter().any(|(k, _)| k == key)
+	}
+
+	pub fn get(&self, key: &str) -> Option<&Expr> {
+		let key = Expr::new_str(key);
+		for (k, v) in &self.obj {
+			if &key == k {
+				return Some(v);
+			}
+		}
+		None
 	}
 
 	pub fn len(&self) -> usize {
@@ -239,6 +260,10 @@ impl HashObject {
 
 	pub fn len(&self) -> usize {
 		self.obj.len()
+	}
+
+	pub fn get(&self, key: &str) -> Option<&Expr> {
+		self.obj.get(key)
 	}
 
 	pub fn entries(&self) -> Vec<(Expr, Expr)> {
