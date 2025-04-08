@@ -228,5 +228,33 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "a": ["a", "b", "c"], "j": ", " }"#).unwrap(), Ok(r#"a, b, c"#)),
 			(Ctx::try_from(r#"{ "a": [null, true, false, []], "j": ", " }"#).unwrap(), Ok(r#"null, true, false, []"#)),
 		]
+	),
+	(
+		keys,
+		r#"{{ a?keys() }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b", "c"] }"#).unwrap(), Ok(r#"[0, 1, 2]"#)),
+			(Ctx::try_from(r#"{ "a": [null, true, false, []] }"#).unwrap(), Ok(r#"[0, 1, 2, 3]"#)),
+		]
+	),
+	(
+		values,
+		r#"{{ a?values() }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b", "c"] }"#).unwrap(), Ok(r#"["a", "b", "c"]"#)),
+			(Ctx::try_from(r#"{ "a": [null, true, false, []] }"#).unwrap(), Ok(r#"[null, true, false, []]"#)),
+		]
+	),
+	(
+		entries,
+		r#"[{{ a?entries()?map(fn (e) => e.key + ":" + e.value)?join(",") }}]"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
+			(Ctx::try_from(r#"{ "a": [null] }"#).unwrap(), Ok(r#"[0:null]"#)),
+			(Ctx::try_from(r#"{ "a": [true, false, []] }"#).unwrap(), Ok(r#"[0:true,1:false,2:[]]"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b", "c"] }"#).unwrap(), Ok(r#"[0:a,1:b,2:c]"#)),
+		]
 	)
 );

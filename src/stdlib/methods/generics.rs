@@ -65,6 +65,40 @@ const switch: BuiltinArg = |_, args| {
 	Ok(Expr::Str(else_expr.to_string()))
 };
 
+const keys: BuiltinArg = |_, args| {
+	Ok(Expr::Array(match &args[0] {
+		Expr::Object(obj) => obj.keys().into(),
+		Expr::Array(arr) => (0..arr.len()).map(|i| Expr::Int(i as i64)).collect::<Vec<Expr>>().into(),
+		_ => return Err("Cannot get keys for this".into())
+	}))
+};
+
+const values: BuiltinArg = |_, args| {
+	Ok(Expr::Array(match &args[0] {
+		Expr::Object(obj) => obj.values().into(),
+		Expr::Array(arr) => arr.clone(),
+		_ => return Err("Cannot get keys for this".into()),
+	}))
+};
+
+const entries: BuiltinArg = |_, args| {
+	Ok(Expr::Array(match &args[0] {
+		Expr::Object(obj) => obj.entries().iter().map(|(k, v)| {
+			Expr::Object(Object::new(vec![
+				(Expr::new_str("key"), k.clone()),
+				(Expr::new_str("value"), v.clone()),
+			]))
+		}).collect::<Vec<Expr>>().into(),
+		Expr::Array(arr) => arr.entries().iter().map(|(k, v)| {
+			Expr::Object(Object::new(vec![
+				(Expr::new_str("key"), k.clone()),
+				(Expr::new_str("value"), v.clone())
+			]))
+		}).collect::<Vec<Expr>>().into(),
+		_ => return Err("Cannot get keys for this".into()),
+	}))
+};
+
 pub fn add_generics(module: Module) -> Module {
 	module
 	.add_value("len", Callable::new(1, len).into())
@@ -75,4 +109,7 @@ pub fn add_generics(module: Module) -> Module {
 	.add_value("to_string", Callable::new(1, to_string).into())
 	.add_value("type", Callable::new(1, r#type).into())
 	.add_value("switch", Callable::new_variable_args(switch).into())
+	.add_value("keys", Callable::new_variable_args(keys).into())
+	.add_value("values", Callable::new_variable_args(values).into())
+	.add_value("entries", Callable::new_variable_args(entries).into())
 }

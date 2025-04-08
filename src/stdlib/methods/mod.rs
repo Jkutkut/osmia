@@ -20,6 +20,7 @@ mod callable;
 mod lambda;
 
 // TODO refactor
+#[allow(dead_code)]
 mod utils {
 	use super::*;
 

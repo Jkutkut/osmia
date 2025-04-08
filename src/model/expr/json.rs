@@ -25,6 +25,12 @@ impl Array {
 		self.arr.iter()
 	}
 
+	pub fn entries(&self) -> Vec<(Expr, Expr)> {
+		self.arr.iter().enumerate()
+			.map(|(i, e)| (Expr::Int(i as i64), e.clone()))
+			.collect()
+	}
+
 	pub fn sort(&self) -> Result<Self, OsmiaError> {
 		Ok(self.sort_by(|a, b| match a.partial_cmp(b) {
 			Some(o) => o,
