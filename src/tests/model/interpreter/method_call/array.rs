@@ -194,5 +194,26 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Ok(r#"[]"#)),
 			(Ctx::try_from(r#"{ "a": ["a", "b", "c"] }"#).unwrap(), Ok(r#"["a", "b", "c"]"#)),
 		]
+	),
+	(
+		reduce01,
+		r#"{{ a?reduce(fn (a, b) => a + b, 0) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Err(vec!["Reduce", "empty", "array"])),
+			(Ctx::try_from(r#"{ "a": [3] }"#).unwrap(), Ok(r#"3"#)),
+			(Ctx::try_from(r#"{ "a": [1, 2] }"#).unwrap(), Ok(r#"3"#)),
+			(Ctx::try_from(r#"{ "a": [1, 2, 3] }"#).unwrap(), Ok(r#"6"#)),
+			(Ctx::try_from(r#"{ "a": [1, 2, 3, 4] }"#).unwrap(), Ok(r#"10"#)),
+		]
+	),
+	(
+		reduce02,
+		r#"{{ a?reduce(fn (a, b) => false, null) }}"#,
+		vec![
+			(Ctx::try_from(r#"{ "a": [] }"#).unwrap(), Err(vec!["Reduce", "empty", "array"])),
+			(Ctx::try_from(r#"{ "a": ["a"] }"#).unwrap(), Ok(r#"false"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b"] }"#).unwrap(), Ok(r#"false"#)),
+			(Ctx::try_from(r#"{ "a": ["a", "b", "c"] }"#).unwrap(), Ok(r#"false"#)),
+		]
 	)
 );

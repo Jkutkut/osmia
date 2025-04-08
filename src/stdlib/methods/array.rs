@@ -118,4 +118,23 @@ pub fn module() -> Module {
 			Ok(Array::new(result).into())
 		}
 	).into())
+	.add_value("reduce", Callable::new(3,
+		|intpr, args| {
+			let arr = arr_or_fail(&args[0])?;
+			let func = callable_or_fail(&args[1])?;
+			if func.arity() != Some(2) {
+				return Err("reduce function must accept exactly 2 arguments".into());
+			}
+			if arr.len() == 0 {
+				return Err("Reduce of empty array with no initial value".into());
+			}
+			let mut result = args[2].clone();
+			for e in arr.iter() {
+				result = intpr.visit_expr(
+					&func.call(intpr, &vec![result, e.clone()])?
+				)?;
+			}
+			Ok(result)
+		}
+	).into())
 }
