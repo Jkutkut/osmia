@@ -8,7 +8,6 @@ pub enum JsonTreeKey<K: Clone + Display> {
 
 impl JsonTreeKey<String> {
 	pub fn from(k: &str) -> Vec<Self> {
-		// TODO do properly
 		k.split(".").map(|s| JsonTreeKey::Key(s.into())).collect()
 	}
 }

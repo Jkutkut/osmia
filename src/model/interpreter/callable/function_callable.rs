@@ -11,7 +11,7 @@ impl FunctionCallable {
 	}
 
 	pub fn arity(&self) -> Option<usize> {
-		Some(self.ft.params().len()) // TODO maybe return None
+		Some(self.ft.params().len())
 	}
 
 	pub fn call(&self, intpr: &OsmiaInterpreter<'_>, args: CallableArgs) -> Result<Stmt, OsmiaError> {

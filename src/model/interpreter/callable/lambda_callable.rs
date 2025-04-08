@@ -11,7 +11,7 @@ impl LambdaCallable {
 	}
 
 	pub fn arity(&self) -> Option<usize> {
-		Some(self.lambda.params().len()) // TODO maybe return None
+		Some(self.lambda.params().len())
 	}
 
 	pub fn call(&self, intpr: &OsmiaInterpreter<'_>, args: CallableArgs) -> Result<Expr, OsmiaError> {
