@@ -60,6 +60,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 		match stmt {
 			Stmt::Raw(s) => Ok((ExitStatus::Okay, OsmiaResult::OsmiaOutput(s.into()))),
 			Stmt::Block(b) => self.visit_block(b),
+			Stmt::NewLine => Ok((ExitStatus::Okay, OsmiaResult::OsmiaOutput("\n".into()))),
 			Stmt::Expr(e) => Ok((ExitStatus::Okay, OsmiaResult::Expr(e.accept(self)?))),
 			Stmt::Comment(_) => Ok((ExitStatus::Okay, OsmiaResult::None)),
 			Stmt::Assign(a) => self.visit_assign(a),

@@ -1,12 +1,25 @@
 mod model;
 mod osmia;
 mod utils;
+mod gh_issues;
 
+use crate::macro_tests;
 use crate::Osmia;
 use crate::CodeInterpreter;
 use crate::types::{
 	Ctx,
 };
+
+#[allow(dead_code)]
+#[cfg(test)]
+fn test_code(
+	code: &str,
+	tokens: Option<<Osmia as CodeInterpreter>::LexerCode>,
+	parsed: Option<<Osmia as CodeInterpreter>::ParserCode>,
+	execution: Vec<(Ctx, Result<&str, Vec<&str>>)>
+) {
+	test(Some(code), tokens, parsed, Some(execution));
+}
 
 #[allow(dead_code)]
 #[cfg(test)]

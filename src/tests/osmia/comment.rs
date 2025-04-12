@@ -51,11 +51,13 @@ macro_tests!(
 	),
 	(
 		comment_03,
-		Some("{{# \n\n Hey\nthere!\n\n }}"),
+		Some("{{# \n\n\n\n Hey\nthere!\n\n }}"),
 		Some(vec![
 			Token::StmtStart,
 			Token::Comment,
 			Token::new_raw(" "),
+			Token::NewLine,
+			Token::NewLine,
 			Token::NewLine,
 			Token::NewLine,
 			Token::new_raw(" Hey"),
@@ -67,7 +69,7 @@ macro_tests!(
 			Token::StmtEnd,
 			Token::Eof
 		]),
-		Some(Stmt::new_comment(" \n\n Hey\nthere!\n\n ")),
+		Some(Stmt::new_comment(" \n\n\n\n Hey\nthere!\n\n ")),
 		Some(vec![(Ctx::new(), Ok(""))])
 	),
 	(
