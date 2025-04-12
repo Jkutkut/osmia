@@ -482,8 +482,26 @@ impl Shl for Expr {
 	/// assert_eq!(osmia.run_code("{{ 1 << 2 }}").unwrap(), "4");
 	/// assert_eq!(osmia.run_code("{{ 1 << 7 }}").unwrap(), "128");
 	/// assert_eq!(osmia.run_code("{{ 1 << 63 }}").unwrap(), "-9223372036854775808");
+	/// assert_eq!(osmia.run_code(r#"{{ "foo" << 1 }}"#).unwrap(), "oo");
+	/// assert_eq!(osmia.run_code(r#"{{ "foo" << 2 }}"#).unwrap(), "o");
+	/// assert_eq!(osmia.run_code(r#"{{ "foo" << 3 }}"#).unwrap(), "");
+	/// assert_eq!(osmia.run_code(r#"{{ "foo" << 10 }}"#).unwrap(), "");
 	/// ```
 	fn shl(self, rhs: Expr) -> Self::Output {
+		match (&self, &rhs) {
+			(Expr::Str(s), Expr::Int(i)) => {
+				if *i < 0 {
+					return Err(format!("Invalid shift amount: {:?}", rhs));
+				}
+				let i: usize = *i as usize;
+				let s: &str = match i < s.len() {
+					true => &s[i..],
+					false => "",
+				};
+				return Ok(Expr::new_str(s));
+			},
+			_ => (),
+		}
 		const OPERATION: &str = "shl (<<)";
 		Ok(Expr::Int(
 			cast_int_for_operation(self, OPERATION)? <<
@@ -508,8 +526,26 @@ impl Shr for Expr {
 	/// assert_eq!(osmia.run_code("{{ 1 >> 2 }}").unwrap(), "0");
 	/// assert_eq!(osmia.run_code("{{ 128 >> 7 }}").unwrap(), "1");
 	/// assert_eq!(osmia.run_code("{{ 1024 >> 10 }}").unwrap(), "1");
+	/// assert_eq!(osmia.run_code(r#"{{ "foo" >> 1 }}"#).unwrap(), "fo");
+	/// assert_eq!(osmia.run_code(r#"{{ "foo" >> 2 }}"#).unwrap(), "f");
+	/// assert_eq!(osmia.run_code(r#"{{ "foo" >> 3 }}"#).unwrap(), "");
+	/// assert_eq!(osmia.run_code(r#"{{ "foo" >> 10 }}"#).unwrap(), "");
 	/// ```
 	fn shr(self, rhs: Expr) -> Self::Output {
+		match (&self, &rhs) {
+			(Expr::Str(s), Expr::Int(i)) => {
+				if *i < 0 {
+					return Err(format!("Invalid shift amount: {:?}", rhs));
+				}
+				let i: usize = *i as usize;
+				let s: &str = match i < s.len() {
+					true => &s[..s.len() - i],
+					false => "",
+				};
+				return Ok(Expr::new_str(s));
+			},
+			_ => (),
+		}
 		const OPERATION: &str = "shr (>>)";
 		Ok(Expr::Int(
 			cast_int_for_operation(self, OPERATION)? >>
