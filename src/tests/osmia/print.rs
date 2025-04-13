@@ -19,9 +19,9 @@ macro_tests!(
 			Stmt::new_raw("print: "),
 			Stmt::new_print(Expr::Int(1))
 		].into())),
-		None
-		// r#"{}"#,
-		// "print: "
+		Some(vec![
+			(Ctx::new(), Ok("print: ")),
+		])
 	),
 	(
 		print02,
@@ -46,9 +46,9 @@ macro_tests!(
 				Expr::Int(1), BinaryOp::Plus, Expr::Float(1.2)
 			).into())
 		].into())),
-		None
-		// "{}",
-		// "print: "
+		Some(vec![
+			(Ctx::new(), Ok("print: ")),
+		])
 	),
 	(
 		print03,
@@ -75,9 +75,9 @@ macro_tests!(
 				Expr::Int(1), Expr::Int(2), Expr::Int(3)
 			].into())
 		)),
-		None
-		// "{}",
-		// ""
+		Some(vec![
+			(Ctx::new(), Ok("")),
+		])
 	),
 	(
 		print04,
@@ -108,8 +108,8 @@ macro_tests!(
 				(Expr::Str("b".into()), Expr::Int(2))
 			].into())
 		)),
-		None
-		// "{}",
-		// ""
+		Some(vec![
+			(Ctx::new(), Ok("")),
+		])
 	)
 );

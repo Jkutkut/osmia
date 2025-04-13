@@ -97,5 +97,18 @@ macro_tests!(
 		]),
 		Some(Stmt::new_comment(" this {{ is a comment {{ }} }} ")),
 		Some(vec![(Ctx::new(), Ok(""))])
+	),
+	(
+		comment_06,
+		Some("{{#
+	This is a multi line comment.
+	Code can be added here and it will be ignored as long as there is no closing delimiter.
+	{{ 1 + 1 }}
+	}}"),
+		None,
+		None,
+		Some(vec![
+			(Ctx::new(), Ok("")),
+		])
 	)
 );
