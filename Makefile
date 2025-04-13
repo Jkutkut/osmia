@@ -41,7 +41,7 @@ doc:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust doc --lib --examples --document-private-items
 
 doc_watch:
-	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear -x "doc --lib --examples --document-private-items"
+	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear -x test -x "doc --lib --examples --document-private-items"
 
 doc_release:
 	@echo "Ensuring repo has no uncommited changes..."

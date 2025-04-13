@@ -6,9 +6,19 @@
 //! # Introduction
 //!	TODO
 //!
-//!	# Operations
+//!	## Expressions
 //!	TODO
 //!	[expr](./model/expr/expr/enum.Expr.html)
+//!
+//!	## Expression methods
+//!	TODO
+//!
+//!	## Statements
+//!	TODO
+//!	[stmt](./model/stmt/stmt/enum.Stmt.html)
+//!
+//!	## Context
+//!	TODO
 //!
 //! # Examples
 //!	```rust
