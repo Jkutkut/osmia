@@ -34,7 +34,7 @@ pub trait CodeInterpreter: for<'a> TryFrom<&'a str> {
 	type ParserCode;
 	type Ctx;
 
-	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+	const VERSION: &'static str;
 
 	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::InterpreterError>;
 	fn new_parser() -> impl Parser<Self::LexerCode, Self::ParserCode, Self::InterpreterError>;
@@ -103,6 +103,8 @@ impl CodeInterpreter for Osmia {
 	type LexerCode = LexerCode;
 	type ParserCode = ParserCode;
 	type Ctx = types::Ctx;
+
+	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::InterpreterError> {
 		OsmiaLexer::new()
