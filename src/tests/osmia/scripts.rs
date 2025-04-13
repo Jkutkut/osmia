@@ -10,9 +10,9 @@ macro_tests!(
 			Token::Eof
 		]),
 		Some(Stmt::new_raw("Hello, world!")),
-		None
-		// None,
-		// "Hello, world!"
+		Some(vec![
+			(Ctx::new(), Ok("Hello, world!")),
+		])
 	),
 	(
 		basic_test01,
@@ -26,9 +26,9 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"{ "name": "world" }"#),
-		// "Hello, world!"
+		Some(vec![
+			(Ctx::try_from(r#"{ "name": "world" }"#).unwrap(), Ok("Hello, world!")),
+		])
 	),
 	(
 		basic_test02,
@@ -54,16 +54,16 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"name": "world",
-		// 		"number": 42,
-		// 		"boolean": true,
-		// 		"null": null
-		// 	}
-		// "#),
-		// "Hello, world! A number 42, a boolean true an a null null."
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"name": "world",
+					"number": 42,
+					"boolean": true,
+					"null": null
+				}
+			"#).unwrap(), Ok("Hello, world! A number 42, a boolean true an a null null.")),
+		])
 	),
 	(
 		basic_test03,
@@ -92,20 +92,20 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"name": "world",
-		// 		"lst": [11, 22, 33],
-		// 		"object": {
-		// 			"key": "value",
-		// 			"obj": {
-		// 				"key": "value2"
-		// 			}
-		// 		}
-		// 	}
-		// "#),
-		// "Hello, world! Single value from lst 22 and an object element value2."
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"name": "world",
+					"lst": [11, 22, 33],
+					"object": {
+						"key": "value",
+						"obj": {
+							"key": "value2"
+						}
+					}
+				}
+			"#).unwrap(), Ok("Hello, world! Single value from lst 22 and an object element value2.")),
+		])
 	),
 	(
 		similar_syntax,
@@ -123,9 +123,9 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"{ "name": "world" }"#),
-		// "Hello, world! The syntax is \"Hello, {{name}}!\"."
+		Some(vec![
+			(Ctx::try_from(r#"{ "name": "world" }"#).unwrap(), Ok(r#"Hello, world! The syntax is "Hello, {{name}}!"."#)),
+		])
 	),
 	(
 		comment,
@@ -140,9 +140,9 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// None,
-		// "Hello!"
+		Some(vec![
+			(Ctx::new(), Ok("Hello!")),
+		])
 	),
 	(
 		complex_value01,
@@ -164,16 +164,16 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"name": {
-		// 			"first": "John",
-		// 			"last": "Doe"
-		// 		}
-		// 	}
-		// "#),
-		// "Hello, John Doe!"
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"name": {
+						"first": "John",
+						"last": "Doe"
+					}
+				}
+			"#).unwrap(), Ok("Hello, John Doe!")),
+		])
 	),
 	(
 		complex_value02,
@@ -193,19 +193,19 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"obj": {
-		// 			"obj": [
-		// 				{
-		// 					"obj": "value"
-		// 				}
-		// 			]
-		// 		}
-		// 	}
-		// "#),
-		// "This is a complex value: value"
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"obj": {
+						"obj": [
+							{
+								"obj": "value"
+							}
+						]
+					}
+				}
+			"#).unwrap(), Ok("This is a complex value: value")),
+		])
 	),
 	(
 		foreach01,
@@ -252,25 +252,24 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"name": "world",
-		// 		"items": [
-		// 			{
-		// 				"url": "https://example01.com",
-		// 				"name": "Example01"
-		// 			},
-		// 			{
-		// 				"url": "https://example02.org",
-		// 				"name": "Example02"
-		// 			}
-		// 		]
-		// 	}
-		// "#),
-		// "Hello, world!
-		// <a href=\"https://example01.com\">Example01</a>
-		// <a href=\"https://example02.org\">Example02</a>\n"
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"name": "world",
+					"items": [
+						{
+							"url": "https://example01.com",
+							"name": "Example01"
+						},
+						{
+							"url": "https://example02.org",
+							"name": "Example02"
+						}
+					]
+				}
+			"#).unwrap(),
+			Ok("Hello, world!\n\t\t<a href=\"https://example01.com\">Example01</a>\n\t\t<a href=\"https://example02.org\">Example02</a>\n"))
+		])
 	),
 	(
 		foreach02,
@@ -309,16 +308,15 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// 	{
-		// 		"name": "world",
-		// 		"items": [1, 2, 3]
-		// 	}
-		// "#),
-		// "Hello, world!
-		// <li>Element 1</li>
-		// <li>Element 2</li>
-		// <li>Element 3</li>\n"
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"name": "world",
+					"items": [1, 2, 3]
+				}
+			"#).unwrap(),
+			Ok("Hello, world!\n\t\t<li>Element 1</li>\n\t\t<li>Element 2</li>\n\t\t<li>Element 3</li>\n"))
+		])
 	),
 	(
 		foreach03,
@@ -360,20 +358,21 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"items": [
-		// 			{
-		// 				"arr": [1, 2, 3]
-		// 			},
-		// 			{
-		// 				"arr": [4, 5, 6]
-		// 			}
-		// 		]
-		// 	}
-		// "#),
-		// "<ul><li>1</li><li>2</li><li>3</li></ul><ul><li>4</li><li>5</li><li>6</li></ul>"
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"items": [
+						{
+							"arr": [1, 2, 3]
+						},
+						{
+							"arr": [4, 5, 6]
+						}
+					]
+				}
+			"#).unwrap(),
+			Ok(r#"<ul><li>1</li><li>2</li><li>3</li></ul><ul><li>4</li><li>5</li><li>6</li></ul>"#))
+		])
 	),
 	(
 		conditional01,
@@ -404,16 +403,18 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"user": {
-		// 			"name": "John",
-		// 			"age": 18
-		// 		}
-		// 	}
-		// "#),
-		// "John is an adult."
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"user": {
+						"name": "John",
+						"age": 18
+					}
+				}
+			"#).unwrap(),
+			Ok("John is an adult.")
+			),
+		])
 	),
 	(
 		conditional02,
@@ -454,26 +455,28 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"users": [
-		// 			{
-		// 				"name": "John",
-		// 				"age": 18
-		// 			},
-		// 			{
-		// 				"name": "Jane",
-		// 				"age": 17
-		// 			},
-		// 			{
-		// 				"name": "Jack",
-		// 				"age": 19
-		// 			}
-		// 		]
-		// 	}
-		// "#),
-		// "John is an adult.Jack is an adult."
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"users": [
+						{
+							"name": "John",
+							"age": 18
+						},
+						{
+							"name": "Jane",
+							"age": 17
+						},
+						{
+							"name": "Jack",
+							"age": 19
+						}
+					]
+				}
+			"#).unwrap(),
+			Ok("John is an adult.Jack is an adult.")
+			),
+		])
 	),
 	(
 		conditional03,
@@ -537,20 +540,20 @@ macro_tests!(
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"var": "value"
-		// 	}
-		// "#),
-		// "Hey!
-		// 	True!
-		// 	var: value\n"
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"var": "value"
+				}
+				"#).unwrap(),
+				Ok("Hey!\n\t\t\tTrue!\n\t\t\tvar: value\n")
+			),
+		])
 	),
 	(
 		spacing01,
 		Some("Hello, {{name}}!
-		{{if age >= 18}}You are an adult.{{fi}}."),
+		{{if age >= 18}}You are an adult.{{fi}}"),
 		Some(vec![
 			Token::new_raw("Hello, "),
 			Token::StmtStart,
@@ -572,18 +575,61 @@ macro_tests!(
 			Token::StmtStart,
 			Token::Fi,
 			Token::StmtEnd,
-			Token::new_raw("."),
 			Token::Eof
 		]),
 		None,
-		None
-		// Some(r#"
-		// 	{
-		// 		"name": "John",
-		// 		"age": 18
-		// 	}
-		// "#),
-		// "Hello, John!
-		// You are an adult."
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"name": "John",
+					"age": 18
+				}
+			"#).unwrap(),
+			Ok("Hello, John!\n\t\tYou are an adult.")),
+		])
+	),
+	(
+		not_found_key01,
+		Some("Hello, {{usr.name}}!"),
+		None,
+		None,
+		Some(vec![
+			(Ctx::try_from(r#"{ "user": { "name": "John" } }"#).unwrap(), Err(vec!["usr", "not", "found"])),
+			(Ctx::try_from(r#"{ "usr": { "nombre": "John" } }"#).unwrap(), Err(vec!["name", "not", "found"])),
+		])
+	),
+	(
+		not_found_key02,
+		Some("Hello, {{lst[i]}}!"),
+		None,
+		None,
+		Some(vec![
+			(Ctx::try_from(r#"{ "i": 4, "lst": [1, 2, 3] }"#).unwrap(), Err(vec!["index", "out", "bounds"])),
+			(Ctx::try_from(r#"{ "i": 4, "lst": { "a": 1, "b": 2 } }"#).unwrap(), Err(vec!["object", "index"])),
+			(Ctx::try_from(r#"{ "i": 0, "lst": { } }"#).unwrap(), Err(vec!["object", "index"])),
+		])
+	),
+	(
+		foreach_fail01,
+		Some("Hello, {{name}}!
+		{{for item in items}}
+			<a href=\"{{item.url}}\">{{item.name}}</a>
+		{{done}}"),
+		None,
+		None,
+		Some(vec![
+			(Ctx::try_from(r#"
+				{
+					"name": "world",
+					"items": [
+						{
+							"url": "https://example01.com",
+							"name": "Example01"
+						},
+						123
+					]
+				}"#
+			).unwrap(),Err(vec!["access", "value", "url"])),
+		])
 	)
 );

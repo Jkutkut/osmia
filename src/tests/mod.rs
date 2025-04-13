@@ -1,9 +1,7 @@
 mod model;
 mod osmia;
 mod utils;
-mod gh_issues;
 
-use crate::macro_tests;
 use crate::Osmia;
 use crate::CodeInterpreter;
 use crate::types::{

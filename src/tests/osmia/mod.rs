@@ -15,7 +15,10 @@ mod scripts;
 mod r#while;
 
 use crate::macro_tests;
-use super::test;
+use super::{
+	test,
+	test_code
+};
 use crate::model::lexer::Token;
 use crate::model::stmt::*;
 use crate::model::expr::*;
