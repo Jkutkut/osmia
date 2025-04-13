@@ -65,15 +65,15 @@ macro_tests!(
 			(Ctx::try_from(r#"{ "name": "world" }"#).unwrap(), Ok(r#"Hello, world! The syntax is "Hello, {{name}}!"."#)),
 		]
 	),
-	// (
-	// 	comment,
-	// 	r#"Hello!{{print "This is a comment"}}"#,
-	// 	None,
-	// 	None,
-	// 	vec![
-	// 		(Ctx::new(), Ok("Hello!")),
-	// 	]
-	// ),
+	(
+		comment,
+		r#"Hello!{{print "This is a comment"}}"#,
+		None,
+		None,
+		vec![
+			(Ctx::new(), Ok("Hello!")),
+		]
+	),
 	(
 		complex_value01,
 		"Hello, {{name.first}} {{name.last}}!",

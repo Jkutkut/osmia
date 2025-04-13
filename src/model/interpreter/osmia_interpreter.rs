@@ -65,6 +65,7 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Stmt::NewLine => Ok((ExitStatus::Okay, OsmiaResult::OsmiaOutput("\n".into()))),
 			Stmt::NewLineNonPrintable => Ok((ExitStatus::Okay, OsmiaResult::None)),
 			Stmt::Expr(e) => Ok((ExitStatus::Okay, OsmiaResult::Expr(e.accept(self)?))),
+			Stmt::Print(s) => self.visit_print(s),
 			Stmt::Comment(_) => Ok((ExitStatus::Okay, OsmiaResult::None)),
 			Stmt::Assign(a) => self.visit_assign(a),
 			Stmt::If(i) => self.visit_if(i),
@@ -74,7 +75,6 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 			Stmt::Continue => Ok((ExitStatus::Continue, OsmiaResult::None)),
 			Stmt::Return(r) => self.visit_return(r),
 			Stmt::Function(f) => self.visit_function(f),
-			s => unimplemented!("Interpreter for statement: {:?}", s), // TODO
 		}
 	}
 
@@ -175,6 +175,11 @@ impl OsmiaInterpreter<'_> {
 			}
 		}
 		Ok((ExitStatus::Okay, content.into()))
+	}
+
+	fn visit_print(&self, s: &Print) -> StmtResult {
+		println!("{}", self.visit_expr(s.expr())?);
+		Ok((ExitStatus::Okay, OsmiaResult::None))
 	}
 
 	fn visit_assign(&self, assign: &Assign) -> StmtResult {

@@ -9,4 +9,8 @@ impl Print {
 	pub fn new(expr: Expr) -> Self {
 		Self { expr }
 	}
+
+	pub fn expr(&self) -> &Expr {
+		&self.expr
+	}
 }
