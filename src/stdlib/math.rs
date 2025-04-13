@@ -42,4 +42,16 @@ pub fn module() -> Module {
 			Ok(Expr::Float(args[0].to_float()?.round()))
 		}
 	).into())
+	.add_value("max", Callable::new(
+		2,
+		|_, args| {
+			Ok(Expr::Float(args[0].to_float()?.max(args[1].to_float()?)))
+		}
+	).into())
+	.add_value("min", Callable::new(
+		2,
+		|_, args| {
+			Ok(Expr::Float(args[0].to_float()?.min(args[1].to_float()?)))
+		}
+	).into())
 }
