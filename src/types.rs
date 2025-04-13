@@ -72,10 +72,10 @@ pub type LexerCode = Vec<Token>;
 /// ```
 pub type ParserCode = Stmt;
 
-/// TODO
+/// The type of the interpreter's output.
 pub type OsmiaOutput = String;
 
-/// TODO
+/// The type of the interpreter's error.
 pub type OsmiaError = String;
 
 pub use crate::ctx::Ctx;
