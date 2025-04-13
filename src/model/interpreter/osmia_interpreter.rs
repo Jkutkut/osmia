@@ -59,8 +59,11 @@ impl Visitor<StmtResult, ExprResult> for OsmiaInterpreter<'_> {
 	fn visit_stmt(&self, stmt: &Stmt) -> StmtResult {
 		match stmt {
 			Stmt::Raw(s) => Ok((ExitStatus::Okay, OsmiaResult::OsmiaOutput(s.into()))),
+			Stmt::NonPrintable(_) => Ok((ExitStatus::Okay, OsmiaResult::None)),
 			Stmt::Block(b) => self.visit_block(b),
+			// TODO keep track of line
 			Stmt::NewLine => Ok((ExitStatus::Okay, OsmiaResult::OsmiaOutput("\n".into()))),
+			Stmt::NewLineNonPrintable => Ok((ExitStatus::Okay, OsmiaResult::None)),
 			Stmt::Expr(e) => Ok((ExitStatus::Okay, OsmiaResult::Expr(e.accept(self)?))),
 			Stmt::Comment(_) => Ok((ExitStatus::Okay, OsmiaResult::None)),
 			Stmt::Assign(a) => self.visit_assign(a),

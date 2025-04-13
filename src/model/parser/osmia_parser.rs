@@ -146,6 +146,7 @@ impl OsmiaParserImpl {
 		while !self.done() {
 			match self.get_current() {
 				Token::NewLine => self.line += 1,
+				Token::NewLineNonPrintable => self.line += 1,
 				_ => return
 			}
 			self.advance();
@@ -172,7 +173,9 @@ impl OsmiaParserImpl {
 		while !self.done() {
 			match self.advance() {
 				Token::NewLine => statements.push(Stmt::NewLine),
+				Token::NewLineNonPrintable => statements.push(Stmt::NewLineNonPrintable),
 				Token::Raw(r) => statements.push(Stmt::Raw(r.to_string())),
+				Token::NonPrintable(r) => statements.push(Stmt::NonPrintable(r.to_string())),
 				Token::StmtStart => match self.stmt(break_with)? {
 					None => break,
 					Some(stmt) => statements.push(stmt),
@@ -234,8 +237,8 @@ impl OsmiaParserImpl {
 		let mut comment = String::new();
 		while !self.done() && !self.check_current(&Token::StmtEnd) {
 			match self.advance() {
-				Token::Raw(r) => comment.push_str(r),
-				Token::NewLine => {
+				Token::Raw(r) | Token::NonPrintable(r) => comment.push_str(r),
+				Token::NewLine | Token::NewLineNonPrintable => {
 					comment.push('\n');
 					self.line += 1;
 				},

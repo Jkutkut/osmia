@@ -4,7 +4,9 @@ use super::*;
 pub enum Stmt {
 	Block(Block),
 	Raw(String),
+	NonPrintable(String),
 	NewLine,
+	NewLineNonPrintable,
 	Expr(Expr),
 	Print(Print),
 	Comment(String),
@@ -21,6 +23,11 @@ pub enum Stmt {
 impl Stmt {
 	pub fn new_raw(s: &str) -> Self {
 		Self::Raw(s.to_string())
+	}
+
+	#[cfg(debug_assertions)]
+	pub fn new_non_printable(s: &str) -> Self {
+		Self::NonPrintable(s.to_string())
 	}
 
 	pub fn new_print(expr: Expr) -> Self {

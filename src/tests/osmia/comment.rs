@@ -56,7 +56,7 @@ macro_tests!(
 			Token::StmtStart,
 			Token::Comment,
 			Token::new_raw(" "),
-			Token::NewLine,
+			Token::NewLineNonPrintable,
 			Token::NewLine,
 			Token::NewLine,
 			Token::NewLine,

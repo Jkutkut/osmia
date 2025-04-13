@@ -1,9 +1,11 @@
 #[derive(Clone, PartialEq)]
 pub enum Token {
 	Raw(String),
+	NonPrintable(String),
 
 	// File
 	NewLine,
+	NewLineNonPrintable,
 	Whitespace,
 	Eof,
 
@@ -91,6 +93,11 @@ impl Token {
 		Self::Raw(s.to_string())
 	}
 
+	#[cfg(debug_assertions)]
+	pub fn new_non_printable(s: &str) -> Self {
+		Self::NonPrintable(s.to_string())
+	}
+
 	pub fn new_str(s: &str) -> Self {
 		Self::Str(s.to_string())
 	}
@@ -101,6 +108,13 @@ impl Token {
 
 	pub fn new_number(s: &str) -> Self {
 		Self::Number(s.to_string())
+	}
+
+	pub fn as_raw_str(&self) -> Option<&str> {
+		match self {
+			Self::Raw(s) => Some(s),
+			_ => None
+		}
 	}
 }
 
@@ -127,6 +141,7 @@ macro_rules! impl_token_traits {
 			(
 				// File
 				NewLine <=> "\\n",
+				NewLineNonPrintable <=> "(--\\n--)",
 				Whitespace <=> "space",
 				Eof <=> "Eof",
 
@@ -138,6 +153,7 @@ macro_rules! impl_token_traits {
 
 				// Complex values
 				Raw(s) <=> "Raw({s})",
+				NonPrintable(s) <=> "NonPrintable({s})",
 				Str(s) <=> "Str({s:?})",
 				Alpha(s) <=> "Alpha({s})",
 				Number(s) <=> "Number({s})",

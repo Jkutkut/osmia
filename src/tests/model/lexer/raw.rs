@@ -3,8 +3,8 @@ use super::*;
 macro_tests!(
 	lexer_test,
 	(empty,"",vec![]),
-	(raw_whitespace_01," ",vec![Token::new_raw(" ")]),
-	(raw_whitespace_02," \t",vec![Token::new_raw(" \t")]),
+	(raw_whitespace_01," ",vec![Token::new_non_printable(" ")]),
+	(raw_whitespace_02," \t",vec![Token::new_non_printable(" \t")]),
 	(raw_newline_01,"\n",vec![Token::NewLine]),
 	(raw_newline_02,"\n\n\n",vec![Token::NewLine,Token::NewLine,Token::NewLine]),
 	(raw_newline_03,"\nFoo\nBar\n",vec![
