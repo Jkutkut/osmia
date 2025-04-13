@@ -26,7 +26,7 @@ impl Display for Expr {
 			Expr::Variable(v) => Ok(write!(f, "{v}")?),
 			Expr::Lambda(l) => Ok(write!(f, "{l}")?),
 			Expr::Callable(c) => Ok(write!(f, "{c}")?),
-			e => unimplemented!("Display for: {:?}", e), // TODO
+			e => Ok(write!(f, "{e:?}")?)
 		}
 	}
 }
