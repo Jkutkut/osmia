@@ -1,5 +1,18 @@
 use super::*;
 
+/// Expressions
+///
+/// A expression is the smallest building block of the language.
+///
+/// # Operations:
+/// - [Addition](#method.add)
+/// - [Subtraction](#method.sub)
+/// - [Multiplication](#method.mul)
+/// - [Division](#method.div)
+/// - [Module / Remainder](#method.rem)
+/// - [Comparison](#method.partial_cmp)
+/// - Bitwise operations: [and](#method.bitand), [or](#method.bitor), [xor](#method.bitxor), [shl](#method.shl), [shr](#method.shr), [not](#method.not), [neg](#method.neg)
+///
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
 	Binary(Binary),

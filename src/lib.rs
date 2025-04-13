@@ -1,3 +1,33 @@
+//! # Index:
+//! - [Introduction](#introduction)
+//! - [Operations](#operations)
+//! - [Examples](#examples)
+//!
+//! # Introduction
+//!	TODO
+//!
+//!	# Operations
+//!	TODO
+//!	[expr](./model/expr/expr/enum.Expr.html)
+//!
+//! # Examples
+//!	```rust
+//!	use osmia::Osmia;
+//!
+//!	let mut osmia = Osmia::default();
+//!	let output = osmia.run_code("1 + 1 = {{ 1 + 1 }}").unwrap();
+//!	assert_eq!(output, "1 + 1 = 2".to_string());
+//!	```
+//!
+//!	## Json context:
+//!	```rust
+//!	use osmia::Osmia;
+//!
+//!	let mut osmia = Osmia::try_from(r#"{ "name": "Marvin" }"#).unwrap();
+//!	let output = osmia.run_code("Hello {{ name }}!").unwrap();
+//!	assert_eq!(output, "Hello Marvin!".to_string());
+//!	```
+
 mod macros;
 mod constants;
 mod model;
@@ -56,24 +86,6 @@ pub trait CodeInterpreter: for<'a> TryFrom<&'a str> {
 }
 
 /// Default osmia template engine API.
-///
-/// # Examples
-///	```rust
-///	use osmia::Osmia;
-///
-///	let mut osmia = Osmia::default();
-///	let output = osmia.run_code("1 + 1 = {{ 1 + 1 }}").unwrap();
-///	assert_eq!(output, "1 + 1 = 2".to_string());
-///	```
-///
-///	## Json context:
-///	```rust
-///	use osmia::Osmia;
-///
-///	let mut osmia = Osmia::try_from(r#"{ "name": "Marvin" }"#).unwrap();
-///	let output = osmia.run_code("Hello {{ name }}!").unwrap();
-///	assert_eq!(output, "Hello Marvin!".to_string());
-///	```
 pub struct Osmia {
 	ctx: types::Ctx,
 }
