@@ -128,8 +128,8 @@ pub fn add_generics(module: Module) -> Module {
 	.add_value("to_string", Callable::new(1, to_string).into())
 	.add_value("type", Callable::new(1, r#type).into())
 	.add_value("switch", Callable::new_variable_args(switch).into())
-	.add_value("keys", Callable::new_variable_args(keys).into())
-	.add_value("values", Callable::new_variable_args(values).into())
-	.add_value("entries", Callable::new_variable_args(entries).into())
-	.add_value("get", Callable::new_variable_args(get).into())
+	.add_value("keys", Callable::new(1, keys).into())
+	.add_value("values", Callable::new(1, values).into())
+	.add_value("entries", Callable::new(1, entries).into())
+	.add_value("get", Callable::new(3, get).into())
 }
