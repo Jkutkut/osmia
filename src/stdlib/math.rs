@@ -1,5 +1,32 @@
 use super::*;
 
+/// # math module
+/// ## Constants:
+/// ```rust
+/// use osmia::Osmia;
+///
+/// let mut osmia = Osmia::default();
+/// osmia.run_code("{{ math.PI }}").unwrap();
+/// osmia.run_code("{{ math.E }}").unwrap();
+/// ```
+///
+/// ## Functions:
+/// ```rust
+/// use osmia::Osmia;
+///
+/// let mut osmia = Osmia::default();
+/// assert_eq!(osmia.run_code("{{ math.abs(-1) }}").unwrap(), "1".to_string());
+/// assert_eq!(osmia.run_code("{{ math.ceil(1.1) }}").unwrap(), "2".to_string());
+/// assert_eq!(osmia.run_code("{{ math.floor(1.9) }}").unwrap(), "1".to_string());
+/// assert_eq!(osmia.run_code("{{ math.pow(2, 3) }}").unwrap(), "8".to_string());
+/// assert_eq!(osmia.run_code("{{ math.sqrt(4) }}").unwrap(), "2".to_string());
+/// assert_eq!(osmia.run_code("{{ math.round(1.5) }}").unwrap(), "2".to_string());
+/// assert_eq!(osmia.run_code("{{ math.max(1, 2) }}").unwrap(), "2".to_string());
+/// assert_eq!(osmia.run_code("{{ math.min(1, 2) }}").unwrap(), "1".to_string());
+/// ```
+///
+/// ## Sub modules:
+/// There are no sub modules for this module
 pub fn module() -> Module {
 	Module::new()
 	// Constants

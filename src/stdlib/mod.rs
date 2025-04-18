@@ -15,6 +15,21 @@ mod methods;
 
 use crate::model::expr::Expr;
 
+/// # stdlib module
+/// ## Constants:
+/// ```rust
+/// use osmia::Osmia;
+///
+/// let mut osmia = Osmia::default();
+/// osmia.run_code("{{ _OSMIA_VERSION }}").unwrap();
+/// ```
+///
+/// ## Functions:
+/// There are no functions in this module
+///
+/// ## Sub modules:
+/// - [math](./math/fn.module.html)
+/// - [methods](./methods/fn.module.html)
 pub fn import(ctx: &mut Ctx) {
 	ctx.set(
 		&JsonTreeKey::from("_OSMIA_VERSION"),

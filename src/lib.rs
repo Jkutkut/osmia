@@ -6,9 +6,18 @@
 //! # Introduction
 //!	TODO
 //!
+//! # Structure:
+//! [structure](./types/type.ParserCode.html#structure)
+//!
 //!	## Expressions
 //!	TODO
 //!	[expr](./model/expr/expr/enum.Expr.html)
+//!
+//!	## Context
+//!	The context allows to read and write variables in a Json-like syntax.
+//!
+//!	Variables, functions and expressions can be stored in the context. The methods for the
+//!	[Expressions](./#expressions) are also stored here.
 //!
 //!	## Expression methods
 //!	TODO
@@ -16,9 +25,6 @@
 //!	## Statements
 //!	TODO
 //!	[stmt](./model/stmt/stmt/enum.Stmt.html)
-//!
-//!	## Context
-//!	TODO
 //!
 //! # Examples
 //!	```rust
