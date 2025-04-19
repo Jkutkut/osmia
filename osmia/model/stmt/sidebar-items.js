@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["assign","block","conditional_stmt","for","function","if","print","return","stmt","while"]};

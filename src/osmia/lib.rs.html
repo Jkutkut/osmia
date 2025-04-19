@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script> if (window.location.protocol !== "file:") document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2">`)</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0 (9b00956e5 2024-04-29)" data-channel="1.78.0" data-search-js="search-42d8da7a6b9792c2.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../osmia/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -153,289 +151,157 @@
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-</pre></div><pre class="rust"><code><span class="kw">mod </span>macros;
+</pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">"../README.md"</span>)]
+</span><span class="doccomment">//!
+//! # Structure:
+//! - [parsing structure](./types/type.ParserCode.html)
+//! - Expressions: the smallest building block of the language.
+//! [documentation](./model/expr/expr/enum.Expr.html)
+//!   - [methods](./stdlib/methods/fn.module.html)
+//! - Statements: piece of code that can be executed.
+//! [documentation](./model/stmt/stmt/enum.Stmt.html)
+//!
+//! ## Context
+//! The context allows to read and write variables in a Json-like syntax.
+//!
+//! Variables, functions and expressions can be stored in the context. The methods for the
+//! [Expressions](./#expressions) are also stored here.
+//! See [methods in stdlib](./stdlib/methods/fn.module.html)
+//!
+//! The [stdlib](./stdlib/fn.import.html) adds the base for Osmia.
+//!
+//! ## Examples
+//! ```rust
+//! use osmia::Osmia;
+//!
+//! let mut osmia = Osmia::default();
+//! let output = osmia.run_code("1 + 1 = {{ 1 + 1 }}").unwrap();
+//! assert_eq!(output, "1 + 1 = 2".to_string());
+//! ```
+//!
+//! ### Json context:
+//! ```rust
+//! use osmia::Osmia;
+//!
+//! let mut osmia = Osmia::try_from(r#"{ "name": "Marvin" }"#).unwrap();
+//! let output = osmia.run_code("Hello {{ name }}!").unwrap();
+//! assert_eq!(output, "Hello Marvin!".to_string());
+//! ```
+
+</span><span class="kw">mod </span>macros;
+<span class="kw">mod </span>constants;
 <span class="kw">mod </span>model;
-<span class="kw">mod </span>parser;
-<span class="kw">mod </span>lexer;
-<span class="kw">mod </span>syntax_tree;
-<span class="kw">mod </span>tree_walker;
-<span class="kw">mod </span>interpreter;
+<span class="kw">mod </span>utils;
+<span class="kw">mod </span>types;
+<span class="kw">mod </span>stdlib;
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests;
 
-<span class="kw">use </span>interpreter::Interpreter;
-<span class="kw">use </span>model::Ctx;
-<span class="kw">use </span>parser::Parser;
-<span class="kw">use </span>lexer::Lexer;
-<span class="kw">use </span>model::Stmt;
+<span class="kw">use </span>types::{
+	LexerCode,
+	ParserCode,
+	OsmiaOutput,
 
-<span class="doccomment">/// This simple API is designed to use the osmia template engine.
-///
-/// # Syntax
-/// ## Text:
-/// By default, all text outside the delimiters will be treated as a plain text.
-///
-/// ```text
-/// Hey there! This is a plain text
-/// ```
-/// ```text
-/// Hey there! This is a plain text
-/// ```
-///
-/// ## Expression:
-/// Evaluates and prints the given expression.
-/// ```text
-/// 1 + 2 = {{ 1 + 2 }}
-/// ```
-/// ```text
-/// 1 + 2 = 3
-/// ```
-///
-/// ## Assign:
-/// Assigns the given expression to the given variable in the context.
-/// ```text
-/// {{ assign foo = 1 + 2 }}
-/// The result is {{foo}}
-/// ```
-/// ```text
-/// The result is 3
-/// ```
-///
-/// ## Print:
-/// Prints the given expression in the stdin. It can be useful when debugging.
-/// ```text
-/// {{ print "Hello world!" }}
-/// ```
-/// ```text
-/// ```
-///
-/// ## If:
-/// ### Single if:
-/// ```text
-/// {{ if 1 == 1 }}
-/// Math is not broken!
-/// {{ fi }}
-/// ```
-/// ```text
-/// Math is not broken!
-/// ```
-///
-/// ### If, else:
-/// ```text
-/// {{ if 1 == 2 }}
-/// Math is not broken!
-/// {{ else }}
-/// Nope, math is right &gt;D
-/// {{ fi }}
-/// ```
-/// ```text
-/// Nope, math is right &gt;D
-/// ```
-///
-/// ### If, else if:
-/// ```text
-/// {{assign value = 2}}
-/// {{ if value == 1 }}
-/// Nope
-/// {{ elseif value == 2 }}
-/// The value is 2!
-/// {{ else }}
-/// Nope
-/// {{ fi }}
-/// ```
-/// ```text
-/// The value is 2!
-/// ```
-///
-/// ## While:
-/// ```text
-/// {{ assign i = 0 }}
-/// {{ while i &lt; 5 }}
-/// {{ assign i = i + 1 }}
-/// i = {{ i }}
-/// {{done}}
-/// ```
-/// ```text
-/// i = 1
-/// i = 2
-/// i = 3
-/// i = 4
-/// i = 5
-/// ```
-///
-/// ## For:
-/// ```text
-/// {{ for i in [1, 2, 3] }}
-///   i = {{ i }}
-/// {{ done }}
-/// {{assign arr = [
-///   {"name": "Marvin1"},
-///   {"name": "Marvin2"},
-///   {"name": "Marvin3"}
-/// ]}}
-/// {{for user in arr}}
-/// User: {{ user.name }}
-/// {{done}}
-/// ```
-/// ```text
-/// i = 1
-/// i = 2
-/// i = 3
-/// User: Marvin1
-/// User: Marvin2
-/// User: Marvin3
-/// ```
-///
-/// ## Continue, break:
-/// ```text
-/// {{continue}}
-/// {{break}}
-/// ```
-///
-/// ## Advanced control:
-/// All variable in the context can be used and edited similarly to
-/// variables in JavaScript.
-/// ```text
-/// {{ assign obj = {"user": {"name": "Marvin"} } }}
-/// Old name: {{ obj.user.name }}
-/// {{ assign obj.user.name = "R2D2" }}
-/// New name: {{ obj.user.name }}
-/// ```
-/// ```text
-/// Old name: Marvin
-/// New name: R2D2
-/// ```
-///
-/// # Examples
-///
-/// ## Basic execution
-/// ```rust
-/// use osmia::Osmia;
-///
-/// let mut interpreter = Osmia::new();
-/// let code = Osmia::code("Hello world! {{ 1 + 2 }}").unwrap();
-/// let result = interpreter.run(&amp;code).unwrap();
-/// assert_eq!(result, "Hello world! 3");
-/// ```
-///
-/// ## Context
-/// The context can be passed as a JSON object in the form of a string.
-/// ```rust
-/// use osmia::Osmia;
-///
-/// let context_json = r#"{"foo": "bar"}"#;
-/// let code = "The value of foo is {{ foo }}";
-/// let mut interpreter = Osmia::from_json(context_json).unwrap();
-/// let code = Osmia::code(code).unwrap();
-/// let result = interpreter.run(&amp;code).unwrap();
-/// assert_eq!(result, "The value of foo is bar");
-/// ```
-///
-/// ## Experimental features: Custom delimiters
-/// You can change the delimiters used by the code lexer.
-/// ```rust
-/// use osmia::Osmia;
-///
-/// let mut interpreter = Osmia::from_json(r#"{"user": {"name": "Marvin"}}"#).unwrap();
-/// let code = Osmia::custom_code("User: ${ user.name }", "${", "}").unwrap();
-/// let result = interpreter.run(&amp;code).unwrap();
-/// assert_eq!(result, "User: Marvin");
-/// ```
-</span><span class="kw">pub struct </span>Osmia;
+	OsmiaError,
+};
+<span class="kw">use </span>model::ctx;
+<span class="kw">use </span>model::lexer::{
+	Lexer, OsmiaLexer,
+};
+<span class="kw">use </span>model::parser::{
+	Parser, OsmiaParser,
+};
+<span class="kw">use </span>model::interpreter::{
+	Interpreter, OsmiaInterpreter,
+};
 
+<span class="kw">pub trait </span>CodeInterpreter: <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
+	<span class="kw">type </span>Output;
+	<span class="kw">type </span>InterpreterError;
+
+	<span class="kw">type </span>LexerCode;
+	<span class="kw">type </span>ParserCode;
+	<span class="kw">type </span>Ctx;
+
+	<span class="kw">const </span>VERSION: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
+
+	<span class="kw">fn </span>new_lexer() -&gt; <span class="kw">impl </span>Lexer&lt;<span class="self">Self</span>::LexerCode, <span class="self">Self</span>::InterpreterError&gt;;
+	<span class="kw">fn </span>new_parser() -&gt; <span class="kw">impl </span>Parser&lt;<span class="self">Self</span>::LexerCode, <span class="self">Self</span>::ParserCode, <span class="self">Self</span>::InterpreterError&gt;;
+	<span class="kw">fn </span>new_interpreter(ctx: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Ctx) -&gt; <span class="kw">impl </span>Interpreter&lt;<span class="self">Self</span>::ParserCode, <span class="self">Self</span>::Output, <span class="self">Self</span>::InterpreterError&gt;;
+
+	<span class="kw">fn </span>lex(code: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::LexerCode, <span class="self">Self</span>::InterpreterError&gt; {
+		<span class="self">Self</span>::new_lexer().lex(code)
+	}
+
+	<span class="kw">fn </span>parse(code: <span class="self">Self</span>::LexerCode) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::ParserCode, <span class="self">Self</span>::InterpreterError&gt; {
+		<span class="self">Self</span>::new_parser().parse(code)
+	}
+
+	<span class="kw">fn </span>interpret(ctx: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Ctx, code: <span class="self">Self</span>::ParserCode) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Output, <span class="self">Self</span>::InterpreterError&gt; {
+		<span class="self">Self</span>::new_interpreter(ctx).interpret(code)
+	}
+
+	<span class="kw">fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>, code: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Output, <span class="self">Self</span>::InterpreterError&gt;;
+}
+
+<span class="doccomment">/// Default osmia template engine API.
+</span><span class="kw">pub struct </span>Osmia {
+	ctx: types::Ctx,
+}
 
 <span class="kw">impl </span>Osmia {
-	<span class="kw">pub const </span>VERSION: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="macro">env!</span>(<span class="string">"CARGO_PKG_VERSION"</span>);
-
-	<span class="kw">pub fn </span>new() -&gt; Interpreter {
-		<span class="self">Self</span>::from_json(<span class="string">"{}"</span>).unwrap()
+	<span class="kw">fn </span>new(ctx: types::Ctx) -&gt; <span class="self">Self </span>{
+		<span class="self">Self </span>{
+			ctx,
+		}
 	}
 
-	<span class="kw">pub fn </span>from_json(json: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Interpreter, String&gt; {
-		<span class="kw">let </span>ctx = <span class="self">Self</span>::new_ctx(json)<span class="question-mark">?</span>;
-		<span class="kw">let </span>interpreter = Interpreter::new(ctx);
-		<span class="prelude-val">Ok</span>(interpreter)
+	<span class="kw">pub fn </span>run_code(<span class="kw-2">&amp;mut </span><span class="self">self</span>, code: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;OsmiaOutput, OsmiaError&gt; {
+		<span class="self">self</span>.run(code)
+	}
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>Osmia {
+	<span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+		<span class="self">Self</span>::new(types::Ctx::new())
+	}
+}
+
+<span class="kw">impl </span>CodeInterpreter <span class="kw">for </span>Osmia {
+	<span class="kw">type </span>Output = OsmiaOutput;
+	<span class="kw">type </span>InterpreterError = OsmiaError;
+
+	<span class="kw">type </span>LexerCode = LexerCode;
+	<span class="kw">type </span>ParserCode = ParserCode;
+	<span class="kw">type </span>Ctx = types::Ctx;
+
+	<span class="kw">const </span>VERSION: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="macro">env!</span>(<span class="string">"CARGO_PKG_VERSION"</span>);
+
+	<span class="kw">fn </span>new_lexer() -&gt; <span class="kw">impl </span>Lexer&lt;<span class="self">Self</span>::LexerCode, <span class="self">Self</span>::InterpreterError&gt; {
+		OsmiaLexer::new()
 	}
 
-	<span class="kw">fn </span>new_ctx(ctx: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Ctx, String&gt; {
-		Ctx::from_str(ctx)
+	<span class="kw">fn </span>new_parser() -&gt; <span class="kw">impl </span>Parser&lt;<span class="self">Self</span>::LexerCode, <span class="self">Self</span>::ParserCode, <span class="self">Self</span>::InterpreterError&gt; {
+		OsmiaParser::new()
 	}
 
-	<span class="kw">pub fn </span>code(code: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Stmt, String&gt; {
-		<span class="self">Self</span>::custom_code(code, <span class="string">"{{"</span>, <span class="string">"}}"</span>)
+	<span class="kw">fn </span>new_interpreter(ctx: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Ctx) -&gt; <span class="kw">impl </span>Interpreter&lt;<span class="self">Self</span>::ParserCode, <span class="self">Self</span>::Output, <span class="self">Self</span>::InterpreterError&gt; {
+		OsmiaInterpreter::new(ctx)
 	}
 
-	<span class="kw">pub fn </span>custom_code(code: <span class="kw-2">&amp;</span>str, start_delimiter: <span class="kw-2">&amp;</span>str, end_delimiter: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Stmt, String&gt; {
-		<span class="kw">let </span>lexer = Lexer::new(start_delimiter, end_delimiter);
-		<span class="kw">let </span>tokens = lexer.scan(code)<span class="question-mark">?</span>;
-		Parser::new(tokens).parse()
+	<span class="kw">fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>, code: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Output, <span class="self">Self</span>::InterpreterError&gt; {
+		<span class="kw">let </span>lexed = <span class="self">Self</span>::lex(code)<span class="question-mark">?</span>;
+		<span class="kw">let </span>parsed = <span class="self">Self</span>::parse(lexed)<span class="question-mark">?</span>;
+		<span class="self">Self</span>::interpret(<span class="kw-2">&amp;mut </span><span class="self">self</span>.ctx, parsed)
+	}
+}
+
+<span class="kw">impl </span>TryFrom&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>Osmia {
+	<span class="kw">type </span>Error = OsmiaError;
+
+	<span class="kw">fn </span>try_from(ctx: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+		<span class="prelude-val">Ok</span>(<span class="self">Self</span>::new(types::Ctx::try_from(ctx)<span class="question-mark">?</span>))
 	}
 }
 </code></pre></div></section></main></body></html>

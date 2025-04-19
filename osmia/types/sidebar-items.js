@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"type":["CtxRef","LexerCode","OsmiaError","OsmiaOutput","ParserCode"]};

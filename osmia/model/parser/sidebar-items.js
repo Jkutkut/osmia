@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["osmia_parser","parser","parser_error_msg"]};

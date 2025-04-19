@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["builtin","callable","function_callable","lambda_callable"],"type":["CallableArgs"]};

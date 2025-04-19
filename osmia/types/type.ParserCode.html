@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Structure:"><title>ParserCode in osmia::types - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc type"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../osmia/index.html">osmia</a><span class="version">2.6.12</span></h2></div><h2 class="location"><a href="#">ParserCode</a></h2><div class="sidebar-elems"><section><h3><a href="#aliased-type">Aliased type</a></h3><h3><a href="#variants">Variants</a></h3><ul class="block variant"><li><a href="#variant.Assign">Assign</a></li><li><a href="#variant.Block">Block</a></li><li><a href="#variant.Break">Break</a></li><li><a href="#variant.Comment">Comment</a></li><li><a href="#variant.Continue">Continue</a></li><li><a href="#variant.Expr">Expr</a></li><li><a href="#variant.For">For</a></li><li><a href="#variant.Function">Function</a></li><li><a href="#variant.If">If</a></li><li><a href="#variant.NewLine">NewLine</a></li><li><a href="#variant.NewLineNonPrintable">NewLineNonPrintable</a></li><li><a href="#variant.NonPrintable">NonPrintable</a></li><li><a href="#variant.Print">Print</a></li><li><a href="#variant.Raw">Raw</a></li><li><a href="#variant.Return">Return</a></li><li><a href="#variant.While">While</a></li></ul></section><h2><a href="index.html">In osmia::types</a></h2></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Type Alias <a href="../index.html">osmia</a>::<wbr><a href="index.html">types</a>::<wbr><a class="type" href="#">ParserCode</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../../src/osmia/types.rs.html#10">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><pre class="rust item-decl"><code>pub type ParserCode = <a class="enum" href="../model/stmt/stmt/enum.Stmt.html" title="enum osmia::model::stmt::stmt::Stmt">Stmt</a>;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h3 id="structure"><a class="doc-anchor" href="#structure">§</a>Structure:</h3><div class="example-wrap"><pre class="language-text"><code>program        → stmt
+stmt           → block | raw | evaluation | print | comment | assign |
+                 if | while | foreach |
+                 break | continue | return |
+                 function
+
+block          → ( stmt )*
+raw            → &quot;...&quot;
+evaluation     → &quot;{{&quot; expression &quot;}}&quot;
+print          → &quot;{{&quot; &quot;print&quot; expression &quot;}}&quot;
+comment        → &quot;{{&quot; &quot;#&quot; expression &quot;}}&quot;
+assign         → &quot;{{&quot; variable &quot;=&quot; expression &quot;}}&quot;
+if             → &quot;{{&quot; &quot;if&quot; conditional ( elseif )* ( else )? &quot;{{&quot; &quot;fi&quot; &quot;}}&quot;
+elseif         → &quot;{{&quot; &quot;elseif&quot; conditional
+else           → &quot;{{&quot; &quot;else&quot; block
+conditional    → expression &quot;}}&quot; stmt
+while          → &quot;{{&quot; &quot;while&quot; conditional &quot;done&quot; &quot;}}&quot;
+for            → &quot;{{&quot; &quot;for&quot; identifier &quot;in&quot; iterable &quot;}}&quot; stmt &quot;{{&quot; &quot;done&quot; &quot;}}&quot;
+iterable       → expression
+break          → &quot;{{&quot; &quot;break&quot; &quot;}}&quot;
+continue       → &quot;{{&quot; &quot;continue&quot; &quot;}}&quot;
+return         → &quot;{{&quot; &quot;return&quot; expression? &quot;}}&quot;
+function       → &quot;{{&quot; &quot;fn&quot; identifier ( &quot;;&quot; parameters )? &quot;}}&quot; block &quot;{{&quot; &quot;done&quot; &quot;}}&quot;
+parameters     → parameter ( &quot;,&quot; parameter )* ( &quot;,&quot; &quot;...&quot; identifier)?
+parameter      → identifier ( &quot;=&quot; expression )?
+
+expression     → lambda | logic_or
+lambda         → &quot;fn&quot; &quot;(&quot; parameters? &quot;)&quot; &quot;=&gt;&quot; expression
+logic_or       → logic_and ( &quot;||&quot; logic_and )*
+logic_and      → equality ( &quot;&amp;&amp;&quot; equality )*
+equality       → bitwise ( ( &quot;!=&quot; | &quot;==&quot; ) bitwise )*
+bitwise        → comparison ( ( &quot;&amp;&quot; | &quot;|&quot; | &quot;^&quot; ) comparison )*
+comparison     → bitshift ( ( &quot;&gt;&quot; | &quot;&gt;=&quot; | &quot;&lt;&quot; | &quot;&lt;=&quot; ) bitshift )*
+bitshift       → term ( ( &quot;&gt;&gt;&quot; | &quot;&lt;&lt;&quot; ) term )*
+term           → factor ( ( &quot;-&quot; | &quot;+&quot; ) factor )*
+factor         → unary ( ( &quot;/&quot; | &quot;*&quot; | &quot;%&quot; ) unary )*
+unary          → ( &quot;!&quot; | &quot;-&quot; | &quot;+&quot; )* value
+
+value          → primary ( method_call | call | variable )*
+primary        → array | object | grouping | literal | var_name
+array          → &quot;[&quot; ( expression? ( &quot;,&quot; expression )* )? &quot;]&quot;
+object         → &quot;{&quot; ( object_entry ( &quot;,&quot; object_entry )* )? &quot;}&quot;
+object_entry   → expression &quot;:&quot; expression
+grouping       → &quot;(&quot; expression &quot;)&quot;
+literal        → float | int | string | boolean | null
+var_name       → identifier
+
+method_call    → ( &quot;?&quot; identifier call )*
+call           → ( &quot;(&quot; arguments? &quot;)&quot; )*
+arguments      → expression ( &quot;,&quot; expression )*
+variable       → ( ( &quot;[&quot; expression &quot;]&quot; ) | ( &quot;.&quot; identifier ) )*
+
+identifier     → alpha ( alpha | digit )*
+alpha          → [a-zA-Z_]
+digit          → [0-9]
+int            → digit+
+float          → int &quot;.&quot; int
+boolean        → &quot;true&quot; | &quot;false&quot;
+null           → &quot;null&quot;
+string         → &#39;&quot;&#39; ( [^&quot;] )* &#39;&quot;&#39; | &quot;&#39;&quot; ( [^&#39;] )* &quot;&#39;&quot;
+</code></pre></div></div></details><h2 id="aliased-type" class="section-header">Aliased Type<a href="#aliased-type" class="anchor">§</a></h2><pre class="rust item-decl"><code>enum ParserCode {
+<details class="toggle type-contents-toggle"><summary class="hideme"><span>Show 16 variants</span></summary>    Block(<a class="struct" href="../model/stmt/block/struct.Block.html" title="struct osmia::model::stmt::block::Block">Block</a>),
+    Raw(<a class="struct" href="https://doc.rust-lang.org/1.80.1/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>),
+    NonPrintable(<a class="struct" href="https://doc.rust-lang.org/1.80.1/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>),
+    NewLine,
+    NewLineNonPrintable,
+    Expr(<a class="enum" href="../model/expr/expr/enum.Expr.html" title="enum osmia::model::expr::expr::Expr">Expr</a>),
+    Print(<a class="struct" href="../model/stmt/print/struct.Print.html" title="struct osmia::model::stmt::print::Print">Print</a>),
+    Comment(<a class="struct" href="https://doc.rust-lang.org/1.80.1/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>),
+    Assign(<a class="struct" href="../model/stmt/assign/struct.Assign.html" title="struct osmia::model::stmt::assign::Assign">Assign</a>),
+    If(<a class="struct" href="../model/stmt/if/struct.If.html" title="struct osmia::model::stmt::if::If">If</a>),
+    While(<a class="struct" href="../model/stmt/conditional_stmt/struct.ConditionalStmt.html" title="struct osmia::model::stmt::conditional_stmt::ConditionalStmt">ConditionalStmt</a>),
+    For(<a class="struct" href="../model/stmt/for/struct.For.html" title="struct osmia::model::stmt::for::For">For</a>),
+    Break,
+    Continue,
+    Return(<a class="struct" href="../model/stmt/return/struct.Return.html" title="struct osmia::model::stmt::return::Return">Return</a>),
+    Function(<a class="struct" href="../model/stmt/function/struct.Function.html" title="struct osmia::model::stmt::function::Function">Function</a>),
+</details>}</code></pre><h2 id="variants" class="variants section-header">Variants<a href="#variants" class="anchor">§</a></h2><div class="variants"><section id="variant.Block" class="variant"><a href="#variant.Block" class="anchor">§</a><h3 class="code-header">Block(<a class="struct" href="../model/stmt/block/struct.Block.html" title="struct osmia::model::stmt::block::Block">Block</a>)</h3></section><section id="variant.Raw" class="variant"><a href="#variant.Raw" class="anchor">§</a><h3 class="code-header">Raw(<a class="struct" href="https://doc.rust-lang.org/1.80.1/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>)</h3></section><section id="variant.NonPrintable" class="variant"><a href="#variant.NonPrintable" class="anchor">§</a><h3 class="code-header">NonPrintable(<a class="struct" href="https://doc.rust-lang.org/1.80.1/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>)</h3></section><section id="variant.NewLine" class="variant"><a href="#variant.NewLine" class="anchor">§</a><h3 class="code-header">NewLine</h3></section><section id="variant.NewLineNonPrintable" class="variant"><a href="#variant.NewLineNonPrintable" class="anchor">§</a><h3 class="code-header">NewLineNonPrintable</h3></section><section id="variant.Expr" class="variant"><a href="#variant.Expr" class="anchor">§</a><h3 class="code-header">Expr(<a class="enum" href="../model/expr/expr/enum.Expr.html" title="enum osmia::model::expr::expr::Expr">Expr</a>)</h3></section><section id="variant.Print" class="variant"><a href="#variant.Print" class="anchor">§</a><h3 class="code-header">Print(<a class="struct" href="../model/stmt/print/struct.Print.html" title="struct osmia::model::stmt::print::Print">Print</a>)</h3></section><section id="variant.Comment" class="variant"><a href="#variant.Comment" class="anchor">§</a><h3 class="code-header">Comment(<a class="struct" href="https://doc.rust-lang.org/1.80.1/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>)</h3></section><section id="variant.Assign" class="variant"><a href="#variant.Assign" class="anchor">§</a><h3 class="code-header">Assign(<a class="struct" href="../model/stmt/assign/struct.Assign.html" title="struct osmia::model::stmt::assign::Assign">Assign</a>)</h3></section><section id="variant.If" class="variant"><a href="#variant.If" class="anchor">§</a><h3 class="code-header">If(<a class="struct" href="../model/stmt/if/struct.If.html" title="struct osmia::model::stmt::if::If">If</a>)</h3></section><section id="variant.While" class="variant"><a href="#variant.While" class="anchor">§</a><h3 class="code-header">While(<a class="struct" href="../model/stmt/conditional_stmt/struct.ConditionalStmt.html" title="struct osmia::model::stmt::conditional_stmt::ConditionalStmt">ConditionalStmt</a>)</h3></section><section id="variant.For" class="variant"><a href="#variant.For" class="anchor">§</a><h3 class="code-header">For(<a class="struct" href="../model/stmt/for/struct.For.html" title="struct osmia::model::stmt::for::For">For</a>)</h3></section><section id="variant.Break" class="variant"><a href="#variant.Break" class="anchor">§</a><h3 class="code-header">Break</h3></section><section id="variant.Continue" class="variant"><a href="#variant.Continue" class="anchor">§</a><h3 class="code-header">Continue</h3></section><section id="variant.Return" class="variant"><a href="#variant.Return" class="anchor">§</a><h3 class="code-header">Return(<a class="struct" href="../model/stmt/return/struct.Return.html" title="struct osmia::model::stmt::return::Return">Return</a>)</h3></section><section id="variant.Function" class="variant"><a href="#variant.Function" class="anchor">§</a><h3 class="code-header">Function(<a class="struct" href="../model/stmt/function/struct.Function.html" title="struct osmia::model::stmt::function::Function">Function</a>)</h3></section></div><script src="../../type.impl/osmia/model/stmt/stmt/enum.Stmt.js" data-self-path="osmia::types::ParserCode" async></script></section></div></main></body></html>

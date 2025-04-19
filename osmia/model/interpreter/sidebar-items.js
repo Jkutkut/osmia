@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["callable","exit_status","interpreter","method_expression","osmia_interpreter","osmia_result"]};

@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["itoa","osmia","proc_macro2","quote","ryu","serde","serde_derive","serde_json","syn","unicode_ident"];
+window.ALL_CRATES = ["aho_corasick","itoa","memchr","osmia","proc_macro2","quote","regex","regex_automata","regex_syntax","ryu","serde","serde_derive","serde_json","syn","unicode_ident"];

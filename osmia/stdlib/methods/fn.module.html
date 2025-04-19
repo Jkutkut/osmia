@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="math module"><title>module in osmia::stdlib::methods - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../osmia/index.html">osmia</a><span class="version">2.6.12</span></h2></div><div class="sidebar-elems"><h2><a href="index.html">In osmia::stdlib::methods</a></h2></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Function <a href="../../index.html">osmia</a>::<wbr><a href="../index.html">stdlib</a>::<wbr><a href="index.html">methods</a>::<wbr><a class="fn" href="#">module</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../../../src/osmia/stdlib/methods/mod.rs.html#203-241">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><pre class="rust item-decl"><code>pub fn module() -&gt; <a class="struct" href="../../model/ctx/lib/module/struct.Module.html" title="struct osmia::model::ctx::lib::module::Module">Module</a></code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="math-module"><a class="doc-anchor" href="#math-module">§</a>math module</h2><h3 id="constants"><a class="doc-anchor" href="#constants">§</a>Constants:</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+osmia.run_code(<span class="string">"{{ math.PI }}"</span>).unwrap();
+osmia.run_code(<span class="string">"{{ math.E }}"</span>).unwrap();</code></pre></div>
+<h3 id="methods"><a class="doc-anchor" href="#methods">§</a>Methods:</h3><h4 id="string"><a class="doc-anchor" href="#string">§</a>String:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+
+<span class="comment">// Generics
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?len() }}"#</span>).unwrap(), <span class="string">"5"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?has_content() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?to_bool() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?to_float() }}"#</span>).is_err());
+<span class="macro">assert!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?to_int() }}"#</span>).is_err());
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?to_string() }}"#</span>).unwrap(), <span class="string">"hello"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?type() }}"#</span>).unwrap(), <span class="string">"string"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hi"?switch("bye", 1, "hi", 2) }}"#</span>).unwrap(), <span class="string">"2"</span>);
+
+<span class="comment">// String only
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "HELLO"?lower() }}"#</span>).unwrap(), <span class="string">"hello"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?upper() }}"#</span>).unwrap(), <span class="string">"HELLO"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "  hi   "?trim() }}"#</span>).unwrap(), <span class="string">"hi"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello world"?capitalize() }}"#</span>).unwrap(), <span class="string">"Hello World"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?starts_with("h") }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?ends_with("o") }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hi"?ensure_starts_with("¡") }}"#</span>).unwrap(), <span class="string">"¡hi"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hi"?ensure_ends_with("!") }}"#</span>).unwrap(), <span class="string">"hi!"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?index_of("l") }}"#</span>).unwrap(), <span class="string">"2"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?last_index_of("l") }}"#</span>).unwrap(), <span class="string">"3"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "h1-F"?match("^\w\d-\w$") }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?replace("l", "1") }}"#</span>).unwrap(), <span class="string">"he1lo"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?replace_all("l", "1") }}"#</span>).unwrap(), <span class="string">"he11o"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?split("") }}"#</span>).unwrap(), <span class="string">r#"["", "h", "e", "l", "l", "o", ""]"#</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?substring(1, 3) }}"#</span>).unwrap(), <span class="string">r#"el"#</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ "hello"?truncate(2) }}..."#</span>).unwrap(), <span class="string">r#"he..."#</span>);</code></pre></div>
+<h4 id="int"><a class="doc-anchor" href="#int">§</a>Int:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+ 
+<span class="comment">// Generics
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1?has_content() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1?to_bool() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1?to_float() }}"#</span>).unwrap(), <span class="string">"1"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1?to_int() }}"#</span>).unwrap(), <span class="string">"1"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1?to_string() }}"#</span>).unwrap(), <span class="string">"1"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1?type() }}"#</span>).unwrap(), <span class="string">"int"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1?switch(1, "one", 2, "two") }}"#</span>).unwrap(), <span class="string">"one"</span>);
+
+<span class="comment">// Int only
+// There are no other methods</span></code></pre></div>
+<h4 id="float"><a class="doc-anchor" href="#float">§</a>Float:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+
+<span class="comment">// Generics
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1.1?has_content() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1.1?to_bool() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1.1?to_float() }}"#</span>).unwrap(), <span class="string">"1.1"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1.1?to_int() }}"#</span>).unwrap(), <span class="string">"1"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1.1?to_string() }}"#</span>).unwrap(), <span class="string">"1.1"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1.1?type() }}"#</span>).unwrap(), <span class="string">"float"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ 1.1?switch(1, "one", 2, "two", null) }}"#</span>).unwrap(), <span class="string">"null"</span>);</code></pre></div>
+<h4 id="bool"><a class="doc-anchor" href="#bool">§</a>Bool:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+ 
+<span class="comment">// Generics
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?has_content() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?to_bool() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?to_string() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?type() }}"#</span>).unwrap(), <span class="string">"bool"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?switch(true, "t", false, "f") }}"#</span>).unwrap(), <span class="string">"t"</span>);
+
+<span class="comment">// Bool only
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?then("t", "f") }}"#</span>).unwrap(), <span class="string">"t"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ false?not() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ false?and(true) }}"#</span>).unwrap(), <span class="string">"false"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?or(false) }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?nand(true) }}"#</span>).unwrap(), <span class="string">"false"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?nor(false) }}"#</span>).unwrap(), <span class="string">"false"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?xor(false) }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ true?xnor(false) }}"#</span>).unwrap(), <span class="string">"false"</span>);</code></pre></div>
+<h4 id="null"><a class="doc-anchor" href="#null">§</a>Null:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+
+<span class="comment">// Generics
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ null?has_content() }}"#</span>).unwrap(), <span class="string">"false"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ null?to_bool() }}"#</span>).unwrap(), <span class="string">"false"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ null?to_string() }}"#</span>).unwrap(), <span class="string">"null"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ null?type() }}"#</span>).unwrap(), <span class="string">"null"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ null?switch(1, "one", 2, "two", "null") }}"#</span>).unwrap(), <span class="string">"null"</span>);
+
+<span class="comment">// Null only
+// There are no other methods</span></code></pre></div>
+<h4 id="array"><a class="doc-anchor" href="#array">§</a>Array:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+
+<span class="comment">// Generics
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?len() }}"#</span>).unwrap(), <span class="string">"3"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?has_content() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?to_bool() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?to_string() }}"#</span>).unwrap(), <span class="string">"[1, 2, 3]"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?type() }}"#</span>).unwrap(), <span class="string">"array"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?switch(1, "one", 2, "two", null) }}"#</span>).unwrap(), <span class="string">"null"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?keys() }}"#</span>).unwrap(), <span class="string">"[0, 1, 2]"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?values() }}"#</span>).unwrap(), <span class="string">"[1, 2, 3]"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?entries() }}"#</span>).unwrap(), <span class="string">r#"[{"key": 0, "value": 1}, {"key": 1, "value": 2}, {"key": 2, "value": 3}]"#</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 2, 3]?get(4, null) }}"#</span>).unwrap(), <span class="string">"null"</span>);
+
+<span class="comment">// Array only
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [3, 2, 1]?sort() }}"#</span>).unwrap(), <span class="string">"[1, 2, 3]"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [2, 3, 1]?sort_by(fn (a, b) =&gt; b - a ) }}"#</span>).unwrap(), <span class="string">"[3, 2, 1]"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 3, 2]?map(fn (a) =&gt; a * 2 - 1) }}"#</span>).unwrap(), <span class="string">"[1, 5, 3]"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 3, 2]?for_each(fn (a) =&gt; a * 2) }}"#</span>).unwrap(), <span class="string">""</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 3, 2]?for_each_index(fn (a, idx) =&gt; a * idx) }}"#</span>).unwrap(), <span class="string">""</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ [1, 3, 2]?reverse() }}"#</span>).unwrap(), <span class="string">"[2, 3, 1]"</span>);</code></pre></div>
+<h4 id="object"><a class="doc-anchor" href="#object">§</a>Object:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+
+<span class="comment">// Generics
+</span><span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {"a": 1, "b": 2}?has_content() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {"a": 1, "b": 2}?to_bool() }}"#</span>).unwrap(), <span class="string">"true"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {"a": 1, "b": 2}?to_string() }}"#</span>).unwrap(), <span class="string">"{\"a\": 1, \"b\": 2}"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {"a": 1, "b": 2}?type() }}"#</span>).unwrap(), <span class="string">"object"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {}?switch({"a": 1}, "empty", {"b": null}, "b", null) }}"#</span>).unwrap(), <span class="string">"null"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {"a": 1, "b": 2}?keys()?sort() }}"#</span>).unwrap(), <span class="string">"[\"a\", \"b\"]"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {"a": 1, "b": 2}?values()?sort() }}"#</span>).unwrap(), <span class="string">"[1, 2]"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(
+	<span class="string">r#"{{ {"a": 1, "b": 2}?entries()?sort_by(fn (a, b) =&gt; b.key - a.key) }}"#</span>).unwrap(),
+	<span class="string">r#"[{"key": "a", "value": 1}, {"key": "b", "value": 2}]"#
+</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {"a": 1, "b": 2}?get("b", null) }}"#</span>).unwrap(), <span class="string">"2"</span>);
+<span class="macro">assert_eq!</span>(osmia.run_code(<span class="string">r#"{{ {"a": 1, "b": 2}?get("c", null) }}"#</span>).unwrap(), <span class="string">"null"</span>);
+
+<span class="comment">// Object only
+// There are no other methods</span></code></pre></div>
+<h3 id="sub-modules"><a class="doc-anchor" href="#sub-modules">§</a>Sub modules:</h3>
+<p>There are no sub modules for this module</p>
+</div></details></section></div></main></body></html>
