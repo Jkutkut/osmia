@@ -1,48 +1,39 @@
-//! # Index:
-//! - [Introduction](#introduction)
-//! - [Operations](#operations)
-//! - [Examples](#examples)
-//!
-//! # Introduction
-//!	TODO
+#![doc = include_str!("../README.md")]
 //!
 //! # Structure:
-//! [structure](./types/type.ParserCode.html#structure)
+//! - [parsing structure](./types/type.ParserCode.html)
+//! - Expressions: the smallest building block of the language.
+//! [documentation](./model/expr/expr/enum.Expr.html)
+//!   - [methods](./stdlib/methods/fn.module.html)
+//! - Statements: piece of code that can be executed.
+//! [documentation](./model/stmt/stmt/enum.Stmt.html)
 //!
-//!	## Expressions
-//!	TODO
-//!	[expr](./model/expr/expr/enum.Expr.html)
+//! ## Context
+//! The context allows to read and write variables in a Json-like syntax.
 //!
-//!	## Context
-//!	The context allows to read and write variables in a Json-like syntax.
+//! Variables, functions and expressions can be stored in the context. The methods for the
+//! [Expressions](./#expressions) are also stored here.
+//! See [methods in stdlib](./stdlib/methods/fn.module.html)
 //!
-//!	Variables, functions and expressions can be stored in the context. The methods for the
-//!	[Expressions](./#expressions) are also stored here.
+//! The [stdlib](./stdlib/fn.import.html) adds the base for Osmia.
 //!
-//!	## Expression methods
-//!	TODO
+//! ## Examples
+//! ```rust
+//! use osmia::Osmia;
 //!
-//!	## Statements
-//!	TODO
-//!	[stmt](./model/stmt/stmt/enum.Stmt.html)
+//! let mut osmia = Osmia::default();
+//! let output = osmia.run_code("1 + 1 = {{ 1 + 1 }}").unwrap();
+//! assert_eq!(output, "1 + 1 = 2".to_string());
+//! ```
 //!
-//! # Examples
-//!	```rust
-//!	use osmia::Osmia;
+//! ### Json context:
+//! ```rust
+//! use osmia::Osmia;
 //!
-//!	let mut osmia = Osmia::default();
-//!	let output = osmia.run_code("1 + 1 = {{ 1 + 1 }}").unwrap();
-//!	assert_eq!(output, "1 + 1 = 2".to_string());
-//!	```
-//!
-//!	## Json context:
-//!	```rust
-//!	use osmia::Osmia;
-//!
-//!	let mut osmia = Osmia::try_from(r#"{ "name": "Marvin" }"#).unwrap();
-//!	let output = osmia.run_code("Hello {{ name }}!").unwrap();
-//!	assert_eq!(output, "Hello Marvin!".to_string());
-//!	```
+//! let mut osmia = Osmia::try_from(r#"{ "name": "Marvin" }"#).unwrap();
+//! let output = osmia.run_code("Hello {{ name }}!").unwrap();
+//! assert_eq!(output, "Hello Marvin!".to_string());
+//! ```
 
 mod macros;
 mod constants;
