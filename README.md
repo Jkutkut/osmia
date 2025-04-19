@@ -6,7 +6,8 @@ write templates that are readable, maintainable, and decoupled from your
 application logic.
 
 ## Documentation / Docs:
-[https://jkutkut.github.io/osmia/osmia](https://jkutkut.github.io/osmia/osmia)
+[Official Documentation](https://jkutkut.github.io/osmia/osmia/index.html)
+[Repository](https://github.com/jkutkut/osmia)
 
 ## ✨ What is Osmia?
 Osmia is a template interpreter — a small, fast engine that reads template files
