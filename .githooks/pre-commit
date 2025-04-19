@@ -1,0 +1,52 @@
+#!/bin/env bash
+
+cargo="Cargo.toml"
+cargo_lock="Cargo.lock"
+
+check_version() {
+    # Check if file exists
+    if [ ! -f "$cargo" ]; then
+        echo "❌ $cargo not found"
+        exit 1
+    fi
+    # Check if file is fully staged
+    if ! git diff --cached --name-only | grep -q "$cargo"; then
+        echo "❌ $cargo is not staged. Please update the version of this commit"
+        exit 1
+    fi
+    if git ls-files --modified | grep -q "$cargo"; then
+        echo "❌ $cargo is not fully in the index"
+        exit 1
+    fi
+    old_version="$(git show HEAD:$cargo | grep -m 1 version | cut -d '"' -f 2)"
+    new_version=$(grep -m 1 version Cargo.toml | cut -d '"' -f 2)
+    if [ "$old_version" == "" ] || [ "$new_version" == "" ]; then
+        echo "❌ Could not find version in $cargo"
+        exit 1
+    fi
+    if [ "$old_version" == "$new_version" ]; then
+        echo "❌ $cargo version not updated"
+        exit 1
+    fi
+    echo "✅ $cargo version updated: $old_version -> $new_version"
+}
+
+ensure_lock_up_to_date() {
+    if [ ! -f "$cargo_lock" ]; then
+        echo "❌ $cargo_lock not found"
+        exit 1
+    fi
+    if ! git diff --cached --name-only | grep -q "$cargo_lock"; then
+        echo "❌ $cargo_lock is not staged."
+        exit 1
+    fi
+    if git ls-files --modified | grep -q "$cargo_lock"; then
+        echo "❌ $cargo_lock is not fully in the index"
+        exit 1
+    fi
+    echo "✅ $cargo_lock ready to be committed"
+
+}
+
+check_version || exit 1
+ensure_lock_up_to_date || exit 1

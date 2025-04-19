@@ -1,7 +1,13 @@
+pub mod callable;
 mod exit_status;
-mod interpreter_value;
+mod interpreter;
+mod osmia_interpreter;
+mod osmia_result;
+mod method_expression;
 
-pub use exit_status::ExitStatus;
-pub use interpreter_value::InterpreterValue;
-
-pub type InterpreterResult = Result<(ExitStatus, InterpreterValue), String>;
+pub use callable::Callable;
+use exit_status::ExitStatus;
+pub use interpreter::Interpreter;
+pub use osmia_interpreter::OsmiaInterpreter;
+pub use osmia_result::OsmiaResult;
+pub use method_expression::MethodExpression;

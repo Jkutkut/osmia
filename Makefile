@@ -20,7 +20,7 @@ DOCKER_RUN_IT = ${DOCKER_RUN} -it --name ${REPO}
 RUN_ATTRS = ${CODE_VOLUME} ${CARGO_REGISTRY} -w /${REPO}
 
 terminal:
-	${DOCKER_RUN_IT} ${RUN_ATTRS} jkutkut/docker4rust
+	${DOCKER_RUN_IT}_terminal ${RUN_ATTRS} jkutkut/docker4rust
 
 reset_file_permissions:
 	sudo chown -R ${USER}:${USER} .
@@ -31,8 +31,17 @@ test:
 test_backtrace:
 	${DOCKER_RUN} ${RUN_ATTRS} -e RUST_BACKTRACE=1 --entrypoint cargo jkutkut/docker4rust test
 
+test_watch:
+	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear test
+
+test_watch_debug:
+	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo -e RUST_BACKTRACE=1 jkutkut/docker4rust watch --clear test
+
 doc:
-	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust doc --lib --examples
+	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust doc --lib --examples --document-private-items
+
+doc_watch:
+	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear -x test -x "doc --lib --examples --document-private-items"
 
 doc_release:
 	@echo "Ensuring repo has no uncommited changes..."
@@ -58,6 +67,20 @@ doc_release:
 	@git push
 	@git checkout main
 
+stop:
+	docker rm -f ${REPO}
 
 clean:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust clean
+
+# ****** Git ******
+
+prepare_commit: hooks
+	${EDITOR} Cargo.toml
+	make test
+	git add Cargo.toml Cargo.lock; git add -N .;
+	git add -p
+
+hooks:
+	git config core.hooksPath .githooks
+	# git config --unset core.hooksPath

@@ -1,4 +1,4 @@
-/// Allows to make execute multiple tests with less boilerplate code.
+/// This macro simplifies running multiple tests with less boilerplate code.
 ///
 /// # Examples
 /// ```rust
@@ -35,14 +35,18 @@
 #[macro_export]
 macro_rules! macro_tests {
 	(
-		$ft:ident,
-		$(($test_name:ident, $($ex:expr),*)),*
+		$ft:ident
+		$(,
+			$(($test_name:ident, $($ex:expr),* $(,)? )),* $(,)?
+		)?
 	) => {
 		$(
-			#[test]
-			fn $test_name() {
-				$ft($($ex),*);
-			}
-		)*
+			$(
+				#[test]
+				fn $test_name() {
+					$ft($($ex),*);
+				}
+			)*
+		)?
 	}
 }

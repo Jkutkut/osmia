@@ -1,219 +1,153 @@
+#![doc = include_str!("../README.md")]
+//!
+//! # Structure:
+//! - [parsing structure](./types/type.ParserCode.html)
+//! - Expressions: the smallest building block of the language.
+//! [documentation](./model/expr/expr/enum.Expr.html)
+//!   - [methods](./stdlib/methods/fn.module.html)
+//! - Statements: piece of code that can be executed.
+//! [documentation](./model/stmt/stmt/enum.Stmt.html)
+//!
+//! ## Context
+//! The context allows to read and write variables in a Json-like syntax.
+//!
+//! Variables, functions and expressions can be stored in the context. The methods for the
+//! [Expressions](./#expressions) are also stored here.
+//! See [methods in stdlib](./stdlib/methods/fn.module.html)
+//!
+//! The [stdlib](./stdlib/fn.import.html) adds the base for Osmia.
+//!
+//! ## Examples
+//! ```rust
+//! use osmia::Osmia;
+//!
+//! let mut osmia = Osmia::default();
+//! let output = osmia.run_code("1 + 1 = {{ 1 + 1 }}").unwrap();
+//! assert_eq!(output, "1 + 1 = 2".to_string());
+//! ```
+//!
+//! ### Json context:
+//! ```rust
+//! use osmia::Osmia;
+//!
+//! let mut osmia = Osmia::try_from(r#"{ "name": "Marvin" }"#).unwrap();
+//! let output = osmia.run_code("Hello {{ name }}!").unwrap();
+//! assert_eq!(output, "Hello Marvin!".to_string());
+//! ```
+
 mod macros;
+mod constants;
 mod model;
-mod parser;
-mod lexer;
-mod syntax_tree;
-mod tree_walker;
-mod interpreter;
+mod utils;
+mod types;
+mod stdlib;
 
 #[cfg(test)]
 mod tests;
 
-use interpreter::Interpreter;
-use model::Ctx;
-use parser::Parser;
-use lexer::Lexer;
-use model::Stmt;
+use types::{
+	LexerCode,
+	ParserCode,
+	OsmiaOutput,
 
-/// This simple API is designed to use the osmia template engine.
-///
-/// # Syntax
-/// ## Text:
-/// By default, all text outside the delimiters will be treated as a plain text.
-///
-/// ```text
-/// Hey there! This is a plain text
-/// ```
-/// ```text
-/// Hey there! This is a plain text
-/// ```
-///
-/// ## Expression:
-/// Evaluates and prints the given expression.
-/// ```text
-/// 1 + 2 = {{ 1 + 2 }}
-/// ```
-/// ```text
-/// 1 + 2 = 3
-/// ```
-///
-/// ## Assign:
-/// Assigns the given expression to the given variable in the context.
-/// ```text
-/// {{ assign foo = 1 + 2 }}
-/// The result is {{foo}}
-/// ```
-/// ```text
-/// The result is 3
-/// ```
-///
-/// ## Print:
-/// Prints the given expression in the stdin. It can be useful when debugging.
-/// ```text
-/// {{ print "Hello world!" }}
-/// ```
-/// ```text
-/// ```
-///
-/// ## If:
-/// ### Single if:
-/// ```text
-/// {{ if 1 == 1 }}
-/// Math is not broken!
-/// {{ fi }}
-/// ```
-/// ```text
-/// Math is not broken!
-/// ```
-///
-/// ### If, else:
-/// ```text
-/// {{ if 1 == 2 }}
-/// Math is not broken!
-/// {{ else }}
-/// Nope, math is right >D
-/// {{ fi }}
-/// ```
-/// ```text
-/// Nope, math is right >D
-/// ```
-///
-/// ### If, else if:
-/// ```text
-/// {{assign value = 2}}
-/// {{ if value == 1 }}
-/// Nope
-/// {{ elseif value == 2 }}
-/// The value is 2!
-/// {{ else }}
-/// Nope
-/// {{ fi }}
-/// ```
-/// ```text
-/// The value is 2!
-/// ```
-///
-/// ## While:
-/// ```text
-/// {{ assign i = 0 }}
-/// {{ while i < 5 }}
-/// {{ assign i = i + 1 }}
-/// i = {{ i }}
-/// {{done}}
-/// ```
-/// ```text
-/// i = 1
-/// i = 2
-/// i = 3
-/// i = 4
-/// i = 5
-/// ```
-///
-/// ## For:
-/// ```text
-/// {{ for i in [1, 2, 3] }}
-///   i = {{ i }}
-/// {{ done }}
-/// {{assign arr = [
-///   {"name": "Marvin1"},
-///   {"name": "Marvin2"},
-///   {"name": "Marvin3"}
-/// ]}}
-/// {{for user in arr}}
-/// User: {{ user.name }}
-/// {{done}}
-/// ```
-/// ```text
-/// i = 1
-/// i = 2
-/// i = 3
-/// User: Marvin1
-/// User: Marvin2
-/// User: Marvin3
-/// ```
-///
-/// ## Continue, break:
-/// ```text
-/// {{continue}}
-/// {{break}}
-/// ```
-///
-/// ## Advanced control:
-/// All variable in the context can be used and edited similarly to
-/// variables in JavaScript.
-/// ```text
-/// {{ assign obj = {"user": {"name": "Marvin"} } }}
-/// Old name: {{ obj.user.name }}
-/// {{ assign obj.user.name = "R2D2" }}
-/// New name: {{ obj.user.name }}
-/// ```
-/// ```text
-/// Old name: Marvin
-/// New name: R2D2
-/// ```
-///
-/// # Examples
-///
-/// ## Basic execution
-/// ```rust
-/// use osmia::Osmia;
-///
-/// let mut interpreter = Osmia::new();
-/// let code = Osmia::code("Hello world! {{ 1 + 2 }}").unwrap();
-/// let result = interpreter.run(&code).unwrap();
-/// assert_eq!(result, "Hello world! 3");
-/// ```
-///
-/// ## Context
-/// The context can be passed as a JSON object in the form of a string.
-/// ```rust
-/// use osmia::Osmia;
-///
-/// let context_json = r#"{"foo": "bar"}"#;
-/// let code = "The value of foo is {{ foo }}";
-/// let mut interpreter = Osmia::from_json(context_json).unwrap();
-/// let code = Osmia::code(code).unwrap();
-/// let result = interpreter.run(&code).unwrap();
-/// assert_eq!(result, "The value of foo is bar");
-/// ```
-///
-/// ## Experimental features: Custom delimiters
-/// You can change the delimiters used by the code lexer.
-/// ```rust
-/// use osmia::Osmia;
-///
-/// let mut interpreter = Osmia::from_json(r#"{"user": {"name": "Marvin"}}"#).unwrap();
-/// let code = Osmia::custom_code("User: ${ user.name }", "${", "}").unwrap();
-/// let result = interpreter.run(&code).unwrap();
-/// assert_eq!(result, "User: Marvin");
-/// ```
-pub struct Osmia;
+	OsmiaError,
+};
+use model::ctx;
+use model::lexer::{
+	Lexer, OsmiaLexer,
+};
+use model::parser::{
+	Parser, OsmiaParser,
+};
+use model::interpreter::{
+	Interpreter, OsmiaInterpreter,
+};
 
+pub trait CodeInterpreter: for<'a> TryFrom<&'a str> {
+	type Output;
+	type InterpreterError;
+
+	type LexerCode;
+	type ParserCode;
+	type Ctx;
+
+	const VERSION: &'static str;
+
+	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::InterpreterError>;
+	fn new_parser() -> impl Parser<Self::LexerCode, Self::ParserCode, Self::InterpreterError>;
+	fn new_interpreter(ctx: &mut Self::Ctx) -> impl Interpreter<Self::ParserCode, Self::Output, Self::InterpreterError>;
+
+	fn lex(code: &str) -> Result<Self::LexerCode, Self::InterpreterError> {
+		Self::new_lexer().lex(code)
+	}
+
+	fn parse(code: Self::LexerCode) -> Result<Self::ParserCode, Self::InterpreterError> {
+		Self::new_parser().parse(code)
+	}
+
+	fn interpret(ctx: &mut Self::Ctx, code: Self::ParserCode) -> Result<Self::Output, Self::InterpreterError> {
+		Self::new_interpreter(ctx).interpret(code)
+	}
+
+	fn run(&mut self, code: &str) -> Result<Self::Output, Self::InterpreterError>;
+}
+
+/// Default osmia template engine API.
+pub struct Osmia {
+	ctx: types::Ctx,
+}
 
 impl Osmia {
-	pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-
-	pub fn new() -> Interpreter {
-		Self::from_json("{}").unwrap()
+	fn new(ctx: types::Ctx) -> Self {
+		Self {
+			ctx,
+		}
 	}
 
-	pub fn from_json(json: &str) -> Result<Interpreter, String> {
-		let ctx = Self::new_ctx(json)?;
-		let interpreter = Interpreter::new(ctx);
-		Ok(interpreter)
+	pub fn run_code(&mut self, code: &str) -> Result<OsmiaOutput, OsmiaError> {
+		self.run(code)
+	}
+}
+
+impl Default for Osmia {
+	fn default() -> Self {
+		Self::new(types::Ctx::new())
+	}
+}
+
+impl CodeInterpreter for Osmia {
+	type Output = OsmiaOutput;
+	type InterpreterError = OsmiaError;
+
+	type LexerCode = LexerCode;
+	type ParserCode = ParserCode;
+	type Ctx = types::Ctx;
+
+	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
+	fn new_lexer() -> impl Lexer<Self::LexerCode, Self::InterpreterError> {
+		OsmiaLexer::new()
 	}
 
-	fn new_ctx(ctx: &str) -> Result<Ctx, String> {
-		Ctx::from_str(ctx)
+	fn new_parser() -> impl Parser<Self::LexerCode, Self::ParserCode, Self::InterpreterError> {
+		OsmiaParser::new()
 	}
 
-	pub fn code(code: &str) -> Result<Stmt, String> {
-		Self::custom_code(code, "{{", "}}")
+	fn new_interpreter(ctx: &mut Self::Ctx) -> impl Interpreter<Self::ParserCode, Self::Output, Self::InterpreterError> {
+		OsmiaInterpreter::new(ctx)
 	}
 
-	pub fn custom_code(code: &str, start_delimiter: &str, end_delimiter: &str) -> Result<Stmt, String> {
-		let lexer = Lexer::new(start_delimiter, end_delimiter);
-		let tokens = lexer.scan(code)?;
-		Parser::new(tokens).parse()
+	fn run(&mut self, code: &str) -> Result<Self::Output, Self::InterpreterError> {
+		let lexed = Self::lex(code)?;
+		let parsed = Self::parse(lexed)?;
+		Self::interpret(&mut self.ctx, parsed)
+	}
+}
+
+impl TryFrom<&str> for Osmia {
+	type Error = OsmiaError;
+
+	fn try_from(ctx: &str) -> Result<Self, Self::Error> {
+		Ok(Self::new(types::Ctx::try_from(ctx)?))
 	}
 }

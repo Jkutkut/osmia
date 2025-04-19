@@ -1,0 +1,313 @@
+use super::*;
+
+macro_tests!(
+	test,
+	(
+		if_01,
+		Some(r#"{{if condition == "if"}}{{print "condition is if"}}{{fi}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::If,
+			Token::Whitespace,
+			Token::new_alpha("condition"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_str("if"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::Print,
+			Token::Whitespace,
+			Token::new_str("condition is if"),
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::Fi,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		Some(Stmt::If(If::new(
+			ConditionalStmt::new(
+				Binary::new(
+					Variable::from_vec(vec![
+						JsonTreeKeyExpr::JsonTreeKey("condition".into())
+					]).into(),
+					BinaryOp::Equal,
+					Expr::new_str("if")
+				).into(),
+				Stmt::Print(Print::new(Expr::new_str("condition is if"))),
+			),
+			None,
+			None
+		))),
+		None
+	),
+	(
+		if_02,
+		Some(r#"
+{{if condition == "if"}}
+	{{print "condition is if"}}
+{{else}}
+	{{print "condition is else"}}
+{{fi}}"#),
+		Some(vec![
+			Token::NewLine,
+			Token::StmtStart,
+			Token::If,
+			Token::Whitespace,
+			Token::new_alpha("condition"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_str("if"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::new_non_printable("\t"),
+			Token::StmtStart,
+			Token::Print,
+			Token::Whitespace,
+			Token::new_str("condition is if"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::StmtStart,
+			Token::Else,
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::new_non_printable("\t"),
+			Token::StmtStart,
+			Token::Print,
+			Token::Whitespace,
+			Token::new_str("condition is else"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::StmtStart,
+			Token::Fi,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		Some(Stmt::Block(vec![
+			Stmt::NewLine,
+			Stmt::If(If::new(
+				ConditionalStmt::new(
+					Binary::new(
+						Variable::from_vec(vec![
+							JsonTreeKeyExpr::JsonTreeKey("condition".into())
+						]).into(),
+						BinaryOp::Equal,
+						Expr::new_str("if")
+					).into(),
+					Stmt::Block(vec![
+						Stmt::NewLineNonPrintable,
+						Stmt::new_non_printable("\t"),
+						Stmt::Print(Print::new(Expr::new_str("condition is if"))),
+						Stmt::NewLineNonPrintable,
+					].into()).into()
+				),
+				None,
+				Some(Stmt::Block(vec![
+					Stmt::NewLineNonPrintable,
+					Stmt::new_non_printable("\t"),
+					Stmt::Print(Print::new(Expr::new_str("condition is else"))),
+					Stmt::NewLineNonPrintable,
+				].into()).into())
+			))
+		].into())),
+		None
+	),
+	(
+		if_03,
+		Some(r#"
+{{if condition == "if"}}
+	{{print "condition is if"}}
+{{elseif condition == "elseif01"}}
+	{{print "condition is elseif01"}}
+{{elseif condition == "elseif02"}}
+	{{print "condition is elseif02"}}
+{{else}}
+	{{print "condition is else"}}
+{{fi}}"#),
+		Some(vec![
+			Token::NewLine,
+			Token::StmtStart,
+			Token::If,
+			Token::Whitespace,
+			Token::new_alpha("condition"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_str("if"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::new_non_printable("\t"),
+			Token::StmtStart,
+			Token::Print,
+			Token::Whitespace,
+			Token::new_str("condition is if"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::StmtStart,
+			Token::ElseIf,
+			Token::Whitespace,
+			Token::new_alpha("condition"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_str("elseif01"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::new_non_printable("\t"),
+			Token::StmtStart,
+			Token::Print,
+			Token::Whitespace,
+			Token::new_str("condition is elseif01"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::StmtStart,
+			Token::ElseIf,
+			Token::Whitespace,
+			Token::new_alpha("condition"),
+			Token::Whitespace,
+			Token::Equal,
+			Token::Whitespace,
+			Token::new_str("elseif02"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::new_non_printable("\t"),
+			Token::StmtStart,
+			Token::Print,
+			Token::Whitespace,
+			Token::new_str("condition is elseif02"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::StmtStart,
+			Token::Else,
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::new_non_printable("\t"),
+			Token::StmtStart,
+			Token::Print,
+			Token::Whitespace,
+			Token::new_str("condition is else"),
+			Token::StmtEnd,
+			Token::NewLineNonPrintable,
+			Token::StmtStart,
+			Token::Fi,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		Some(Stmt::Block(vec![
+			Stmt::NewLine,
+			Stmt::If(If::new(
+				ConditionalStmt::new(
+					Binary::new(
+						Variable::from_vec(vec![
+							JsonTreeKeyExpr::JsonTreeKey("condition".into())
+						]).into(),
+						BinaryOp::Equal,
+						Expr::new_str("if")
+					).into(),
+					Stmt::Block(vec![
+						Stmt::NewLineNonPrintable,
+						Stmt::new_non_printable("\t"),
+						Stmt::Print(Print::new(Expr::new_str("condition is if"))),
+						Stmt::NewLineNonPrintable,
+					].into()).into()
+				),
+				Some(vec![
+					ConditionalStmt::new(
+						Binary::new(
+							Variable::from_vec(vec![
+								JsonTreeKeyExpr::JsonTreeKey("condition".into())
+							]).into(),
+							BinaryOp::Equal,
+							Expr::new_str("elseif01")
+						).into(),
+						Stmt::Block(vec![
+							Stmt::NewLineNonPrintable,
+							Stmt::new_non_printable("\t"),
+							Stmt::Print(Print::new(Expr::new_str("condition is elseif01"))),
+							Stmt::NewLineNonPrintable,
+						].into()).into()
+					),
+					ConditionalStmt::new(
+						Binary::new(
+							Variable::from_vec(vec![
+								JsonTreeKeyExpr::JsonTreeKey("condition".into())
+							]).into(),
+							BinaryOp::Equal,
+							Expr::new_str("elseif02")
+						).into(),
+						Stmt::Block(vec![
+							Stmt::NewLineNonPrintable,
+							Stmt::new_non_printable("\t"),
+							Stmt::Print(Print::new(Expr::new_str("condition is elseif02"))),
+							Stmt::NewLineNonPrintable,
+						].into()).into()
+					),
+				]),
+				Some(Stmt::Block(vec![
+					Stmt::NewLineNonPrintable,
+					Stmt::new_non_printable("\t"),
+					Stmt::Print(Print::new(Expr::new_str("condition is else"))),
+					Stmt::NewLineNonPrintable,
+				].into()).into())
+			))
+		].into())),
+		None
+	),
+	(
+		if_04,
+		Some(r#"{{if v1}}if{{if v2}}if01{{else}}else01{{fi}}{{else}}else02{{fi}}"#),
+		Some(vec![
+			Token::StmtStart,
+			Token::If,
+			Token::Whitespace,
+			Token::new_alpha("v1"),
+			Token::StmtEnd,
+			Token::new_raw("if"),
+			Token::StmtStart,
+			Token::If,
+			Token::Whitespace,
+			Token::new_alpha("v2"),
+			Token::StmtEnd,
+			Token::new_raw("if01"),
+			Token::StmtStart,
+			Token::Else,
+			Token::StmtEnd,
+			Token::new_raw("else01"),
+			Token::StmtStart,
+			Token::Fi,
+			Token::StmtEnd,
+			Token::StmtStart,
+			Token::Else,
+			Token::StmtEnd,
+			Token::new_raw("else02"),
+			Token::StmtStart,
+			Token::Fi,
+			Token::StmtEnd,
+			Token::Eof
+		]),
+		Some(Stmt::If(If::new(
+			ConditionalStmt::new(
+				Variable::from_vec(vec![
+					JsonTreeKeyExpr::JsonTreeKey("v1".into())
+				]).into(),
+				Stmt::Block(vec![
+					Stmt::new_raw("if"),
+					Stmt::If(If::new(
+						ConditionalStmt::new(
+							Variable::from_vec(vec![
+								JsonTreeKeyExpr::JsonTreeKey("v2".into())
+							]).into(),
+							Stmt::new_raw("if01"),
+						),
+						None,
+						Some(Stmt::new_raw("else01"))
+					))
+				].into()).into()
+			),
+			None,
+			Some(Stmt::new_raw("else02")),
+		))),
+		None
+	),
+);
