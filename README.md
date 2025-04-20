@@ -20,6 +20,10 @@ project, whether you’re working in Java, Python, C#, Rust, Go, or any other
 language. This makes it perfect for projects that need flexible template
 generation without being locked into a specific tech stack.
 
+## Run Osmia
+[osmia-cli](https://github.com/jkutkut/osmia-cli)
+[docker4osmia](https://github.com/jkutkut/docker4osmia)
+
 ## 🛠️ Use Cases
 - HTML templating in web projects.
 - Formatting JSON from an API response.
