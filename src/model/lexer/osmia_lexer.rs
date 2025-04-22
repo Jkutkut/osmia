@@ -32,7 +32,6 @@ impl OsmiaLexer {
 			line_end = i;
 			i = Self::find_start_line(&tokens, line_end);
 			if !Self::is_printable_line(&tokens, i, line_end) {
-				println!("non printable line: {:?} ({} - {})", tokens[i..=line_end].to_vec(), i, line_end);
 				if matches!(tokens[line_end], Token::NewLine) {
 					tokens[line_end] = Token::NewLineNonPrintable;
 				}
