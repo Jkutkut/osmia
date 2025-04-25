@@ -176,5 +176,12 @@ macro_tests!(
 		vec![
 			(Ctx::new(), Ok("2")),
 		]
+	),
+	(
+		assign_not_printable,
+		"{{ v = 0 }}\n\t{{ v = v + 1 }}\n\t\t{{ v = v + 1 }}\n\t\t\t{{ v = v + 1 }}\n\t\n\t{{ v = v + 1 }}\n{{ v }}",
+		vec![
+			(Ctx::new(), Ok("4")),
+		]
 	)
 );

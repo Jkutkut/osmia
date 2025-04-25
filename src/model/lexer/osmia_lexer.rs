@@ -95,7 +95,16 @@ impl OsmiaLexer {
 			Token::Print | Token::Comment | Token::Function | Token::Return => (),
 			Token::If | Token::ElseIf | Token::Else | Token::Fi => (),
 			Token::While | Token::For | Token::Continue | Token::Break | Token::Done => (),
-			_ => return None
+			_ => {
+				let mut is_assignment = true;
+				while start < end && !matches!(tokens[start], Token::StmtEnd) {
+					if matches!(tokens[start], Token::Assign) {
+						is_assignment = false;
+					}
+					start += 1;
+				}
+				return if is_assignment { None } else { Some((start, end)) };
+			}
 		}
 		while start < end && !matches!(tokens[start], Token::StmtEnd) {
 			start += 1;
