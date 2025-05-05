@@ -111,6 +111,14 @@
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
 </pre></div><pre class="rust"><code><span class="kw">use super</span>::{
 	Lexer,
 	OsmiaLexerScanner
@@ -145,7 +153,6 @@
 			line_end = i;
 			i = <span class="self">Self</span>::find_start_line(<span class="kw-2">&amp;</span>tokens, line_end);
 			<span class="kw">if </span>!<span class="self">Self</span>::is_printable_line(<span class="kw-2">&amp;</span>tokens, i, line_end) {
-				<span class="macro">println!</span>(<span class="string">"non printable line: {:?} ({} - {})"</span>, tokens[i..=line_end].to_vec(), i, line_end);
 				<span class="kw">if </span><span class="macro">matches!</span>(tokens[line_end], Token::NewLine) {
 					tokens[line_end] = Token::NewLineNonPrintable;
 				}
@@ -209,8 +216,17 @@
 			Token::Print | Token::Comment | Token::Function | Token::Return =&gt; (),
 			Token::If | Token::ElseIf | Token::Else | Token::Fi =&gt; (),
 			Token::While | Token::For | Token::Continue | Token::Break | Token::Done =&gt; (),
-			<span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">None
-		</span>}
+			<span class="kw">_ </span>=&gt; {
+				<span class="kw">let </span><span class="kw-2">mut </span>is_assignment = <span class="bool-val">true</span>;
+				<span class="kw">while </span>start &lt; end &amp;&amp; !<span class="macro">matches!</span>(tokens[start], Token::StmtEnd) {
+					<span class="kw">if </span><span class="macro">matches!</span>(tokens[start], Token::Assign) {
+						is_assignment = <span class="bool-val">false</span>;
+					}
+					start += <span class="number">1</span>;
+				}
+				<span class="kw">return if </span>is_assignment { <span class="prelude-val">None </span>} <span class="kw">else </span>{ <span class="prelude-val">Some</span>((start, end)) };
+			}
+		}
 		<span class="kw">while </span>start &lt; end &amp;&amp; !<span class="macro">matches!</span>(tokens[start], Token::StmtEnd) {
 			start += <span class="number">1</span>;
 		}
