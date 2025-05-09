@@ -27,6 +27,9 @@ mod types;
 mod stdlib;
 
 #[cfg(test)]
+use macro_test::macro_tests;
+
+#[cfg(test)]
 mod tests;
 
 use types::{

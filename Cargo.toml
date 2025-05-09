@@ -1,6 +1,6 @@
 [package]
 name = "osmia"
-version = "2.6.18"
+version = "2.6.19"
 edition = "2021"
 authors = ["Jkutkut"]
 
@@ -8,3 +8,6 @@ authors = ["Jkutkut"]
 regex = "1.11.1"
 serde = { version = "1.0.206", features = ["derive"] }
 serde_json = "1.0.124"
+
+[dev-dependencies]
+macro_test = { git = "https://github.com/jkutkut/rust-macro-test" }
