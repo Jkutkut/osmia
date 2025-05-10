@@ -256,5 +256,23 @@ macro_tests! {
 		vec![
 			(Ctx::new(), Ok("1"))
 		]
+	),
+	(
+		ctx_array,
+		"{{ ctx?len() }}",
+		vec![
+			(
+				Ctx::try_from(r#"{"ctx": ["Marvin", "C3PO", "R2D2"]}"#).unwrap(),
+				Ok("3")
+			),
+			(
+				Ctx::try_from(r#"[]"#).unwrap(),
+				Ok("0")
+			),
+			(
+				Ctx::try_from(r#"["Marvin", "C3PO", "R2D2"]"#).unwrap(),
+				Ok("3")
+			),
+		]
 	)
 }

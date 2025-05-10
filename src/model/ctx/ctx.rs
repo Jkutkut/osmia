@@ -98,7 +98,11 @@ impl<'a> TryFrom<&'a str> for Ctx {
 		let content: JsonTree<String, CtxValue> = match serde_json::from_str(json) {
 			Ok(c) => match c {
 				JsonTree::Object(_) => c,
-				JsonTree::Array(_) => return Err("Cannot use an array as a context".into()),
+				JsonTree::Array(_) => {
+					let mut obj = JsonTree::new_obj();
+					obj.set(&mut JsonTreeKey::from("ctx").iter(), c).unwrap();
+					obj
+				},
 				_ => return Err("Ctx must be an object".into()),
 			}
 			Err(e) => return Err(format!("Invalid JSON: {}", e)),
