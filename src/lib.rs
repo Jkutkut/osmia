@@ -1,3 +1,4 @@
+#![doc(html_logo_url = "https://raw.githubusercontent.com/Jkutkut/osmia/refs/heads/main/res/logo.svg")]
 #![doc = include_str!("../README.md")]
 //!
 //! # Structure:

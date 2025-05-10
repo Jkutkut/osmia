@@ -73,6 +73,26 @@ stop:
 clean:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust clean
 
+# ****** Logo ******
+LOGO_PATH = res
+LOGO_FULL_PATH = ${LOGO_PATH}/logo.svg
+LOGO_GENERATOR_SRC = src/utils/logo-generator.rs
+LOGO_GENERATOR_TARGET = ./target/logo-generator
+
+logo: ${LOGO_FULL_PATH}
+
+logo_watch:
+	@# Needs inotify-tools
+	@while inotifywait -e modify ${LOGO_GENERATOR_SRC} > /dev/null || true; do \
+		make logo; \
+	done
+
+${LOGO_FULL_PATH}: ${LOGO_GENERATOR_TARGET}
+	$< $@
+
+${LOGO_GENERATOR_TARGET}: ${LOGO_GENERATOR_SRC}
+	${DOCKER_RUN_IT} ${CODE_VOLUME} -w /${REPO} --entrypoint rustc jkutkut/docker4rust $< -o $@
+
 # ****** Git ******
 
 prepare_commit: hooks
