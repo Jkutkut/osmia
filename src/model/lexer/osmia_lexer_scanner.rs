@@ -31,10 +31,12 @@ impl<'a> OsmiaLexerScanner<'a> {
 		while self.code_left() {
 			if !self.in_stmt {
 				self.consume_raw();
-				self.consume_start_delimiter();
-				if self.consume("#") {
-					self.consume_comment();
-					self.consume_end_delimiter();
+				if self.is_match(START_DELIMITER) {
+					self.consume_start_delimiter();
+					if self.consume("#") {
+						self.consume_comment();
+						self.consume_end_delimiter();
+					}
 				}
 			}
 			else {
