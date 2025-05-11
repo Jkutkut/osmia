@@ -443,3 +443,105 @@ macro_tests!(
 		]
 	)
 );
+
+macro_tests!(
+	test_code,
+	(
+		gh_25_01,
+		"f\n#f",
+		Some(vec![
+			Token::new_raw("f"), Token::NewLine, Token::new_raw("#f"), Token::Eof
+		]),
+		None,
+		vec![
+			(Ctx::new(), Ok("f\n#f"))
+		]
+	),
+	(
+		gh_25_02,
+		r#"
+# Containers:
+
+{{for container in ctx}}
+## {{ container.Name?replace("/", "") }}
+{{done}}"#.trim(),
+		Some(vec![
+			Token::new_raw("# Containers:"), Token::NewLine,
+			Token::NewLine,
+			Token::StmtStart, Token::For, Token::Whitespace, Token::new_alpha("container"),
+			Token::Whitespace, Token::In, Token::Whitespace, Token::new_alpha("ctx"),
+			Token::StmtEnd, Token::NewLineNonPrintable,
+			Token::new_raw("## "), Token::StmtStart, Token::Whitespace,
+			Token::new_alpha("container"),
+			Token::Dot, Token::new_alpha("Name"),
+			Token::Question, Token::new_alpha("replace"), Token::ParentStart,
+			Token::new_str("/"), Token::Comma, Token::Whitespace, Token::new_str(""), Token::ParentEnd,
+			Token::Whitespace, Token::StmtEnd, Token::NewLine,
+			Token::StmtStart, Token::Done, Token::StmtEnd,
+			Token::Eof
+		]),
+		None,
+		vec![
+			(
+				Ctx::try_from(r#"[{
+					"Name": "nginx",
+					"Path": "/usr/sbin/nginx",
+					"Args": [],
+					"HostConfig": {
+						"Binds": []
+					}
+				}]"#).unwrap(),
+				Ok("# Containers:\n\n## nginx\n")
+			)
+		]
+	),
+	(
+		gh_25_03,
+		r#"
+# Containers:
+
+{{for container in ctx}}
+## {{ container.Name?replace("/", "") }}
+  {{cmd = container.Path}}
+  {{if container.Args?len() > 0}}
+    {{cmd = cmd + " " + container.Args?join(" ")}}
+  {{fi}}
+- cmd: `{{container.Path}}`
+  {{if container.HostConfig.Binds?len() > 0}}
+- binds:
+    {{for bind in container.HostConfig.Binds}}
+      {{bind_arr = bind?split(":")}}
+    - from `{{bind_arr[0]}}` to `{{bind_arr[1]}}`
+    {{done}}
+  {{fi}}
+{{done}}"#.trim(),
+		None,
+		None,
+		vec![
+			(
+				Ctx::try_from(r#"[{
+					"Name": "nginx",
+					"Path": "/usr/sbin/nginx",
+					"Args": [],
+					"HostConfig": {
+						"Binds": []
+					}
+				}]"#).unwrap(),
+				Ok("# Containers:\n\n## nginx\n- cmd: `/usr/sbin/nginx`\n")
+			),
+			(
+				Ctx::try_from(r#"[{
+					"Name": "nginx",
+					"Path": "/usr/sbin/nginx",
+					"Args": ["arg1", "arg2"],
+					"HostConfig": {
+						"Binds": [
+							"/var/run/docker.sock:/var/run/docker.sock"
+						]
+					}
+				}]"#).unwrap(),
+				Ok("# Containers:\n\n## nginx\n- cmd: `/usr/sbin/nginx`\n- binds:\n    - from `/var/run/docker.sock` to `/var/run/docker.sock`\n")
+			)
+		]
+	)
+);
