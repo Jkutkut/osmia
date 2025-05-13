@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["impl_debug","macro_tests"]};
+window.SIDEBAR_ITEMS = {"mod":["impl_debug"]};

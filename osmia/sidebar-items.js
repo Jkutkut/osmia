@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["impl_debug","macro_tests"],"mod":["constants","macros","model","stdlib","types","utils"],"struct":["Osmia"],"trait":["CodeInterpreter"]};
+window.SIDEBAR_ITEMS = {"macro":["impl_debug"],"mod":["constants","macros","model","stdlib","types","utils"],"struct":["Osmia"],"trait":["CodeInterpreter"]};

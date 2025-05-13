@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["ctx","ctx_value","json_tree","json_tree_error","json_tree_key","lib"]};
+window.SIDEBAR_ITEMS = {"mod":["ctx","ctx_json_dumper","ctx_value","json_tree","json_tree_error","json_tree_key","lib"]};
