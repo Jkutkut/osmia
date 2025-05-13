@@ -1,7 +1,10 @@
 [package]
 name = "osmia"
-version = "2.9.0"
+version = "2.10.0"
 edition = "2021"
+repository = "https://github.com/jkutkut/osmia"
+description = "Templating in rust"
+license = "gpl-3.0-or-later"
 authors = ["Jkutkut"]
 
 [dependencies]

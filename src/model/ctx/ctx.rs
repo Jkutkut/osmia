@@ -89,6 +89,10 @@ impl Ctx {
 		}
 		self.set_in_current_scope(key, value)
 	}
+
+	pub fn raw(&self) -> &VecDeque<JsonTree<String, CtxValue>> {
+		&self.ctx
+	}
 }
 
 impl<'a> TryFrom<&'a str> for Ctx {

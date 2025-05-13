@@ -95,6 +95,10 @@ impl Osmia {
 	pub fn run_code(&mut self, code: &str) -> Result<OsmiaOutput, OsmiaError> {
 		self.run(code)
 	}
+
+	pub fn ctx_json_dump(&self) -> String {
+		ctx::CtxJsonDumper::dump(&self.ctx)
+	}
 }
 
 impl Default for Osmia {
