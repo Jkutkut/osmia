@@ -171,6 +171,10 @@ pub use utils::*;
 /// assert_eq!(osmia.run_code(r#"{{ [1, 3, 2]?for_each(fn (a) => a * 2) }}"#).unwrap(), "");
 /// assert_eq!(osmia.run_code(r#"{{ [1, 3, 2]?for_each_index(fn (a, idx) => a * idx) }}"#).unwrap(), "");
 /// assert_eq!(osmia.run_code(r#"{{ [1, 3, 2]?reverse() }}"#).unwrap(), "[2, 3, 1]");
+/// assert_eq!(osmia.run_code(r#"{{ [1, 2, 3, 4]?filter(fn (a) => a % 2 == 0) }}"#).unwrap(), "[2, 4]");
+/// assert_eq!(osmia.run_code(r#"{{ [1, 2, 3, 4]?filter_index(fn (a, idx) => idx % 2 == 0) }}"#).unwrap(), "[1, 3]");
+/// assert_eq!(osmia.run_code(r#"{{ [1, 2, 3, 4]?reduce(fn (a, b) => a + b, 0) }}"#).unwrap(), "10");
+/// assert_eq!(osmia.run_code(r#"{{ [1, 2, 3]?join(",") }}"#).unwrap(), "1,2,3");
 /// ```
 ///
 /// ### Object:
