@@ -41,6 +41,10 @@ use types::{
 	OsmiaError,
 };
 use model::ctx;
+use model::ctx::{
+	CtxJsonDumper,
+	JsonTreeKey,
+};
 use model::lexer::{
 	Lexer, OsmiaLexer,
 };
@@ -97,7 +101,14 @@ impl Osmia {
 	}
 
 	pub fn ctx_json_dump(&self) -> String {
-		ctx::CtxJsonDumper::dump(&self.ctx)
+		CtxJsonDumper::dump(&self.ctx)
+	}
+
+	pub fn ctx_json_dump_variable(&self, var: &str) -> Result<String, OsmiaError> {
+		let node = self.ctx.get(&JsonTreeKey::from(var))?;
+		Ok(CtxJsonDumper::dump2str(
+			CtxJsonDumper::dump_node(&node)
+		))
 	}
 }
 

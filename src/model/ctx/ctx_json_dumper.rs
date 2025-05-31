@@ -78,6 +78,10 @@ impl CtxJsonDumper {
 		serde_json::to_string(&dump).unwrap()
 	}
 
+	pub fn dump2str(node: DumpNode) -> String {
+		serde_json::to_string(&node).unwrap()
+	}
+
 	pub fn dump_node(node: &JsonTree<String, CtxValue>) -> DumpNode {
 		match node {
 			JsonTree::Value(v) => match v {
