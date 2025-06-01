@@ -127,6 +127,18 @@ fn test_invalid_variable_value(v: &str, expected: Vec<&str>) {
 	}
 }
 
+#[cfg(test)]
+fn test_variable_with_ctx(v: &str, expected: Vec<&str>) {
+	println!("Variable: {}", v);
+	let osmia = Osmia::default();
+	let dump = osmia.ctx_json_dump_variable(v).unwrap();
+	println!("Dump {}", dump);
+	for e in expected {
+		println!("Expected: {}", e);
+		assert!(dump.contains(e));
+	}
+}
+
 macro_tests!(
 	test_variable_value,
 	(var_int01, "f", r#"{"f": 0}"#, &format_node("variable", "0")),
@@ -142,6 +154,20 @@ macro_tests!(
 	(var_obj_obj02, "a.b.c", r#"{"a": {"b": {"c": "foo"}}}"#, &format_node("variable", r#""foo""#)),
 	(var_mix_obj01, "a[0].b", r#"{"a": [{"b": "foo"}]}"#, &format_node("variable", r#""foo""#)),
 	(var_mix_obj02, "a.b[0]", r#"{"a": {"b": ["foo"]}}"#, &format_node("variable", r#""foo""#)),
+);
+
+macro_tests!(
+	test_variable_with_ctx,
+	(math01, "math.abs", vec![
+		"function",
+		#[cfg(feature = "detailed-dumper")]
+		"absolute value"
+	]),
+	(method01, "_method.str.len", vec![
+		"function",
+		#[cfg(feature = "detailed-dumper")]
+		"the length"
+	])
 );
 
 macro_tests!(

@@ -4,7 +4,9 @@ use std::cmp::Ordering;
 pub fn module() -> Module {
 	Module::new()
 	.add_value("sort", Callable::new(1,
-		|_, args| Ok(arr_or_fail(&args[0])?.sort()?.into())
+		|_, args| Ok(arr_or_fail(&args[0])?.sort()?.into()),
+		#[cfg(feature = "detailed-dumper")]
+		"Sorts the array"
 	).into())
 	.add_value("sort_by", Callable::new(2,
 		|intpr, args| {
@@ -29,7 +31,9 @@ pub fn module() -> Module {
 				}
 			});
 			Ok(sorted.into())
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Sorts the array by the given function"
 	).into())
 	.add_value("map", Callable::new(2,
 		|intpr, args| {
@@ -44,7 +48,9 @@ pub fn module() -> Module {
 				)?))
 				.collect::<Result<Vec<Expr>, OsmiaError>>()?;
 			Ok(Array::new(result).into())
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Maps the array with the given function"
 	).into())
 	.add_value("for_each", Callable::new(2,
 		|intpr, args| {
@@ -61,7 +67,9 @@ pub fn module() -> Module {
 				})
 				.collect::<Result<Vec<Expr>, OsmiaError>>()?;
 			Ok(Expr::new_str("").into())
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Iterates over the array with the given function"
 	).into())
 	.add_value("for_each_index", Callable::new(2,
 		|intpr, args| {
@@ -78,13 +86,17 @@ pub fn module() -> Module {
 				})
 				.collect::<Result<Vec<Expr>, OsmiaError>>()?;
 			Ok(Expr::new_str("").into())
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"For each with index"
 	).into())
 	.add_value("reverse", Callable::new(1,
 		|_, args| {
 			let arr = arr_or_fail(&args[0])?;
 			Ok(Array::new(arr.iter().rev().cloned().collect()).into())
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Reverses the array"
 	).into())
 	.add_value("filter", Callable::new(2,
 		|intpr, args| {
@@ -100,7 +112,9 @@ pub fn module() -> Module {
 				}
 			}
 			Ok(Array::new(result).into())
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Filters the array with the given function"
 	).into())
 	.add_value("filter_index", Callable::new(2,
 		|intpr, args| {
@@ -116,7 +130,9 @@ pub fn module() -> Module {
 				}
 			}
 			Ok(Array::new(result).into())
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Filter with index"
 	).into())
 	.add_value("reduce", Callable::new(3,
 		|intpr, args| {
@@ -135,7 +151,9 @@ pub fn module() -> Module {
 				)?;
 			}
 			Ok(result)
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Combines the elements with the reduction function"
 	).into())
 	.add_value("join", Callable::new(2,
 		|_, args| {
@@ -146,6 +164,8 @@ pub fn module() -> Module {
 				.collect::<Vec<_>>()
 				.join(&sep)
 			).into())
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Joins the array with the given separator"
 	).into())
 }

@@ -7,19 +7,47 @@ pub struct Builtin {
 	arity: Option<usize>,
 	call: BuiltinArg,
 	params: Option<Vec<FunctionParam>>,
+	#[cfg(feature = "detailed-dumper")]
+	description: String,
 }
 
 impl Builtin {
-	pub fn new(arity: usize, call: BuiltinArg) -> Self {
-		Self { arity: Some(arity), call, params: None }
+	fn raw(
+		arity: Option<usize>,
+		call: BuiltinArg,
+		params: Option<Vec<FunctionParam>>,
+		#[cfg(feature = "detailed-dumper")] description: &str
+	) -> Self {
+		Self {
+			arity,
+			call,
+			params,
+			#[cfg(feature = "detailed-dumper")]
+			description: description.into(),
+		}
 	}
 
-	pub fn new_variable_args(call: BuiltinArg) -> Self {
-		Self { arity: None, call, params: None }
+	pub fn new(
+		arity: usize,
+		call: BuiltinArg,
+		#[cfg(feature = "detailed-dumper")] description: &str
+	) -> Self {
+		Self::raw(
+			Some(arity), call, None,
+			#[cfg(feature = "detailed-dumper")]
+			description
+		)
 	}
 
-	pub fn with_params(arity: usize, call: BuiltinArg, params: Vec<FunctionParam>) -> Self {
-		Self { arity: Some(arity), call, params: Some(params) }
+	pub fn new_variable_args(
+		call: BuiltinArg,
+		#[cfg(feature = "detailed-dumper")] description: &str
+	) -> Self {
+		Self::raw(
+			None, call, None,
+			#[cfg(feature = "detailed-dumper")]
+			description
+		)
 	}
 
 	pub fn arity(&self) -> Option<usize> {
@@ -32,6 +60,11 @@ impl Builtin {
 
 	pub fn params(&self) -> Option<&Vec<FunctionParam>> {
 		self.params.as_ref()
+	}
+
+	#[cfg(feature = "detailed-dumper")]
+	pub fn description(&self) -> &str {
+		&self.description
 	}
 }
 

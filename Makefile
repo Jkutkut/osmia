@@ -37,6 +37,9 @@ test_watch:
 test_watch_dumper:
 	${DOCKER_RUN} -it --name ${REPO}_dumper ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear test --features dumper
 
+test_watch_no_features:
+	${DOCKER_RUN} -it --name ${REPO}_no_features ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear test
+
 test_watch_debug:
 	${DOCKER_RUN_IT} ${RUN_ATTRS} --entrypoint cargo -e RUST_BACKTRACE=1 jkutkut/docker4rust watch --clear test --all-features
 
@@ -73,6 +76,7 @@ doc_release:
 stop:
 	docker rm -f ${REPO}
 	docker rm -f ${REPO}_dumper
+	docker rm -f ${REPO}_no_features
 
 clean:
 	${DOCKER_RUN} ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust clean

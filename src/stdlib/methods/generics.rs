@@ -120,16 +120,64 @@ const get: BuiltinArg = |_, args| {
 
 pub fn add_generics(module: Module) -> Module {
 	module
-	.add_value("len", Callable::new(1, len).into())
-	.add_value("has_content", Callable::new(1, has_content).into())
-	.add_value("to_bool", Callable::new(1, to_bool).into())
-	.add_value("to_float", Callable::new(1, to_float).into())
-	.add_value("to_int", Callable::new(1, to_int).into())
-	.add_value("to_string", Callable::new(1, to_string).into())
-	.add_value("type", Callable::new(1, r#type).into())
-	.add_value("switch", Callable::new_variable_args(switch).into())
-	.add_value("keys", Callable::new(1, keys).into())
-	.add_value("values", Callable::new(1, values).into())
-	.add_value("entries", Callable::new(1, entries).into())
-	.add_value("get", Callable::new(3, get).into())
+	.add_value("len", Callable::new(
+		1, len,
+		#[cfg(feature = "detailed-dumper")]
+		"Returns the length of the variable"
+	).into())
+	.add_value("has_content", Callable::new(
+		1, has_content,
+		#[cfg(feature = "detailed-dumper")]
+		"Checks if the variable has content"
+	).into())
+	.add_value("to_bool", Callable::new(
+		1, to_bool,
+		#[cfg(feature = "detailed-dumper")]
+		"Converts the variable to a boolean"
+	).into())
+	.add_value("to_float", Callable::new(
+		1, to_float,
+		#[cfg(feature = "detailed-dumper")]
+		"Converts the variable to a float"
+	).into())
+	.add_value("to_int", Callable::new(
+		1, to_int,
+		#[cfg(feature = "detailed-dumper")]
+		"Converts the variable to an int"
+	).into())
+	.add_value("to_string", Callable::new(
+		1, to_string,
+		#[cfg(feature = "detailed-dumper")]
+		"Converts the variable to a string"
+	).into())
+	.add_value("type", Callable::new(
+		1, r#type,
+		#[cfg(feature = "detailed-dumper")]
+		"Returns the type of the variable"
+	).into())
+	.add_value("switch", Callable::new_variable_args(
+		switch,
+		#[cfg(feature = "detailed-dumper")]
+		"Switches the variable based on the condition"
+	).into())
+	.add_value("keys", Callable::new(
+		1, keys,
+		#[cfg(feature = "detailed-dumper")]
+		"Returns an array of keys to access the variable"
+	).into())
+	.add_value("values", Callable::new(
+		1, values,
+		#[cfg(feature = "detailed-dumper")]
+		"Returns an array with the values of the variable"
+	).into())
+	.add_value("entries", Callable::new(
+		1, entries,
+		#[cfg(feature = "detailed-dumper")]
+		"Returns an array with the entries of the variable"
+	).into())
+	.add_value("get", Callable::new(
+		3, get,
+		#[cfg(feature = "detailed-dumper")]
+		"Alternative to accessing by index or dot notation"
+	).into())
 }

@@ -8,11 +8,28 @@ use std::collections::BTreeMap;
 use serde::ser::{SerializeStruct};
 
 #[derive(Clone)]
+pub struct CallableDumpNode {
+	arity: Option<usize>,
+	#[cfg(feature = "detailed-dumper")]
+	description: Option<String>,
+}
+
+impl CallableDumpNode {
+	pub fn new(arity: Option<usize>, #[cfg(feature = "detailed-dumper")] description: Option<String>) -> Self {
+		Self {
+			arity,
+			#[cfg(feature = "detailed-dumper")]
+			description
+		}
+	}
+}
+
+#[derive(Clone)]
 pub enum DumpNode {
 	Node(Vec<(String, DumpNode)>),
 	Array(Vec<DumpNode>),
 	Variable(CtxValue),
-	Callable(Option<usize>)
+	Callable(CallableDumpNode),
 }
 
 impl DumpNode {
@@ -53,9 +70,13 @@ impl Serialize for DumpNode {
 			}
 			DumpNode::Callable(c) => {
 				state.serialize_field("type", "function")?;
-				match c {
-					Some(a) => state.serialize_field("arity", a)?,
+				match c.arity {
+					Some(a) => state.serialize_field("arity", &a)?,
 					None => state.serialize_field("arity", &())?,
+				}
+				#[cfg(feature = "detailed-dumper")]
+				if let Some(d) = &c.description {
+					state.serialize_field("description", &d)?;
 				}
 			}
 		};
@@ -85,7 +106,10 @@ impl CtxJsonDumper {
 	pub fn dump_node(node: &JsonTree<String, CtxValue>) -> DumpNode {
 		match node {
 			JsonTree::Value(v) => match v {
-				CtxValue::Callable(c) => DumpNode::Callable(c.arity()),
+				CtxValue::Callable(c) => DumpNode::Callable(CallableDumpNode::new(
+					c.arity(),
+					#[cfg(feature = "detailed-dumper")] c.description()
+				)),
 				_ => DumpNode::Variable(v.clone()),
 			},
 			JsonTree::Array(arr) => DumpNode::Array(arr.iter().map(|e| CtxJsonDumper::dump_node(e)).collect()),

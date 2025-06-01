@@ -8,12 +8,26 @@ pub enum Callable {
 }
 
 impl Callable {
-	pub fn new(arity: usize, call: BuiltinArg) -> Self {
-		Self::Builtin(Builtin::new(arity, call))
+	pub fn new(
+		arity: usize, call: BuiltinArg,
+		#[cfg(feature = "detailed-dumper")] description: &str
+	) -> Self {
+		Self::Builtin(Builtin::new(
+			arity, call,
+			#[cfg(feature = "detailed-dumper")]
+			description
+		))
 	}
 
-	pub fn new_variable_args(call: BuiltinArg) -> Self {
-		Self::Builtin(Builtin::new_variable_args(call))
+	pub fn new_variable_args(
+		call: BuiltinArg,
+		#[cfg(feature = "detailed-dumper")] description: &str
+	) -> Self {
+		Self::Builtin(Builtin::new_variable_args(
+			call,
+			#[cfg(feature = "detailed-dumper")]
+			description
+		))
 	}
 
 	pub fn arity(&self) -> Option<usize> {
@@ -58,6 +72,14 @@ impl Callable {
 			Callable::Builtin(f) => Ok(Stmt::Expr(f.call(intpr, args)?)),
 			Callable::Lambda(l) => Ok(Stmt::Expr(l.call(intpr, args)?)),
 			Callable::Function(f) => f.call(intpr, args),
+		}
+	}
+
+	#[cfg(feature = "detailed-dumper")]
+	pub fn description(&self) -> Option<String> {
+		match self {
+			Callable::Builtin(b) => Some(b.description().into()),
+			_ => None,
 		}
 	}
 }

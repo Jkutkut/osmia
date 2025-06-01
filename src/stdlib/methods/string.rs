@@ -4,13 +4,19 @@ use regex::Regex;
 pub fn module() -> Module {
 	Module::new()
 	.add_value("lower", Callable::new(1,
-		|_, args| Ok(Expr::Str(string_or_fail(&args[0])?.to_lowercase().into()))
+		|_, args| Ok(Expr::Str(string_or_fail(&args[0])?.to_lowercase().into())),
+		#[cfg(feature = "detailed-dumper")]
+		"Returns the string in lowercase"
 	).into())
 	.add_value("upper", Callable::new(1,
-		|_, args| Ok(Expr::Str(string_or_fail(&args[0])?.to_uppercase().into()))
+		|_, args| Ok(Expr::Str(string_or_fail(&args[0])?.to_uppercase().into())),
+		#[cfg(feature = "detailed-dumper")]
+		"Returns the string in uppercase"
 	).into())
 	.add_value("trim", Callable::new(1,
-		|_, args| Ok(Expr::Str(string_or_fail(&args[0])?.trim().into()))
+		|_, args| Ok(Expr::Str(string_or_fail(&args[0])?.trim().into())),
+		#[cfg(feature = "detailed-dumper")]
+		"Removes whitespaces from sides"
 	).into())
 	.add_value("capitalize", Callable::new(1,
 		|_, args| {
@@ -27,13 +33,19 @@ pub fn module() -> Module {
 				}
 			}
 			Ok(Expr::Str(result))
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Returns the string capitalized"
 	).into())
 	.add_value("starts_with", Callable::new(2,
-		|_, args| Ok(Expr::Bool(string_or_fail(&args[0])?.starts_with(string_or_fail(&args[1])?).into()))
+		|_, args| Ok(Expr::Bool(string_or_fail(&args[0])?.starts_with(string_or_fail(&args[1])?).into())),
+		#[cfg(feature = "detailed-dumper")]
+		"Checks if the string starts with the given prefix"
 	).into())
 	.add_value("ends_with", Callable::new(2,
-		|_, args| Ok(Expr::Bool(string_or_fail(&args[0])?.ends_with(string_or_fail(&args[1])?).into()))
+		|_, args| Ok(Expr::Bool(string_or_fail(&args[0])?.ends_with(string_or_fail(&args[1])?).into())),
+		#[cfg(feature = "detailed-dumper")]
+		"Checks if the string ends with the given suffix"
 	).into())
 	.add_value("ensure_starts_with", Callable::new(2,
 		|_, args| {
@@ -43,7 +55,9 @@ pub fn module() -> Module {
 				true => Ok(Expr::Str(s.into())),
 				false => Ok(Expr::Str(format!("{}{}", prefix, s).into()))
 			}
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Ensures the variable starts with the prefix"
 	).into())
 	.add_value("ensure_ends_with", Callable::new(2,
 		|_, args| {
@@ -53,19 +67,25 @@ pub fn module() -> Module {
 				true => Ok(Expr::Str(s.into())),
 				false => Ok(Expr::Str(format!("{}{}", s, suffix).into()))
 			}
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Ensures the variable ends with the suffix"
 	).into())
 	.add_value("index_of", Callable::new(2,
 		|_, args| match string_or_fail(&args[0])?.find(string_or_fail(&args[1])?) {
 			Some(i) => Ok(Expr::Int(i as i64)),
 			None => Ok(Expr::Int(-1))
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Returns the index of the needle in the haystack"
 	).into())
 	.add_value("last_index_of", Callable::new(2,
 		|_, args| match string_or_fail(&args[0])?.rfind(string_or_fail(&args[1])?) {
 			Some(i) => Ok(Expr::Int(i as i64)),
 			None => Ok(Expr::Int(-1))
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Returns the last index of the needle in the haystack"
 	).into())
 	// .add_value("left_pad", Callable::new(2,
 	// 	|_, args| todo!() // TODO
@@ -85,7 +105,9 @@ pub fn module() -> Module {
 				Err(e) => return Err(format!("Invalid regex: {}", e))
 			};
 			Ok(Expr::Bool(re.is_match(&s)))
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Returns whether the variable matches the regex"
 	).into())
 	.add_value("replace", Callable::new(3,
 		|_, args| {
@@ -96,7 +118,9 @@ pub fn module() -> Module {
 			};
 			let repl = string_or_fail(&args[2])?;
 			Ok(Expr::Str(pattern.replace(&s, repl).into()))
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Replaces the needle with the replacement"
 	).into())
 	.add_value("replace_all", Callable::new(3,
 		|_, args| {
@@ -107,7 +131,9 @@ pub fn module() -> Module {
 			};
 			let repl = string_or_fail(&args[2])?;
 			Ok(Expr::Str(pattern.replace_all(&s, repl).into()))
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Replaces all needles with the replacement"
 	).into())
 	.add_value("split", Callable::new(2,
 		|_, args| Ok(Expr::Array(
@@ -115,7 +141,9 @@ pub fn module() -> Module {
 				.split(string_or_fail(&args[1])?)
 				.map(|s| Expr::Str(s.into()))
 				.collect::<Vec<Expr>>().into()
-		))
+		)),
+		#[cfg(feature = "detailed-dumper")]
+		"Splits the string by the separator"
 	).into())
 	.add_value("substring", Callable::new(3,
 		|_, args| {
@@ -126,13 +154,17 @@ pub fn module() -> Module {
 				return Err(format!("Cannot start after end: {} > {}", start, end));
 			}
 			Ok(Expr::Str(s[start..end].into()))
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Returns a substring of the string"
 	).into())
 	.add_value("truncate", Callable::new(2,
 		|_, args| {
 			let s = string_or_fail(&args[0])?;
 			let len = std::cmp::min(usize_or_fail(&args[1])?, s.len());
 			Ok(Expr::Str(s[..len].into()))
-		}
+		},
+		#[cfg(feature = "detailed-dumper")]
+		"Truncates the string to the given length"
 	).into())
 }
