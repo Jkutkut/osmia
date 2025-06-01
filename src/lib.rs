@@ -41,6 +41,8 @@ use types::{
 	OsmiaError,
 };
 use model::ctx;
+
+#[cfg(feature = "dumper")]
 use model::ctx::{
 	CtxJsonDumper,
 	JsonTreeKey,
@@ -99,7 +101,10 @@ impl Osmia {
 	pub fn run_code(&mut self, code: &str) -> Result<OsmiaOutput, OsmiaError> {
 		self.run(code)
 	}
+}
 
+#[cfg(feature = "dumper")]
+impl Osmia {
 	pub fn ctx_json_dump(&self) -> String {
 		CtxJsonDumper::dump(&self.ctx)
 	}

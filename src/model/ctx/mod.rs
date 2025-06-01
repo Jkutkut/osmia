@@ -4,11 +4,14 @@ mod ctx_value;
 mod json_tree;
 mod json_tree_error;
 mod json_tree_key;
-mod ctx_json_dumper;
 
 pub use ctx::Ctx;
 pub use ctx_value::CtxValue;
 pub use json_tree::JsonTree;
 pub use json_tree_error::JsonTreeError;
 pub use json_tree_key::JsonTreeKey;
+
+#[cfg(feature = "dumper")]
+mod ctx_json_dumper;
+#[cfg(feature = "dumper")]
 pub use ctx_json_dumper::CtxJsonDumper;

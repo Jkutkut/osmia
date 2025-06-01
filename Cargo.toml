@@ -1,11 +1,16 @@
 [package]
 name = "osmia"
-version = "2.10.3"
+version = "2.11.0"
 edition = "2021"
 repository = "https://github.com/jkutkut/osmia"
 description = "Templating in rust"
 license = "gpl-3.0-or-later"
 authors = ["Jkutkut"]
+
+[features]
+default = []
+
+dumper = []
 
 [dependencies]
 regex = "1.11.1"
