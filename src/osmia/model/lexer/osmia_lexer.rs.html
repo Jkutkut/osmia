@@ -16,7 +16,7 @@
 <a href=#16 id=16 data-nosnippet>16</a>
 <a href=#17 id=17 data-nosnippet>17</a><span class="kw">impl </span>Lexer&lt;LexerCode, OsmiaError&gt; <span class="kw">for </span>OsmiaLexer {
 <a href=#18 id=18 data-nosnippet>18</a>	<span class="kw">fn </span>lex(<span class="kw-2">&amp;</span><span class="self">self</span>, code: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;LexerCode, OsmiaError&gt; {
-<a href=#19 id=19 data-nosnippet>19</a>		<span class="kw">let </span><span class="kw-2">mut </span>scanner = OsmiaLexerScanner::new(code);
+<a href=#19 id=19 data-nosnippet>19</a>		<span class="kw">let </span>scanner = OsmiaLexerScanner::new(code);
 <a href=#20 id=20 data-nosnippet>20</a>		<span class="kw">match </span>scanner.scan() {
 <a href=#21 id=21 data-nosnippet>21</a>			<span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">"Lexer error: {}"</span>, err)),
 <a href=#22 id=22 data-nosnippet>22</a>			<span class="prelude-val">Ok</span>(tokens) =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::clean_tokens(tokens)),
