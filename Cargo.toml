@@ -1,6 +1,6 @@
 [package]
 name = "osmia"
-version = "2.11.0"
+version = "2.11.1"
 edition = "2021"
 repository = "https://github.com/jkutkut/osmia"
 description = "Templating in rust"
@@ -11,6 +11,7 @@ authors = ["Jkutkut"]
 default = []
 
 dumper = []
+detailed-dumper = []
 
 [dependencies]
 regex = "1.11.1"
