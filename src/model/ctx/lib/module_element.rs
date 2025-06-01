@@ -8,7 +8,7 @@ pub struct ModuleElement {
 impl ModuleElement {
 	pub fn new(key: &str, value: ModuleValue) -> Self {
 		Self {
-			key: JsonTreeKey::from(key),
+			key: JsonTreeKey::try_parse(key).unwrap(),
 			value,
 		}
 	}

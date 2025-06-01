@@ -32,15 +32,15 @@ use crate::model::expr::Expr;
 /// - [methods](./methods/fn.module.html)
 pub fn import(ctx: &mut Ctx) {
 	ctx.set(
-		&JsonTreeKey::from("_OSMIA_VERSION"),
+		&JsonTreeKey::try_parse("_OSMIA_VERSION").unwrap(),
 		CtxValue::Str(VERSION.into()).into()
 	).unwrap();
 	ctx.set(
-		&JsonTreeKey::from(METHOD_CTX_LOCATION),
+		&JsonTreeKey::try_parse(METHOD_CTX_LOCATION).unwrap(),
 		methods::module().into()
 	).unwrap();
 	ctx.set(
-		&JsonTreeKey::from("math"),
+		&JsonTreeKey::try_parse("math").unwrap(),
 		math::module().into()
 	).unwrap();
 }

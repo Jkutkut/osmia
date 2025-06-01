@@ -105,7 +105,7 @@ impl Osmia {
 	}
 
 	pub fn ctx_json_dump_variable(&self, var: &str) -> Result<String, OsmiaError> {
-		let node = self.ctx.get(&JsonTreeKey::from(var))?;
+		let node = self.ctx.get(&JsonTreeKey::try_parse(var)?)?;
 		Ok(CtxJsonDumper::dump2str(
 			CtxJsonDumper::dump_node(&node)
 		))

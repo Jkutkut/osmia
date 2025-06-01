@@ -16,7 +16,7 @@ impl OsmiaLexer {
 
 impl Lexer<LexerCode, OsmiaError> for OsmiaLexer {
 	fn lex(&self, code: &str) -> Result<LexerCode, OsmiaError> {
-		let mut scanner = OsmiaLexerScanner::new(code);
+		let scanner = OsmiaLexerScanner::new(code);
 		match scanner.scan() {
 			Err(err) => Err(format!("Lexer error: {}", err)),
 			Ok(tokens) => Ok(Self::clean_tokens(tokens)),

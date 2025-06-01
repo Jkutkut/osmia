@@ -104,7 +104,8 @@ impl<'a> TryFrom<&'a str> for Ctx {
 				JsonTree::Object(_) => c,
 				JsonTree::Array(_) => {
 					let mut obj = JsonTree::new_obj();
-					obj.set(&mut JsonTreeKey::from("ctx").iter(), c).unwrap();
+					let key = JsonTreeKey::try_parse("ctx").unwrap();
+					obj.set(&mut key.iter(), c).unwrap();
 					obj
 				},
 				_ => return Err("Ctx must be an object".into()),

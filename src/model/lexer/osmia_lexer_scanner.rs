@@ -27,33 +27,19 @@ impl<'a> OsmiaLexerScanner<'a> {
 		}
 	}
 
-	pub fn scan(&mut self) -> Result<LexerCode, String> {
+	pub fn scan(mut self) -> Result<LexerCode, String> {
 		while self.code_left() {
-			if !self.in_stmt {
+			while !self.is_match(START_DELIMITER) && self.code_left() {
 				self.consume_raw();
-				if self.is_match(START_DELIMITER) {
-					self.consume_start_delimiter();
-					if self.consume("#") {
-						self.consume_comment();
-						self.consume_end_delimiter();
-					}
-				}
 			}
-			else {
-				let mut white_space = false;
-				while self.code_left() && self.current().is_ascii_whitespace() {
-					if self.current() != b'\n' {
-						self.advance();
-						if !white_space {
-							self.tokens.push(Token::Whitespace);
-							white_space = true;
-						}
-					}
-					self.consume_new_line();
+			if self.is_match(START_DELIMITER) {
+				self.consume_start_delimiter();
+				if self.consume("#") {
+					self.consume_comment();
+					self.consume_end_delimiter();
 				}
-				self.consume_end_delimiter();
 				if self.in_stmt {
-					self.consume_token()?;
+					self.consume_stmt_body()?;
 				}
 			}
 		}
@@ -64,7 +50,13 @@ impl<'a> OsmiaLexerScanner<'a> {
 			)));
 		}
 		self.tokens.push(Token::Eof);
-		Ok(self.tokens.clone())
+		Ok(self.tokens)
+	}
+	
+	pub fn scan_stmt(mut self) -> Result<LexerCode, String> {
+		self.in_stmt = true;
+		self.consume_stmt_body()?;
+		Ok(self.tokens)
 	}
 }
 
@@ -181,6 +173,20 @@ impl<'a> OsmiaLexerScanner<'a> {
 		}
 	}
 
+	fn consume_whitespace(&mut self) {
+		let mut white_space = false;
+		while self.code_left() && self.current().is_ascii_whitespace() {
+			if self.current() != b'\n' {
+				self.advance();
+				if !white_space {
+					self.tokens.push(Token::Whitespace);
+					white_space = true;
+				}
+			}
+			self.consume_new_line();
+		}
+	}
+
 	fn consume_start_delimiter(&mut self) {
 		if self.consume(START_DELIMITER) {
 			self.in_stmt = true;
@@ -193,6 +199,25 @@ impl<'a> OsmiaLexerScanner<'a> {
 			self.in_stmt = false;
 			self.tokens.push(Token::StmtEnd);
 		}
+	}
+
+	// fn consume_stmt(&mut self) -> Result<(), String> {
+
+	// }
+
+	fn consume_stmt_body(&mut self) -> Result<(), String> {
+		loop {
+			if !self.code_left() {
+				break;
+			}
+			self.consume_whitespace();
+			self.consume_end_delimiter();
+			if !self.in_stmt {
+				break;
+			}
+			self.consume_token()?;
+		}
+		Ok(())
 	}
 
 	fn consume_comment(&mut self) {

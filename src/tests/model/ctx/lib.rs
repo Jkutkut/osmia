@@ -15,11 +15,11 @@ use crate::model::{
 };
 
 fn get_expr(intpr: &OsmiaInterpreter<'_>, key: &str) -> Result<Expr, OsmiaError> {
-	Ok(intpr.ctx.borrow().get(&JsonTreeKey::from(key))?.try_into()?)
+	Ok(intpr.ctx.borrow().get(&JsonTreeKey::try_parse(key)?)?.try_into()?)
 }
 
 fn get_ft(intpr: &OsmiaInterpreter<'_>, key: &str) -> Result<Callable, OsmiaError> {
-	match intpr.ctx.borrow().get(&JsonTreeKey::from(key)) {
+	match intpr.ctx.borrow().get(&JsonTreeKey::try_parse(key)?) {
 		Ok(JsonTree::Value(CtxValue::Callable(c))) => Ok(c.clone()),
 		Ok(_) => Err(format!("Not a callable")),
 		Err(e) => Err(e),
