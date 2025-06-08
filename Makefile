@@ -37,6 +37,9 @@ test_watch:
 test_watch_dumper:
 	${DOCKER_RUN} -it --name ${REPO}_dumper ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear test --features dumper
 
+test_watch_detailed_dumper:
+	${DOCKER_RUN} -it --name ${REPO}_dumper ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear test --features detailed-dumper
+
 test_watch_no_features:
 	${DOCKER_RUN} -it --name ${REPO}_no_features ${RUN_ATTRS} --entrypoint cargo jkutkut/docker4rust watch --clear test
 
