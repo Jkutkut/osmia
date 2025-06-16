@@ -1,6 +1,6 @@
 [package]
 name = "osmia"
-version = "2.11.4"
+version = "2.11.5"
 edition = "2021"
 repository = "https://github.com/jkutkut/osmia"
 description = "Templating in rust"
