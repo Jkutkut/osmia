@@ -1,3 +1,21 @@
+//! # Ctx
+//! The context can be loaded with information from external sources by the use of the available
+//! utilities. You can feed the context with JSON or YAML.
+//!
+//! **Note**: Keep in mind that the osmia context uses a JSON-like structure, even if the context
+//! was fed with YAML.
+//!
+//! As you can load any JSON or YAML, the logic only permits objects and arrays as the root
+//! elements of the context.
+//! - If you load an object, each key-value of the object will become a variable in the context.
+//! - If you load an array, how would you use it? What is its name? Osmia defines it as a variable
+//! called `ctx`.
+//! - If you try to load a primitive (number, text...) as a root context, how would you request
+//! that information from Osmia? Osmia does not allow this.
+//!
+#![doc = include_str!("../../../docs/ctx.md")]
+//!
+
 use std::collections::VecDeque;
 
 use super::*;
@@ -93,29 +111,46 @@ impl Ctx {
 	pub fn raw(&self) -> &VecDeque<JsonTree<String, CtxValue>> {
 		&self.ctx
 	}
+
+	fn try_from_json_tree(
+		jt: JsonTree<String, CtxValue>,
+	) -> Result<Self, OsmiaError> {
+		let content = match jt {
+			JsonTree::Object(_) => jt,
+			JsonTree::Array(_) => {
+				let mut obj = JsonTree::new_obj();
+				let key = JsonTreeKey::try_parse("ctx").unwrap();
+				obj.set(&mut key.iter(), jt).unwrap();
+				obj
+			},
+			_ => return Err("Ctx must be an object or array".into()),
+		};
+		let mut ctx = Self::from(content);
+		Self::default_libs(&mut ctx);
+		ctx.begin_scope();
+		Ok(ctx)
+	}
+	
+	pub fn try_from_json(json: &str) -> Result<Self, OsmiaError> {
+		match serde_json::from_str(json) {
+			Ok(jt) => Self::try_from_json_tree(jt),
+			Err(e) => Err(format!("Invalid JSON: {}", e)),
+		}
+	}
+
+	pub fn try_from_yaml(yaml: &str) -> Result<Self, OsmiaError> {
+		match serde_yml::from_str(yaml) {
+			Ok(jt) => Self::try_from_json_tree(jt),
+			Err(e) => Err(format!("Invalid JSON: {}", e)),
+		}
+	}
 }
 
 impl<'a> TryFrom<&'a str> for Ctx {
 	type Error = OsmiaError;
 
 	fn try_from(json: &'a str) -> Result<Self, Self::Error> {
-		let content: JsonTree<String, CtxValue> = match serde_json::from_str(json) {
-			Ok(c) => match c {
-				JsonTree::Object(_) => c,
-				JsonTree::Array(_) => {
-					let mut obj = JsonTree::new_obj();
-					let key = JsonTreeKey::try_parse("ctx").unwrap();
-					obj.set(&mut key.iter(), c).unwrap();
-					obj
-				},
-				_ => return Err("Ctx must be an object".into()),
-			}
-			Err(e) => return Err(format!("Invalid JSON: {}", e)),
-		};
-		let mut ctx = Self::from(content);
-		Self::default_libs(&mut ctx);
-		ctx.begin_scope();
-		Ok(ctx)
+		Self::try_from_json(json)
 	}
 }
 

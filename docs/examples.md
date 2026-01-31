@@ -15,3 +15,12 @@ let mut osmia = Osmia::try_from(r#"{ "name": "Marvin" }"#).unwrap();
 let output = osmia.run_code("Hello {{ name }}!").unwrap();
 assert_eq!(output, "Hello Marvin!".to_string());
 ```
+
+### YAML context:
+```rust
+use osmia::Osmia;
+
+let mut osmia = Osmia::try_from_yaml(r#"name: Marvin"#).unwrap();
+let output = osmia.run_code("Hello {{ name }}!").unwrap();
+assert_eq!(output, "Hello Marvin!".to_string());
+```

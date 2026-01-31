@@ -16,9 +16,10 @@
 //! [Expressions](./#expressions) are also stored here.
 //! See [methods in stdlib](./stdlib/methods/fn.module.html)
 //!
-//! The [stdlib](./stdlib/fn.import.html) adds the base for Osmia.
+//! The [stdlib](./stdlib/fn.import.html) also adds constants to Osmia.
 //!
 #![doc = include_str!("../docs/examples.md")]
+//! See more detail examples [here](./model/ctx/ctx/index.html)
 
 mod macros;
 mod constants;
@@ -156,6 +157,16 @@ impl TryFrom<&str> for Osmia {
 	type Error = OsmiaError;
 
 	fn try_from(ctx: &str) -> Result<Self, Self::Error> {
-		Ok(Self::new(types::Ctx::try_from(ctx)?))
+		Osmia::try_from_json(ctx)
+	}
+}
+
+impl Osmia {
+	pub fn try_from_json(json: &str) -> Result<Self, OsmiaError> {
+		Ok(Self::new(types::Ctx::try_from(json)?))
+	}
+
+	pub fn try_from_yaml(yaml: &str) -> Result<Self, OsmiaError> {
+		Ok(Self::new(types::Ctx::try_from_yaml(yaml)?))
 	}
 }

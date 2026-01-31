@@ -3,6 +3,105 @@ use super::*;
 macro_tests! {
 	interpreter_test,
 	(
+		ctx_get_yaml_01,
+		"{{ name }}",
+		vec![
+			(
+				Ctx::try_from_yaml(r#"name: Marvin"#).unwrap(),
+				Ok("Marvin")
+			),
+			(
+				Ctx::try_from_yaml(r#"name: "Marvin""#).unwrap(),
+				Ok("Marvin")
+			),
+		]
+	),
+	(
+		ctx_get_yaml_02,
+		"{{ site }}",
+		vec![
+			(
+				Ctx::try_from_yaml(r#"
+site:
+  parameters:
+    sharable: false
+  templates:
+    prototypeId: module:pages/prototype
+    availability:
+      templates:
+        home:
+          id: module:pages/home
+        content:
+          id: module:pages/content
+  mappings:
+    website:
+      handlePrefix: /site
+      repository: website
+  theme:
+    name: site-theme
+  domains:
+    site:
+      name: site.com
+        "#).unwrap(),
+				Ok(r#"{"domains": {"site": {"name": "site.com"}}, "mappings": {"website": {"handlePrefix": "/site", "repository": "website"}}, "parameters": {"sharable": false}, "templates": {"availability": {"templates": {"content": {"id": "module:pages/content"}, "home": {"id": "module:pages/home"}}}, "prototypeId": "module:pages/prototype"}, "theme": {"name": "site-theme"}}"#)
+			),
+			(
+				Ctx::try_from_yaml(r#"
+site:
+  parameters:
+    - true
+    - 12
+    - false
+    - -1
+    - foo
+        "#).unwrap(),
+				Ok("{\"parameters\": [true, 12, false, -1, \"foo\"]}")
+			),
+		]
+	),
+	(
+		ctx_get_yaml_03,
+		"{{ ctx }}",
+		vec![
+			(
+				Ctx::try_from_yaml(r#"- yes"#).unwrap(),
+				Ok("[\"yes\"]")
+			),
+			(
+				Ctx::try_from_yaml(r#"
+- foo:
+  - true
+        "#).unwrap(),
+				Ok("[{\"foo\": [true]}]")
+			),
+			(
+				Ctx::try_from_yaml(r#"
+- name: obj
+  b: true
+  c: false
+        "#).unwrap(),
+				Ok("[{\"b\": true, \"c\": false, \"name\": \"obj\"}]")
+			),
+			(
+				Ctx::try_from_yaml(r#"
+ctx:
+  properties:
+    - name: title
+      label: Title
+      i18n: true
+      required: true
+    - name: tags
+      i18n: true
+        "#).unwrap(),
+				Ok("{\"properties\": [{\"i18n\": true, \"label\": \"Title\", \"name\": \"title\", \"required\": true}, {\"i18n\": true, \"name\": \"tags\"}]}")
+			),
+		]
+	),
+}
+
+macro_tests! {
+	interpreter_test,
+	(
 		ctx_get_01,
 		"{{ name }}",
 		vec![
