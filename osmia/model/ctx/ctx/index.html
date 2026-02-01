@@ -1,1 +1,80 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `ctx` mod in crate `osmia`."><title>osmia::model::ctx::ctx - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../../../static.files/storage-3a5871a4.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../osmia/index.html"><img src="https://raw.githubusercontent.com/Jkutkut/osmia/refs/heads/main/res/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../osmia/index.html"><img src="https://raw.githubusercontent.com/Jkutkut/osmia/refs/heads/main/res/logo.svg" alt="logo"></a><h2><a href="../../../../osmia/index.html">osmia</a><span class="version">2.11.3</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module ctx</a></h2><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="../index.html">In osmia::<wbr>model::<wbr>ctx</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">osmia</a>::<wbr><a href="../../index.html">model</a>::<wbr><a href="../index.html">ctx</a></div><h1>Module <span>ctx</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../../src/osmia/model/ctx/ctx.rs.html#1-151">Source</a> </span></div><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Ctx.html" title="struct osmia::model::ctx::ctx::Ctx">Ctx</a></dt></dl></section></div></main></body></html>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Ctx"><title>osmia::model::ctx::ctx - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-1a91846b.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="osmia" data-themes="" data-resource-suffix="" data-rustdoc-version="1.88.0 (6b00bc388 2025-06-23)" data-channel="1.88.0" data-search-js="search-f7877310.js" data-settings-js="settings-5514c975.js" ><script src="../../../../static.files/storage-4e99c027.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../../static.files/main-7ef8a74a.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../../osmia/index.html"><img src="https://raw.githubusercontent.com/Jkutkut/osmia/refs/heads/main/res/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../../osmia/index.html"><img src="https://raw.githubusercontent.com/Jkutkut/osmia/refs/heads/main/res/logo.svg" alt="logo"></a><h2><a href="../../../../osmia/index.html">osmia</a><span class="version">2.12.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module ctx</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#ctx" title="Ctx">Ctx</a><ul><li><a href="#examples" title="Examples">Examples</a></li></ul></li></ul><h3><a href="#structs">Module Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="../index.html">In osmia::<wbr>model::<wbr>ctx</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">osmia</a>::<wbr><a href="../../index.html">model</a>::<wbr><a href="../index.html">ctx</a></div><h1>Module <span>ctx</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../../src/osmia/model/ctx/ctx.rs.html#1-186">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="ctx"><a class="doc-anchor" href="#ctx">§</a>Ctx</h2>
+<p>The context can be loaded with information from external sources by the use of the available
+utilities. You can feed the context with JSON or YAML.</p>
+<p><strong>Note</strong>: Keep in mind that the osmia context uses a JSON-like structure, even if the context
+was fed with YAML.</p>
+<p>As you can load any JSON or YAML, the logic only permits objects and arrays as the root
+elements of the context.</p>
+<ul>
+<li>If you load an object, each key-value of the object will become a variable in the context.</li>
+<li>If you load an array, how would you use it? What is its name? Osmia defines it as a variable
+called <code>ctx</code>.</li>
+<li>If you try to load a primitive (number, text…) as a root context, how would you request
+that information from Osmia? Osmia does not allow this.</li>
+</ul>
+<h3 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h3><h4 id="no-context"><a class="doc-anchor" href="#no-context">§</a>No context:</h4>
+<p>Only the default context from stdlib will be added.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::default();
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"{{ _OSMIA_VERSION }}"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="macro">env!</span>(<span class="string">"CARGO_PKG_VERSION"</span>).to_string());</code></pre></div>
+<h4 id="json-context-as-an-object"><a class="doc-anchor" href="#json-context-as-an-object">§</a>Json context as an object:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::try_from_json(<span class="string">r#"
+{
+    "user": {
+        "name": "Marvin",
+        "details": {
+            "alias": "c3po"
+        }
+    }
+}
+"#</span>).unwrap();
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"Hello {{ user.name }}, aka {{ user.details.alias }}!"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"Hello Marvin, aka c3po!"</span>.to_string());
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"{{ user }}"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"{\"details\": {\"alias\": \"c3po\"}, \"name\": \"Marvin\"}"</span>.to_string());</code></pre></div>
+<h4 id="json-context-as-an-array"><a class="doc-anchor" href="#json-context-as-an-array">§</a>Json context as an array:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::try_from_json(<span class="string">r#"
+[
+    true,
+    [
+        false
+    ]
+]
+"#</span>).unwrap();
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"First {{ ctx[0] }}, second: {{ ctx[1][0] }}"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"First true, second: false"</span>.to_string());
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"{{ ctx }}"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"[true, [false]]"</span>.to_string());</code></pre></div>
+<h4 id="yaml-context-as-an-object"><a class="doc-anchor" href="#yaml-context-as-an-object">§</a>YAML context as an object:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::try_from_yaml(<span class="string">r#"
+user:
+    name: Marvin
+    details:
+        alias: c3po
+"#</span>).unwrap();
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"Hello {{ user.name }}, aka {{user.details.alias}}!"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"Hello Marvin, aka c3po!"</span>.to_string());
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"{{ user }}"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"{\"details\": {\"alias\": \"c3po\"}, \"name\": \"Marvin\"}"</span>.to_string());</code></pre></div>
+<h4 id="yaml-context-as-an-array"><a class="doc-anchor" href="#yaml-context-as-an-array">§</a>YAML context as an array:</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>osmia::Osmia;
+
+<span class="kw">let </span><span class="kw-2">mut </span>osmia = Osmia::try_from_yaml(<span class="string">r#"
+- true
+- array:
+  - false
+"#</span>).unwrap();
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"First {{ ctx[0] }}, second: {{ ctx[1].array[0] }}"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"First true, second: false"</span>.to_string());
+<span class="kw">let </span>output = osmia.run_code(<span class="string">"{{ ctx }}"</span>).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"[true, {\"array\": [false]}]"</span>.to_string());</code></pre></div>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Ctx.html" title="struct osmia::model::ctx::ctx::Ctx">Ctx</a></dt></dl></section></div></main></body></html>
